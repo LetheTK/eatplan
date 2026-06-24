@@ -155,10 +155,12 @@ const knowledgeItems = [
     id: "staple",
     type: "主食",
     title: "主食与混搭",
-    summary: "土豆、糙米、紫薯可以混搭，但总量仍按一份主食额度控制。混搭是拆分，不是叠加。",
+    summary: "土豆、糙米、紫薯可以混搭。混搭相当于把轮换放进同一餐，兼顾营养互补、肠道菌群多样性和执行口感。",
     facts: [
       ["糙米", "100g熟重约一份"],
       ["土豆", "150g熟重约一份"],
+      ["混搭", "在一份主食额度内拆分，不是叠加"],
+      ["轮换价值", "营养互补 + 肠道菌群多样性 + 减少厌倦"],
       ["缓冲", "额外50g熟重只在训练状态差时加"]
     ],
     note: "来源：主食健康饮食指南。"
@@ -293,6 +295,9 @@ function assessmentClass(status) {
 }
 
 function buildMacroAssessment(total, proteinRatio, carbRatio) {
+  const mixedLowCarbHint = state.staple === "mixed"
+    ? "混搭本身没问题；训练状态差时加50g熟重缓冲。"
+    : null;
   const protein = proteinRatio < 1.3
     ? ["偏低", "低于减脂保肌下限，优先开K或加蛋白。"]
     : proteinRatio > 1.7
@@ -302,22 +307,22 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
   let carb;
   if (state.day === "run") {
     carb = carbRatio < 1.8
-      ? ["偏低", "跑步日碳水偏紧，建议香蕉或50g主食缓冲。"]
+      ? ["偏低", mixedLowCarbHint || "跑步日碳水偏紧，建议香蕉或50g主食缓冲。"]
       : carbRatio > 2.3
         ? ["偏高", "跑步日也不必继续加主食。"]
         : ["合理", "适合5km跑步和恢复。"];
   } else if (state.day === "strength") {
     carb = carbRatio < 1.5
-      ? ["偏低", "力量日可能影响训练状态，掉力时加50g主食。"]
+      ? ["偏低", mixedLowCarbHint || "力量日可能影响训练状态，掉力时加50g主食。"]
       : carbRatio > 2.2
         ? ["偏高", "若非高疲劳日，可取消香蕉或缓冲。"]
         : ["合理", "能覆盖日常力量训练。"];
   } else {
     carb = carbRatio < 1.4
-      ? ["偏低", "日常减脂可接受；若饿或脑雾再加主食。"]
+      ? ["偏低", mixedLowCarbHint || "日常减脂可接受；若饿或脑雾再加50g主食缓冲。"]
       : carbRatio > 2.0
         ? ["偏高", "休息/日常日不需要继续加碳水。"]
-        : ["合理", "适合休息或日常减脂。"];
+        : ["合理", state.staple === "mixed" ? "混搭可长期用，按一份主食额度执行。" : "适合休息或日常减脂。"];
   }
 
   const fatRatio = total.fat / PROFILE_WEIGHT_KG;
@@ -385,6 +390,9 @@ function renderPlanner() {
   }
   if (state.buffer) {
     actions.push("50g缓冲已计入。晚上观察饥饿感、腿沉和恢复速度。");
+  }
+  if (state.staple === "mixed") {
+    actions.push("混搭主食等于把土豆、糙米、紫薯放在同一份主食额度内轮换；有利于营养互补和肠道菌群多样性。");
   }
 
   els.actionList.innerHTML = actions.map((item) => `<li>${item}</li>`).join("");
