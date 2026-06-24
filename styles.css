@@ -787,8 +787,21 @@ h1 {
 }
 
 @media (max-width: 680px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
   .app-shell {
+    max-width: 100%;
+    overflow-x: hidden;
     padding: max(10px, env(safe-area-inset-top)) 10px calc(98px + env(safe-area-inset-bottom));
+  }
+
+  body[data-view="today"] .app-shell {
+    padding-bottom: calc(152px + env(safe-area-inset-bottom));
   }
 
   .topbar {
@@ -832,14 +845,20 @@ h1 {
   }
 
   .planner {
+    width: 100%;
+    max-width: 100%;
     min-height: auto;
     padding: 14px;
     background: transparent;
+    overflow-x: hidden;
   }
 
   .rules,
   .knowledge {
+    width: 100%;
+    max-width: 100%;
     padding: 14px;
+    overflow-x: hidden;
   }
 
   .planner-head {
@@ -864,46 +883,61 @@ h1 {
   }
 
   .status-stack {
-    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     justify-items: stretch;
   }
 
   .status-stack span,
   .status-stack b {
+    min-width: 0;
     justify-content: center;
+    white-space: normal;
+    text-align: center;
   }
 
   .mobile-section-tabs {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    z-index: 19;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 14px;
+    gap: 6px;
+    margin: 0;
+    border: 1px solid rgba(232, 226, 216, 0.72);
+    border-radius: 20px;
+    background: rgba(255, 254, 250, 0.94);
+    box-shadow: 0 12px 30px rgba(33, 31, 26, 0.11);
+    backdrop-filter: blur(18px);
+    padding: 6px;
   }
 
   .mobile-section-tabs button {
     position: relative;
-    min-height: 56px;
-    border: 1px solid rgba(232, 226, 216, 0.78);
-    border-radius: var(--radius-sm);
-    background: rgba(255, 254, 250, 0.58);
+    min-height: 44px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
     color: #3d453d;
     cursor: pointer;
     display: grid;
-    gap: 3px;
-    align-content: center;
-    padding: 8px 6px;
-    text-align: left;
-    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+    place-items: center;
+    padding: 0 8px;
+    text-align: center;
+    transition: background 180ms ease, color 180ms ease, transform 160ms ease;
   }
 
   .mobile-section-tabs button.active {
-    border-color: transparent;
     background: #e0f2e8;
+    color: #24724e;
   }
 
   .mobile-section-tabs button i {
     top: 8px;
-    right: 8px;
+    right: 18%;
   }
 
   .mobile-section-tabs span,
@@ -914,15 +948,12 @@ h1 {
   }
 
   .mobile-section-tabs span {
-    color: var(--accent);
     font-size: 12px;
     font-weight: 780;
   }
 
   .mobile-section-tabs b {
-    color: #4f584f;
-    font-size: 11px;
-    font-weight: 650;
+    display: none;
   }
 
   .mobile-panel {
@@ -942,11 +973,13 @@ h1 {
   .segmented,
   .breakfast-segment,
   .toggle-row {
+    width: 100%;
+    min-width: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .settings-panel summary {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .settings-panel summary span {
@@ -955,6 +988,15 @@ h1 {
 
   .toggle-row label:last-child {
     grid-column: 1 / -1;
+  }
+
+  .settings-panel,
+  .control-strip,
+  .segmented button,
+  .toggle-row label {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .today-card {

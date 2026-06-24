@@ -436,6 +436,7 @@ function renderMobilePanel() {
 }
 
 function renderView() {
+  document.body.dataset.view = state.view;
   els.viewControls.querySelectorAll("button").forEach((button) => {
     const active = button.dataset.view === state.view;
     button.classList.toggle("active", active);
