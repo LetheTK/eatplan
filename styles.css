@@ -541,6 +541,53 @@ h1 {
   color: #7a3f32;
 }
 
+.ratio-set {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.ratio-line {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 78px;
+  gap: 10px;
+  align-items: center;
+  min-height: 32px;
+}
+
+.ratio-line span,
+.ratio-line b {
+  color: #858780;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.ratio-line b {
+  color: #60635d;
+  font-family: var(--mono);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ratio-track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8e1d7;
+}
+
+.ratio-track div {
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width 220ms ease-out;
+}
+
+#carbRatioBar {
+  background: var(--accent-2);
+}
+
 .daily-tip {
   display: grid;
   gap: 7px;
@@ -944,6 +991,16 @@ h1 {
 
   .nutrition-row p {
     grid-column: 2 / -1;
+  }
+
+  .ratio-set {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .ratio-line {
+    grid-template-columns: 52px minmax(0, 1fr) 72px;
+    min-height: 28px;
   }
 
   .meal-flow article {

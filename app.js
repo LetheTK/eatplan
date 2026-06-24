@@ -225,6 +225,10 @@ const els = {
   dailyTipText: document.querySelector("#dailyTipText"),
   statusPill: document.querySelector("#statusPill"),
   nutritionList: document.querySelector("#nutritionList"),
+  proteinRatioBar: document.querySelector("#proteinRatioBar"),
+  carbRatioBar: document.querySelector("#carbRatioBar"),
+  proteinRatio: document.querySelector("#proteinRatio"),
+  carbRatio: document.querySelector("#carbRatio"),
   firstMealText: document.querySelector("#firstMealText"),
   firstMealHint: document.querySelector("#firstMealHint"),
   firstMealMeta: document.querySelector("#firstMealMeta"),
@@ -405,6 +409,10 @@ function renderPlanner() {
   els.todaySummary.textContent = `${staple.description}，早餐为${breakfast.label}，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
   setNutritionAlert(Boolean(macroIssue));
   renderNutritionRows(total, assessment, proteinRatio, carbRatio);
+  els.proteinRatio.textContent = `${formatDecimal(proteinRatio)} g/kg`;
+  els.carbRatio.textContent = `${formatDecimal(carbRatio)} g/kg`;
+  els.proteinRatioBar.style.width = `${Math.min(100, Math.max(8, (proteinRatio / 1.8) * 100))}%`;
+  els.carbRatioBar.style.width = `${Math.min(100, Math.max(8, (carbRatio / 2.2) * 100))}%`;
 
   els.firstMealText.textContent = breakfast.meal;
   els.firstMealHint.textContent = breakfast.hint;
