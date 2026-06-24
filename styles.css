@@ -546,13 +546,24 @@ h1 {
   color: #263f2c;
 }
 
+.assessment-item.warn,
+.assessment-item.caution {
+  border-color: #d9a091;
+  background: #fff5f1;
+}
+
 .assessment-item.warn b {
-  background: #f3e4bd;
-  color: #684f18;
+  background: #ead2c8;
+  color: #7a3f32;
 }
 
 .assessment-item.caution b {
   background: #ead2c8;
+  color: #7a3f32;
+}
+
+.assessment-item.warn p,
+.assessment-item.caution p {
   color: #7a3f32;
 }
 
