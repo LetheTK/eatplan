@@ -223,6 +223,9 @@ const els = {
   carbBar: document.querySelector("#carbBar"),
   proteinRatio: document.querySelector("#proteinRatio"),
   carbRatio: document.querySelector("#carbRatio"),
+  proteinAssessment: document.querySelector("#proteinAssessment"),
+  carbAssessment: document.querySelector("#carbAssessment"),
+  fatAssessment: document.querySelector("#fatAssessment"),
   firstMealText: document.querySelector("#firstMealText"),
   firstMealHint: document.querySelector("#firstMealHint"),
   secondMealText: document.querySelector("#secondMealText"),
@@ -283,6 +286,56 @@ function setActive(container, attr, value) {
   });
 }
 
+function assessmentClass(status) {
+  if (status === "偏低") return "warn";
+  if (status === "偏高") return "caution";
+  return "good";
+}
+
+function buildMacroAssessment(total, proteinRatio, carbRatio) {
+  const protein = proteinRatio < 1.3
+    ? ["偏低", "低于减脂保肌下限，优先开K或加蛋白。"]
+    : proteinRatio > 1.7
+      ? ["偏高", "已到高活动上沿，日常不用再加蛋白。"]
+      : ["合理", "落在减脂保肌推荐区间。"];
+
+  let carb;
+  if (state.day === "run") {
+    carb = carbRatio < 1.8
+      ? ["偏低", "跑步日碳水偏紧，建议香蕉或50g主食缓冲。"]
+      : carbRatio > 2.3
+        ? ["偏高", "跑步日也不必继续加主食。"]
+        : ["合理", "适合5km跑步和恢复。"];
+  } else if (state.day === "strength") {
+    carb = carbRatio < 1.5
+      ? ["偏低", "力量日可能影响训练状态，掉力时加50g主食。"]
+      : carbRatio > 2.2
+        ? ["偏高", "若非高疲劳日，可取消香蕉或缓冲。"]
+        : ["合理", "能覆盖日常力量训练。"];
+  } else {
+    carb = carbRatio < 1.4
+      ? ["偏低", "日常减脂可接受；若饿或脑雾再加主食。"]
+      : carbRatio > 2.0
+        ? ["偏高", "休息/日常日不需要继续加碳水。"]
+        : ["合理", "适合休息或日常减脂。"];
+  }
+
+  const fatRatio = total.fat / PROFILE_WEIGHT_KG;
+  const fat = fatRatio < 0.45
+    ? ["偏低", "长期过低不利于激素和饱腹感。"]
+    : fatRatio > 0.85
+      ? ["偏高", "今天少加油、少鸭皮和坚果。"]
+      : ["合理", "处在减脂期可持续范围。"];
+
+  return { protein, carb, fat };
+}
+
+function renderAssessment(el, title, value, unit, assessment) {
+  const [status, detail] = assessment;
+  el.className = `assessment-item ${assessmentClass(status)}`;
+  el.innerHTML = `<span>${title}</span><b>${status}</b><em>${value}${unit}</em><p>${detail}</p>`;
+}
+
 function renderPlanner() {
   const day = dayTypes[state.day];
   const staple = staples[state.staple];
@@ -308,6 +361,12 @@ function renderPlanner() {
   els.carbRatio.textContent = `${formatDecimal(carbRatio)} g/kg`;
   els.proteinBar.style.width = `${proteinPercent}%`;
   els.carbBar.style.width = `${carbPercent}%`;
+
+  const assessment = buildMacroAssessment(total, proteinRatio, carbRatio);
+  renderAssessment(els.proteinAssessment, "蛋白质", formatDecimal(total.protein), "g", assessment.protein);
+  renderAssessment(els.carbAssessment, "碳水", round(total.carbs), "g", assessment.carb);
+  renderAssessment(els.fatAssessment, "脂肪", formatDecimal(total.fat), "g", assessment.fat);
+
   els.firstMealText.textContent = breakfast.meal;
   els.firstMealHint.textContent = breakfast.hint;
   els.secondMealText.textContent = staple.secondMeal;

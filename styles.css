@@ -504,6 +504,58 @@ h1 {
   transition: width 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.macro-assessment {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.assessment-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fbf8f1;
+}
+
+.assessment-item span,
+.assessment-item em {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
+}
+
+.assessment-item b {
+  display: inline-flex;
+  margin: 7px 0 5px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.assessment-item p {
+  margin: 0;
+  color: #4f584f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.assessment-item.good b {
+  background: #dfe8d8;
+  color: #263f2c;
+}
+
+.assessment-item.warn b {
+  background: #f3e4bd;
+  color: #684f18;
+}
+
+.assessment-item.caution b {
+  background: #ead2c8;
+  color: #7a3f32;
+}
+
 .action-panel {
   padding: 20px;
   background: var(--dark);
@@ -723,6 +775,10 @@ h1 {
 
   .macro-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .macro-assessment {
+    grid-template-columns: 1fr;
   }
 
   .bar-line {
