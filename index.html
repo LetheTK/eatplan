@@ -39,7 +39,22 @@
           </div>
         </div>
 
-        <details class="settings-panel" id="settingsPanel" open>
+        <div class="mobile-section-tabs" id="mobileSectionTabs" aria-label="今日内容切换">
+          <button type="button" data-mobile-panel="settings" class="active">
+            <span>今日饮食</span>
+            <b id="mobileDietHint">日常 · 土豆 · 平衡</b>
+          </button>
+          <button type="button" data-mobile-panel="meals">
+            <span>三餐</span>
+            <b>第一餐 · 第二餐 · 第三餐</b>
+          </button>
+          <button type="button" data-mobile-panel="totals">
+            <span>营养总计</span>
+            <b id="mobileTotalHint">1318 kcal · 108.8g蛋白</b>
+          </button>
+        </div>
+
+        <details class="settings-panel mobile-panel active" id="settingsPanel" data-mobile-panel-content="settings" open>
           <summary>
             <span>今日饮食</span>
             <b id="settingsSummary">日常 · 土豆 · 平衡早餐 · F</b>
@@ -81,7 +96,7 @@
           </div>
         </details>
 
-        <div class="meal-flow" aria-label="三餐结构">
+        <div class="meal-flow mobile-panel" data-mobile-panel-content="meals" aria-label="三餐结构">
           <article>
             <span>第一餐</span>
             <b id="firstMealText">麦片100g + 牛奶125ml + 鸡蛋1个</b>
@@ -99,7 +114,7 @@
           </article>
         </div>
 
-        <div class="daily-layout">
+        <div class="daily-layout mobile-panel" data-mobile-panel-content="totals">
           <article class="today-card">
             <div class="today-title">
               <p class="kicker">营养总计</p>
@@ -149,11 +164,6 @@
               <div id="fatAssessment"></div>
             </div>
           </article>
-
-          <aside class="action-panel">
-            <p class="kicker">今天照做</p>
-            <ol id="actionList"></ol>
-          </aside>
         </div>
       </section>
 

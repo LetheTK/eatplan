@@ -193,6 +193,7 @@ const knowledgeItems = [
 
 const state = {
   view: "today",
+  mobilePanel: "settings",
   day: "daily",
   staple: "potato",
   breakfast: "balanced",
@@ -205,6 +206,10 @@ const state = {
 const els = {
   viewControls: document.querySelector("#viewControls"),
   viewPanels: document.querySelectorAll("[data-view-panel]"),
+  mobileSectionTabs: document.querySelector("#mobileSectionTabs"),
+  mobilePanels: document.querySelectorAll("[data-mobile-panel-content]"),
+  mobileDietHint: document.querySelector("#mobileDietHint"),
+  mobileTotalHint: document.querySelector("#mobileTotalHint"),
   settingsSummary: document.querySelector("#settingsSummary"),
   dayControls: document.querySelector("#dayTypeControls"),
   stapleControls: document.querySelector("#stapleControls"),
@@ -233,7 +238,6 @@ const els = {
   secondMealText: document.querySelector("#secondMealText"),
   thirdMealText: document.querySelector("#thirdMealText"),
   thirdMealHint: document.querySelector("#thirdMealHint"),
-  actionList: document.querySelector("#actionList"),
   knowledgeTabs: document.querySelector("#knowledgeTabs"),
   knowledgeType: document.querySelector("#knowledgeType"),
   knowledgeTitle: document.querySelector("#knowledgeTitle"),
@@ -356,6 +360,8 @@ function renderPlanner() {
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
   els.statusPill.textContent = state.proteinK ? "已启用 K" : day.status;
   els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${state.proteinK ? "K" : "F"} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
+  els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
+  els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白`;
   els.todaySummary.textContent = `${staple.description}，早餐为${breakfast.label}，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
 
   els.kcalValue.textContent = round(total.kcal);
@@ -377,25 +383,17 @@ function renderPlanner() {
   els.secondMealText.textContent = staple.secondMeal;
   els.thirdMealText.textContent = state.proteinK ? "方案 K：鸡蛋3个 + 鸡胸100g" : "方案 F：鸡蛋4个";
   els.thirdMealHint.textContent = state.proteinK ? "今天属于跑步、高疲劳或恢复压力日。" : "跑步、力量明显累或睡眠差时再升到K。";
+}
 
-  const actions = [...day.actions];
-  if (state.day !== "run" && state.banana) {
-    actions.unshift("你已手动计入香蕉，把这105 kcal当作计划内加餐。");
-  }
-  if (state.day === "run" && !state.banana) {
-    actions.unshift("跑步日建议打开香蕉，当前碳水会偏紧。");
-  }
-  if (state.proteinK && state.day === "daily") {
-    actions.unshift("日常日通常不需要K；若今天疲劳明显再保留。");
-  }
-  if (state.buffer) {
-    actions.push("50g缓冲已计入。晚上观察饥饿感、腿沉和恢复速度。");
-  }
-  if (state.staple === "mixed") {
-    actions.push("混搭主食等于把土豆、糙米、紫薯放在同一份主食额度内轮换；有利于营养互补和肠道菌群多样性。");
-  }
-
-  els.actionList.innerHTML = actions.map((item) => `<li>${item}</li>`).join("");
+function renderMobilePanel() {
+  els.mobileSectionTabs.querySelectorAll("button").forEach((button) => {
+    const active = button.dataset.mobilePanel === state.mobilePanel;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "true" : "false");
+  });
+  els.mobilePanels.forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.mobilePanelContent === state.mobilePanel);
+  });
 }
 
 function renderView() {
@@ -490,7 +488,15 @@ els.viewControls.addEventListener("click", (event) => {
   renderView();
 });
 
+els.mobileSectionTabs.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-mobile-panel]");
+  if (!button) return;
+  state.mobilePanel = button.dataset.mobilePanel;
+  renderMobilePanel();
+});
+
 renderKnowledgeTabs();
 renderPlanner();
+renderMobilePanel();
 renderKnowledge();
 renderView();
