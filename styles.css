@@ -206,9 +206,9 @@ button:active {
 .section-heading {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
+  gap: 12px;
   align-items: end;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   min-width: 0;
 }
 
@@ -228,9 +228,9 @@ p {
 }
 
 h1 {
-  margin-bottom: 8px;
-  font-size: clamp(34px, 7vw, 62px);
-  line-height: 1.02;
+  margin-bottom: 6px;
+  font-size: clamp(28px, 4.2vw, 44px);
+  line-height: 1.08;
   letter-spacing: 0;
 }
 
@@ -246,7 +246,7 @@ h1 {
   max-width: 720px;
   margin-bottom: 0;
   color: #4f584f;
-  line-height: 1.65;
+  line-height: 1.48;
 }
 
 .status-stack {
@@ -737,8 +737,8 @@ h1 {
   }
 
   .planner-head {
-    gap: 9px;
-    margin-bottom: 10px;
+    gap: 7px;
+    margin-bottom: 8px;
   }
 
   .kicker {
@@ -747,14 +747,14 @@ h1 {
   }
 
   h1 {
-    margin-bottom: 6px;
-    font-size: 30px;
-    line-height: 1.08;
+    margin-bottom: 4px;
+    font-size: 24px;
+    line-height: 1.12;
   }
 
   .planner-lead {
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 12px;
+    line-height: 1.38;
   }
 
   .status-stack {
