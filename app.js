@@ -221,6 +221,8 @@ const els = {
   waterTarget: document.querySelector("#waterTarget"),
   todayTitle: document.querySelector("#todayTitle"),
   todaySummary: document.querySelector("#todaySummary"),
+  dailyTipTitle: document.querySelector("#dailyTipTitle"),
+  dailyTipText: document.querySelector("#dailyTipText"),
   statusPill: document.querySelector("#statusPill"),
   kcalValue: document.querySelector("#kcalValue"),
   proteinValue: document.querySelector("#proteinValue"),
@@ -359,6 +361,8 @@ function renderPlanner() {
   els.waterTarget.textContent = day.water;
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
   els.statusPill.textContent = state.proteinK ? "已启用 K" : day.status;
+  els.dailyTipTitle.textContent = state.proteinK ? "恢复压力大时保留 K" : day.lead;
+  els.dailyTipText.textContent = `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`;
   els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${state.proteinK ? "K" : "F"} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
   els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
   els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白`;
