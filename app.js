@@ -89,6 +89,39 @@ const staples = {
   }
 };
 
+const breakfasts = {
+  balanced: {
+    label: "平衡早餐",
+    shortLabel: "平衡",
+    meal: "麦片100g + 牛奶125ml + 鸡蛋1个",
+    hint: "保留口感和钙，减少牛奶成本。",
+    kcal: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  },
+  milk: {
+    label: "保留牛奶",
+    shortLabel: "牛奶",
+    meal: "麦片100g + 牛奶250ml",
+    hint: "操作最简单，但蛋白质性价比最低。",
+    kcal: 5,
+    protein: -2.2,
+    carbs: 4.5,
+    fat: -1.9
+  },
+  eggs: {
+    label: "不用牛奶",
+    shortLabel: "鸡蛋",
+    meal: "麦片100g + 鸡蛋2个",
+    hint: "更便宜、蛋白更高，但鸡蛋数量增加。",
+    kcal: -5,
+    protein: 2.2,
+    carbs: -4.5,
+    fat: 1.9
+  }
+};
+
 const banana = { kcal: 105, protein: 1.3, carbs: 27, fat: 0.3 };
 const buffer = { kcal: 45, protein: 0, carbs: 10, fat: 0 };
 const planKDelta = { kcal: 74, protein: 16.8, carbs: -0.5, fat: -1.1 };
@@ -157,8 +190,10 @@ const knowledgeItems = [
 ];
 
 const state = {
+  view: "today",
   day: "daily",
   staple: "potato",
+  breakfast: "balanced",
   banana: false,
   buffer: false,
   proteinK: false,
@@ -166,8 +201,12 @@ const state = {
 };
 
 const els = {
+  viewControls: document.querySelector("#viewControls"),
+  viewPanels: document.querySelectorAll("[data-view-panel]"),
+  settingsSummary: document.querySelector("#settingsSummary"),
   dayControls: document.querySelector("#dayTypeControls"),
   stapleControls: document.querySelector("#stapleControls"),
+  breakfastControls: document.querySelector("#breakfastControls"),
   bananaToggle: document.querySelector("#bananaToggle"),
   bufferToggle: document.querySelector("#bufferToggle"),
   proteinToggle: document.querySelector("#proteinToggle"),
@@ -184,6 +223,8 @@ const els = {
   carbBar: document.querySelector("#carbBar"),
   proteinRatio: document.querySelector("#proteinRatio"),
   carbRatio: document.querySelector("#carbRatio"),
+  firstMealText: document.querySelector("#firstMealText"),
+  firstMealHint: document.querySelector("#firstMealHint"),
   secondMealText: document.querySelector("#secondMealText"),
   thirdMealText: document.querySelector("#thirdMealText"),
   thirdMealHint: document.querySelector("#thirdMealHint"),
@@ -206,7 +247,13 @@ function formatDecimal(value) {
 
 function calculate() {
   const staple = staples[state.staple];
+  const breakfast = breakfasts[state.breakfast];
   const total = { ...staple };
+
+  total.kcal += breakfast.kcal;
+  total.protein += breakfast.protein;
+  total.carbs += breakfast.carbs;
+  total.fat += breakfast.fat;
 
   if (state.banana) {
     total.kcal += banana.kcal;
@@ -239,6 +286,7 @@ function setActive(container, attr, value) {
 function renderPlanner() {
   const day = dayTypes[state.day];
   const staple = staples[state.staple];
+  const breakfast = breakfasts[state.breakfast];
   const total = calculate();
   const proteinRatio = total.protein / PROFILE_WEIGHT_KG;
   const carbRatio = total.carbs / PROFILE_WEIGHT_KG;
@@ -249,7 +297,8 @@ function renderPlanner() {
   els.waterTarget.textContent = day.water;
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
   els.statusPill.textContent = state.proteinK ? "已启用 K" : day.status;
-  els.todaySummary.textContent = `${staple.description}，早餐按牛奶125ml+鸡蛋1个，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
+  els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${state.proteinK ? "K" : "F"} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
+  els.todaySummary.textContent = `${staple.description}，早餐为${breakfast.label}，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
 
   els.kcalValue.textContent = round(total.kcal);
   els.proteinValue.textContent = formatDecimal(total.protein);
@@ -259,6 +308,8 @@ function renderPlanner() {
   els.carbRatio.textContent = `${formatDecimal(carbRatio)} g/kg`;
   els.proteinBar.style.width = `${proteinPercent}%`;
   els.carbBar.style.width = `${carbPercent}%`;
+  els.firstMealText.textContent = breakfast.meal;
+  els.firstMealHint.textContent = breakfast.hint;
   els.secondMealText.textContent = staple.secondMeal;
   els.thirdMealText.textContent = state.proteinK ? "方案 K：鸡蛋3个 + 鸡胸100g" : "方案 F：鸡蛋4个";
   els.thirdMealHint.textContent = state.proteinK ? "今天属于跑步、高疲劳或恢复压力日。" : "跑步、力量明显累或睡眠差时再升到K。";
@@ -278,6 +329,20 @@ function renderPlanner() {
   }
 
   els.actionList.innerHTML = actions.map((item) => `<li>${item}</li>`).join("");
+}
+
+function renderView() {
+  els.viewControls.querySelectorAll("button").forEach((button) => {
+    const active = button.dataset.view === state.view;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "page" : "false");
+  });
+  els.viewPanels.forEach((panel) => {
+    const active = panel.dataset.viewPanel === state.view;
+    panel.hidden = !active;
+    panel.classList.toggle("active", active);
+  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function renderKnowledgeTabs() {
@@ -321,6 +386,14 @@ els.stapleControls.addEventListener("click", (event) => {
   renderPlanner();
 });
 
+els.breakfastControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-breakfast]");
+  if (!button) return;
+  state.breakfast = button.dataset.breakfast;
+  setActive(els.breakfastControls, "breakfast", state.breakfast);
+  renderPlanner();
+});
+
 els.bananaToggle.addEventListener("change", () => {
   state.banana = els.bananaToggle.checked;
   renderPlanner();
@@ -343,6 +416,14 @@ els.knowledgeTabs.addEventListener("click", (event) => {
   renderKnowledge();
 });
 
+els.viewControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-view]");
+  if (!button) return;
+  state.view = button.dataset.view;
+  renderView();
+});
+
 renderKnowledgeTabs();
 renderPlanner();
 renderKnowledge();
+renderView();

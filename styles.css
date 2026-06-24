@@ -154,23 +154,31 @@ button {
   min-width: 180px;
 }
 
-.nav-links a {
+.nav-links button {
   min-height: 34px;
   display: grid;
   place-items: center;
+  border: 0;
   border-radius: 8px;
+  background: transparent;
   color: #475147;
+  cursor: pointer;
   font-size: 13px;
   transition: background 160ms ease, transform 160ms ease;
 }
 
-.nav-links a:hover {
+.nav-links button:hover,
+.nav-links button.active {
   background: rgba(76, 107, 83, 0.1);
 }
 
-.nav-links a:active,
+.nav-links button:active,
 button:active {
   transform: scale(0.98);
+}
+
+.view-section[hidden] {
+  display: none;
 }
 
 .planner,
@@ -270,15 +278,61 @@ h1 {
   color: #5a513f;
 }
 
-.control-strip {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr 1.1fr;
-  gap: 10px;
-  padding: 10px;
+.settings-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #f8f4ec;
   margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.settings-panel summary {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.18fr) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.settings-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-panel summary span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 780;
+}
+
+.settings-panel summary b {
+  color: #3d453d;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.settings-panel summary::after {
+  content: "收起";
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: var(--muted);
+  background: var(--panel);
+  font-size: 12px;
+}
+
+.settings-panel:not([open]) summary::after {
+  content: "展开";
+}
+
+.control-strip {
+  display: grid;
+  grid-template-columns: 1fr 0.82fr 0.9fr 1fr;
+  gap: 10px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
   min-width: 0;
 }
 
@@ -309,6 +363,10 @@ h1 {
 }
 
 .toggle-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.breakfast-segment {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -350,6 +408,7 @@ h1 {
   grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
   gap: 12px;
   align-items: stretch;
+  margin-top: 12px;
   min-width: 0;
 }
 
@@ -645,8 +704,17 @@ h1 {
 
   .day-segment,
   .segmented,
+  .breakfast-segment,
   .toggle-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-panel summary {
+    grid-template-columns: 1fr auto;
+  }
+
+  .settings-panel summary span {
+    grid-column: 1 / -1;
   }
 
   .toggle-row label:last-child {

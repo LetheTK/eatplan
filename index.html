@@ -18,15 +18,15 @@
           <small>75kg · 减脂保肌 · 总表 v4</small>
         </span>
       </a>
-      <nav class="nav-links" aria-label="页面导航">
-        <a href="#top">今日</a>
-        <a href="#rules">规则</a>
-        <a href="#knowledge">知识库</a>
+      <nav class="nav-links" aria-label="页面导航" id="viewControls">
+        <button type="button" data-view="today" class="active">今日</button>
+        <button type="button" data-view="rules">规则</button>
+        <button type="button" data-view="knowledge">知识库</button>
       </nav>
     </header>
 
     <main id="top">
-      <section class="planner" aria-labelledby="planner-title">
+      <section class="planner view-section active" data-view-panel="today" aria-labelledby="planner-title">
         <div class="planner-head">
           <div>
             <p class="kicker">今日执行</p>
@@ -39,32 +39,64 @@
           </div>
         </div>
 
-        <div class="control-strip" aria-label="今日选项">
-          <div class="control-group">
-            <span>当天类型</span>
-            <div class="segmented day-segment" id="dayTypeControls">
-              <button type="button" data-day="daily" class="active">日常</button>
-              <button type="button" data-day="run">跑步</button>
-              <button type="button" data-day="strength">力量</button>
-              <button type="button" data-day="rest">休息</button>
+        <details class="settings-panel" id="settingsPanel" open>
+          <summary>
+            <span>今日设置</span>
+            <b id="settingsSummary">日常 · 土豆 · 平衡早餐 · F</b>
+          </summary>
+          <div class="control-strip" aria-label="今日选项">
+            <div class="control-group">
+              <span>当天类型</span>
+              <div class="segmented day-segment" id="dayTypeControls">
+                <button type="button" data-day="daily" class="active">日常</button>
+                <button type="button" data-day="run">跑步</button>
+                <button type="button" data-day="strength">力量</button>
+                <button type="button" data-day="rest">休息</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <span>主食</span>
+              <div class="segmented" id="stapleControls">
+                <button type="button" data-staple="rice">糙米</button>
+                <button type="button" data-staple="potato" class="active">土豆</button>
+                <button type="button" data-staple="mixed">混搭</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <span>早餐</span>
+              <div class="segmented breakfast-segment" id="breakfastControls">
+                <button type="button" data-breakfast="balanced" class="active">平衡</button>
+                <button type="button" data-breakfast="milk">牛奶</button>
+                <button type="button" data-breakfast="eggs">鸡蛋</button>
+              </div>
+            </div>
+            <div class="control-group">
+              <span>调整</span>
+              <div class="toggle-row">
+                <label><input id="bananaToggle" type="checkbox"> 香蕉</label>
+                <label><input id="bufferToggle" type="checkbox"> 50g 缓冲</label>
+                <label><input id="proteinToggle" type="checkbox"> 启用 K</label>
+              </div>
             </div>
           </div>
-          <div class="control-group">
-            <span>主食</span>
-            <div class="segmented" id="stapleControls">
-              <button type="button" data-staple="rice">糙米</button>
-              <button type="button" data-staple="potato" class="active">土豆</button>
-              <button type="button" data-staple="mixed">混搭</button>
-            </div>
-          </div>
-          <div class="control-group">
-            <span>调整</span>
-            <div class="toggle-row">
-              <label><input id="bananaToggle" type="checkbox"> 香蕉</label>
-              <label><input id="bufferToggle" type="checkbox"> 50g 缓冲</label>
-              <label><input id="proteinToggle" type="checkbox"> 启用 K</label>
-            </div>
-          </div>
+        </details>
+
+        <div class="meal-flow" aria-label="三餐结构">
+          <article>
+            <span>第一餐</span>
+            <b id="firstMealText">麦片100g + 牛奶125ml + 鸡蛋1个</b>
+            <p id="firstMealHint">保留口感和钙，减少牛奶成本。</p>
+          </article>
+          <article>
+            <span>第二餐</span>
+            <b id="secondMealText">鸡胸150g + 鸭胸100g · 土豆150g</b>
+            <p>想省事时改成鸡胸4天、鸭胸3天轮换。</p>
+          </article>
+          <article>
+            <span>第三餐</span>
+            <b id="thirdMealText">方案 F：鸡蛋4个</b>
+            <p id="thirdMealHint">跑步、力量明显累或睡眠差时再升到 K。</p>
+          </article>
         </div>
 
         <div class="daily-layout">
@@ -117,27 +149,9 @@
             <ol id="actionList"></ol>
           </aside>
         </div>
-
-        <div class="meal-flow" aria-label="三餐结构">
-          <article>
-            <span>第一餐</span>
-            <b>麦片100g + 牛奶125ml + 鸡蛋1个</b>
-            <p>保留口感和钙，减少牛奶成本。</p>
-          </article>
-          <article>
-            <span>第二餐</span>
-            <b id="secondMealText">鸡胸150g + 鸭胸100g · 土豆150g</b>
-            <p>想省事时改成鸡胸4天、鸭胸3天轮换。</p>
-          </article>
-          <article>
-            <span>第三餐</span>
-            <b id="thirdMealText">方案 F：鸡蛋4个</b>
-            <p id="thirdMealHint">跑步、力量明显累或睡眠差时再升到 K。</p>
-          </article>
-        </div>
       </section>
 
-      <section class="rules" id="rules" aria-labelledby="rules-title">
+      <section class="rules view-section" data-view-panel="rules" id="rules" aria-labelledby="rules-title" hidden>
         <div class="section-heading">
           <p class="kicker">执行规则</p>
           <h2 id="rules-title">只保留会改变今天吃法的规则。</h2>
@@ -176,7 +190,7 @@
         </div>
       </section>
 
-      <section class="knowledge" id="knowledge" aria-labelledby="knowledge-title">
+      <section class="knowledge view-section" data-view-panel="knowledge" id="knowledge" aria-labelledby="knowledge-title" hidden>
         <div class="section-heading">
           <p class="kicker">知识库</p>
           <h2 id="knowledge-title">不用打开 Markdown，也能看懂依据。</h2>
