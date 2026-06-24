@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f6f3ed">
-  <meta name="description" content="75kg 减脂保肌饮食执行仪表盘，支持跑步日、力量日、主食缓冲和移动端查看。">
-  <title>减脂执行仪表盘</title>
-  <link rel="preload" href="./assets/meal-prep-dashboard-hero.png" as="image">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="description" content="75kg 减脂保肌饮食执行页，首页直接给出日常、跑步、力量和休息日饮食建议。">
+  <title>每日饮食建议</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -15,49 +14,39 @@
       <a class="brand" href="#top" aria-label="回到顶部">
         <span class="brand-mark" aria-hidden="true"></span>
         <span>
-          <strong>减脂执行仪表盘</strong>
-          <small>75kg · 保肌 · 跑步与徒手力量</small>
+          <strong>每日饮食建议</strong>
+          <small>75kg · 减脂保肌 · 总表 v4</small>
         </span>
       </a>
       <nav class="nav-links" aria-label="页面导航">
-        <a href="#planner">今日</a>
+        <a href="#top">今日</a>
         <a href="#rules">规则</a>
-        <a href="#library">知识库</a>
-        <a href="#deploy">部署</a>
+        <a href="#knowledge">知识库</a>
       </nav>
     </header>
 
     <main id="top">
-      <section class="hero">
-        <div class="hero-copy">
-          <p class="kicker">当前计划 · 总表 v4</p>
-          <h1>打开就知道今天怎么吃。</h1>
-          <p class="hero-text">把总表、主食混搭、跑步日香蕉、50g 主食缓冲、鸡鸭胸搭配和 F/K 蛋白档合到一个手机优先的页面。它不是解释型文章，而是每天执行时用的控制台。</p>
-          <div class="hero-actions">
-            <a class="btn primary" href="#planner">进入今日面板</a>
-            <a class="btn secondary" href="#rules">查看执行规则</a>
+      <section class="planner" aria-labelledby="planner-title">
+        <div class="planner-head">
+          <div>
+            <p class="kicker">今日执行</p>
+            <h1 id="planner-title">先照这个吃。</h1>
+            <p class="planner-lead" id="plannerLead">日常默认方案 F，跑步或高疲劳时再升到 K。</p>
           </div>
-        </div>
-        <figure class="hero-visual">
-          <img src="./assets/meal-prep-dashboard-hero.png" alt="鸡胸肉、糙米、土豆、紫薯、香蕉和水杯组成的减脂备餐桌面">
-          <figcaption>基础主食一份，训练状态差时再加 50g 熟重缓冲。</figcaption>
-        </figure>
-      </section>
-
-      <section class="planner" id="planner" aria-labelledby="planner-title">
-        <div class="section-heading">
-          <p class="kicker">今日面板</p>
-          <h2 id="planner-title">选择今天的场景，页面给出执行口径。</h2>
+          <div class="status-stack">
+            <span id="statusPill">日常方案 F</span>
+            <b id="waterTarget">2-2.5L 水</b>
+          </div>
         </div>
 
         <div class="control-strip" aria-label="今日选项">
           <div class="control-group">
             <span>当天类型</span>
-            <div class="segmented" id="dayTypeControls">
-              <button type="button" data-day="rest">休息</button>
-              <button type="button" data-day="recovery">恢复</button>
+            <div class="segmented day-segment" id="dayTypeControls">
+              <button type="button" data-day="daily" class="active">日常</button>
+              <button type="button" data-day="run">跑步</button>
               <button type="button" data-day="strength">力量</button>
-              <button type="button" data-day="run" class="active">跑步</button>
+              <button type="button" data-day="rest">休息</button>
             </div>
           </div>
           <div class="control-group">
@@ -71,54 +60,54 @@
           <div class="control-group">
             <span>调整</span>
             <div class="toggle-row">
-              <label><input id="bananaToggle" type="checkbox" checked> 香蕉</label>
+              <label><input id="bananaToggle" type="checkbox"> 香蕉</label>
               <label><input id="bufferToggle" type="checkbox"> 50g 缓冲</label>
+              <label><input id="proteinToggle" type="checkbox"> 启用 K</label>
             </div>
           </div>
         </div>
 
-        <div class="dashboard-grid">
+        <div class="daily-layout">
           <article class="today-card">
-            <div class="today-header">
-              <div>
-                <p class="kicker">今日建议</p>
-                <h3 id="todayTitle">跑步日 · 土豆主食</h3>
-              </div>
-              <span class="status-pill" id="statusPill">跑前香蕉</span>
+            <div class="today-title">
+              <p class="kicker">营养总计</p>
+              <h2 id="todayTitle">日常 · 土豆主食</h2>
             </div>
             <p class="today-summary" id="todaySummary"></p>
+
             <div class="macro-grid" aria-label="今日营养总计">
               <div>
                 <span>热量</span>
-                <strong id="kcalValue">1423</strong>
+                <strong id="kcalValue">1318</strong>
                 <small>kcal</small>
               </div>
               <div>
                 <span>蛋白质</span>
-                <strong id="proteinValue">110.1</strong>
+                <strong id="proteinValue">108.8</strong>
                 <small>g</small>
               </div>
               <div>
                 <span>碳水</span>
-                <strong id="carbValue">142</strong>
+                <strong id="carbValue">115</strong>
                 <small>g</small>
               </div>
               <div>
                 <span>脂肪</span>
-                <strong id="fatValue">50.3</strong>
+                <strong id="fatValue">50.0</strong>
                 <small>g</small>
               </div>
             </div>
+
             <div class="bar-set">
               <div class="bar-line">
                 <span>蛋白质</span>
                 <div class="bar-track"><div id="proteinBar"></div></div>
-                <b id="proteinRatio">1.47 g/kg</b>
+                <b id="proteinRatio">1.45 g/kg</b>
               </div>
               <div class="bar-line">
                 <span>碳水</span>
                 <div class="bar-track"><div id="carbBar"></div></div>
-                <b id="carbRatio">1.89 g/kg</b>
+                <b id="carbRatio">1.53 g/kg</b>
               </div>
             </div>
           </article>
@@ -127,32 +116,23 @@
             <p class="kicker">今天照做</p>
             <ol id="actionList"></ol>
           </aside>
+        </div>
 
-          <article class="meal-card">
-            <div class="card-head">
-              <h3>固定饮食结构</h3>
-              <span>优化版默认</span>
-            </div>
-            <div class="meal-list">
-              <div><b>第一餐</b><span>麦片 100g + 牛奶 125ml + 鸡蛋 1 个</span><em>约 506 kcal · 蛋白 23.5g</em></div>
-              <div><b>第二餐</b><span>鸡胸150g + 鸭胸100g + 蔬菜 + 油 + 主食</span><em id="secondMealText">鸡胸150g + 鸭胸100g · 土豆150g</em></div>
-              <div><b>第三餐</b><span>方案 F：鸡蛋 4 个</span><em>K 只在跑步/高疲劳日启用</em></div>
-            </div>
+        <div class="meal-flow" aria-label="三餐结构">
+          <article>
+            <span>第一餐</span>
+            <b>麦片100g + 牛奶125ml + 鸡蛋1个</b>
+            <p>保留口感和钙，减少牛奶成本。</p>
           </article>
-
-          <article class="signal-card">
-            <div class="card-head">
-              <h3>是否启用 50g 缓冲</h3>
-              <span>不是默认加量</span>
-            </div>
-            <div class="signal-list">
-              <p>后半程腿沉、力量掉得快、跑后超过 1 小时仍疲劳时再加。</p>
-              <div class="buffer-table">
-                <span>土豆 +50g</span><b>+40 kcal / +10g 碳水</b>
-                <span>糙米 +50g</span><b>+55 kcal / +11.5g 碳水</b>
-                <span>紫薯 +50g</span><b>+45 kcal / +10g 碳水</b>
-              </div>
-            </div>
+          <article>
+            <span>第二餐</span>
+            <b id="secondMealText">鸡胸150g + 鸭胸100g · 土豆150g</b>
+            <p>想省事时改成鸡胸4天、鸭胸3天轮换。</p>
+          </article>
+          <article>
+            <span>第三餐</span>
+            <b id="thirdMealText">方案 F：鸡蛋4个</b>
+            <p id="thirdMealHint">跑步、力量明显累或睡眠差时再升到 K。</p>
           </article>
         </div>
       </section>
@@ -160,76 +140,59 @@
       <section class="rules" id="rules" aria-labelledby="rules-title">
         <div class="section-heading">
           <p class="kicker">执行规则</p>
-          <h2 id="rules-title">把复杂知识压缩成几个稳定判断。</h2>
+          <h2 id="rules-title">只保留会改变今天吃法的规则。</h2>
         </div>
         <div class="rule-grid">
           <article>
             <span class="rule-index">01</span>
-            <h3>主食一份，不叠加</h3>
-            <p>糙米 100g、土豆 150g、紫薯 130g 或混搭都算一份主食额度。混搭是拆分，不是加量。</p>
+            <h3>主食一份</h3>
+            <p>糙米100g、土豆150g、紫薯130g或混搭都算一份。混搭是拆分，不是加量。</p>
           </article>
           <article>
             <span class="rule-index">02</span>
-            <h3>跑步日先香蕉</h3>
-            <p>5km 跑步日优先跑前 30-60 分钟吃 1 根香蕉。跑后仍疲劳，再考虑 50g 主食缓冲。</p>
+            <h3>跑步先香蕉</h3>
+            <p>5km 跑步日跑前30-60分钟吃1根香蕉。跑后仍腿沉，再加50g熟重主食。</p>
           </article>
           <article>
             <span class="rule-index">03</span>
-            <h3>温热复热更现实</h3>
-            <p>土豆、紫薯、米饭做熟冷藏或冷冻后，吃前加热到温热即可。抗性淀粉不值得用冷硬口感交换。</p>
+            <h3>F日常，K触发</h3>
+            <p>F覆盖日常保肌。跑步、高疲劳、恢复差或睡眠差时，再把第三餐升到K。</p>
           </article>
           <article>
             <span class="rule-index">04</span>
-            <h3>饮水跟训练走</h3>
-            <p>日常 2-2.5L，力量日 2.3-2.8L，跑步日 2.5-3L。跑后小口慢饮，别猛灌。</p>
+            <h3>鸡鸭别搞复杂</h3>
+            <p>每天混就鸡胸150g+鸭胸100g；嫌麻烦就鸡胸4天、鸭胸3天轮换。</p>
           </article>
           <article>
             <span class="rule-index">05</span>
-            <h3>鸡鸭混搭不必复杂</h3>
-            <p>最省事是鸡胸4天、鸭胸3天轮换。若每天混，第二餐用鸡胸150g + 鸭胸100g。</p>
+            <h3>温热复热</h3>
+            <p>土豆、紫薯、米饭熟后冷藏或冷冻，吃前加热到温热即可。</p>
           </article>
           <article>
             <span class="rule-index">06</span>
-            <h3>F日常，K触发</h3>
-            <p>方案F覆盖日常保肌。跑步日、力量明显累、睡眠差或恢复差时，再把第三餐升到方案K。</p>
+            <h3>水跟训练走</h3>
+            <p>日常2-2.5L，力量2.3-2.8L，跑步2.5-3L。跑后小口慢饮。</p>
           </article>
         </div>
       </section>
 
-      <section class="library" id="library" aria-labelledby="library-title">
+      <section class="knowledge" id="knowledge" aria-labelledby="knowledge-title">
         <div class="section-heading">
-          <p class="kicker">知识库入口</p>
-          <h2 id="library-title">需要原因时，再回到 Markdown。</h2>
+          <p class="kicker">知识库</p>
+          <h2 id="knowledge-title">不用打开 Markdown，也能看懂依据。</h2>
         </div>
-        <div class="doc-list">
-          <a href="./docs/总表-v4.md"><b>总表-v4</b><span>当前计划、营养总计、热量收支</span></a>
-          <a href="./docs/主食-健康饮食完整指南_v2.md"><b>主食指南</b><span>土豆、糙米、紫薯、复热、混搭</span></a>
-          <a href="./docs/每日饮水完整指南.md"><b>每日饮水</b><span>跑步日、力量日、饭前饭后饮水</span></a>
-          <a href="./docs/蛋白质补充方案-v2.md"><b>蛋白质补充</b><span>第三餐和保肌蛋白档位</span></a>
-          <a href="./docs/蛋白质食材采购价格与替换规则-2026-06-24.md"><b>采购替换</b><span>鸡胸、鸭胸、鸡蛋、牛奶成本</span></a>
-          <a href="./docs/一周训练计划.md"><b>一周训练</b><span>跑步、力量、恢复日安排</span></a>
-          <a href="./docs/营养补充完整方案_v2.md"><b>营养补充</b><span>鱼油、D3、复合维生素、南瓜子</span></a>
-        </div>
-      </section>
 
-      <section class="deploy" id="deploy" aria-labelledby="deploy-title">
-        <div class="section-heading">
-          <p class="kicker">Cloudflare Pages</p>
-          <h2 id="deploy-title">纯静态部署，不需要后端。</h2>
-        </div>
-        <div class="deploy-panel">
-          <div>
-            <h3>上传方式</h3>
-            <p>把 `cloudflare-dashboard` 文件夹作为 Pages 项目上传。构建命令留空，输出目录填 `/` 或选择 Direct Upload。</p>
-          </div>
-          <div>
-            <h3>仓库方式</h3>
-            <p>连接仓库后，项目根目录设为 `cloudflare-dashboard`。Build command 留空，Build output directory 留空或填 `.`。</p>
-          </div>
-          <div>
-            <h3>隐私边界</h3>
-            <p>页面只包含静态规则和本地计算。没有 API 请求，不上传饮食记录，不依赖外部字体或脚本。</p>
-          </div>
+        <div class="knowledge-layout">
+          <div class="knowledge-tabs" id="knowledgeTabs" aria-label="知识库分类"></div>
+          <article class="knowledge-reader">
+            <div class="reader-head">
+              <p class="kicker" id="knowledgeType">总表</p>
+              <h3 id="knowledgeTitle">当前总控</h3>
+            </div>
+            <p id="knowledgeSummary"></p>
+            <dl id="knowledgeFacts"></dl>
+            <div class="reader-note" id="knowledgeNote"></div>
+          </article>
         </div>
       </section>
     </main>
