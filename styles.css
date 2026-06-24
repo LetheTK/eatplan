@@ -154,6 +154,7 @@ button {
 }
 
 .nav-links button {
+  position: relative;
   min-height: 34px;
   display: grid;
   place-items: center;
@@ -164,6 +165,26 @@ button {
   cursor: pointer;
   font-size: 13px;
   transition: background 160ms ease, transform 160ms ease;
+}
+
+.nav-links button i,
+.mobile-section-tabs button i {
+  display: none;
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #d94b3d;
+}
+
+.nav-links button.has-alert i,
+.mobile-section-tabs button.has-alert i {
+  display: block;
+}
+
+.nav-links button i {
+  top: 7px;
+  right: 13px;
 }
 
 .nav-links button:hover,
@@ -445,134 +466,78 @@ h1 {
   line-height: 1.55;
 }
 
-.macro-grid {
+.nutrition-list {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  min-width: 0;
+  margin-top: 14px;
 }
 
-.macro-grid div {
-  border: 0;
+.nutrition-row {
+  display: grid;
+  grid-template-columns: minmax(64px, 0.65fr) minmax(92px, auto) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 66px;
   border-radius: var(--radius-md);
   background: #ffffff;
   box-shadow: 0 10px 24px rgba(33, 31, 26, 0.05);
-  padding: 16px;
+  padding: 13px 14px;
 }
 
-.macro-grid span,
-.macro-grid small,
-.bar-line span,
-.bar-line b,
-.meal-flow span {
-  color: var(--muted);
-  font-size: 12px;
+.nutrition-row span {
+  color: #858780;
+  font-size: 13px;
+  font-weight: 720;
 }
 
-.macro-grid strong {
-  display: block;
-  margin-top: 4px;
+.nutrition-row strong {
+  color: var(--ink);
   font-family: var(--mono);
-  font-size: clamp(25px, 5vw, 36px);
+  font-size: 24px;
   line-height: 1;
   letter-spacing: 0;
 }
 
-.bar-set {
-  display: grid;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.bar-line {
-  border-top: 0;
-  display: grid;
-  grid-template-columns: 74px minmax(0, 1fr) 80px;
-  gap: 10px;
-  align-items: center;
-  padding-top: 12px;
-}
-
-.bar-track {
-  height: 4px;
-  border-radius: 999px;
-  background: #e9e2d6;
-  overflow: hidden;
-}
-
-.bar-track div {
-  width: 40%;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent);
-  transition: width 240ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-#carbBar {
-  background: var(--accent-2);
-}
-
-.macro-assessment {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.assessment-item {
-  border: 0;
-  border-radius: var(--radius-md);
-  padding: 12px;
-  background: #ffffff;
-  box-shadow: 0 8px 18px rgba(33, 31, 26, 0.045);
-}
-
-.assessment-item span,
-.assessment-item em {
-  display: block;
-  color: var(--muted);
+.nutrition-row strong small {
+  margin-left: 3px;
+  color: #8f948b;
+  font-family: var(--sans);
   font-size: 12px;
-  font-style: normal;
+  font-weight: 650;
 }
 
-.assessment-item b {
-  display: inline-flex;
-  margin: 7px 0 5px;
+.nutrition-row em {
+  justify-self: end;
   border-radius: 999px;
-  padding: 4px 8px;
-  font-size: 13px;
-}
-
-.assessment-item p {
-  margin: 0;
-  color: #4f584f;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.assessment-item.good b {
   background: #e0f2e8;
   color: #24724e;
+  padding: 5px 9px;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 760;
+  white-space: nowrap;
 }
 
-.assessment-item.warn,
-.assessment-item.caution {
-  border-color: #d9a091;
+.nutrition-row p {
+  grid-column: 2 / -1;
+  margin: -5px 0 0;
+  color: #8f948b;
+  font-size: 12px;
+}
+
+.nutrition-row.warn,
+.nutrition-row.caution {
   background: #fff5f1;
 }
 
-.assessment-item.warn b {
+.nutrition-row.warn em,
+.nutrition-row.caution em {
   background: #ead2c8;
   color: #7a3f32;
 }
 
-.assessment-item.caution b {
-  background: #ead2c8;
-  color: #7a3f32;
-}
-
-.assessment-item.warn p,
-.assessment-item.caution p {
+.nutrition-row.warn p,
+.nutrition-row.caution p {
   color: #7a3f32;
 }
 
@@ -616,12 +581,26 @@ h1 {
   padding: 18px;
 }
 
+.meal-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.meal-card-head time {
+  color: #a2a49d;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .meal-flow span,
-.meal-flow b {
+.meal-flow b,
+.meal-flow small {
   display: block;
 }
 
-.meal-flow span {
+.meal-card-head span {
   width: fit-content;
   border-radius: 999px;
   padding: 5px 10px;
@@ -637,10 +616,16 @@ h1 {
 }
 
 .meal-flow p {
-  margin-bottom: 0;
+  margin-bottom: 9px;
   color: #8b8d86;
   line-height: 1.55;
   font-size: 13px;
+}
+
+.meal-flow small {
+  color: #8f948b;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .rule-grid {
@@ -756,19 +741,47 @@ h1 {
 
 @media (max-width: 680px) {
   .app-shell {
-    padding: max(10px, env(safe-area-inset-top)) 10px 18px;
+    padding: max(10px, env(safe-area-inset-top)) 10px calc(98px + env(safe-area-inset-bottom));
   }
 
   .topbar {
+    position: static;
     align-items: stretch;
     flex-direction: column;
     border-radius: 14px;
     box-shadow: none;
+    backdrop-filter: none;
   }
 
   .nav-links {
-    width: 100%;
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    z-index: 20;
+    width: auto;
     min-width: 0;
+    min-height: 64px;
+    border-radius: 22px;
+    background: rgba(255, 254, 250, 0.94);
+    box-shadow: 0 18px 42px rgba(33, 31, 26, 0.16);
+    backdrop-filter: blur(18px);
+    padding: 7px;
+  }
+
+  .nav-links button {
+    min-height: 50px;
+    border-radius: 16px;
+  }
+
+  .nav-links button.active {
+    background: #e0f2e8;
+    color: #24724e;
+  }
+
+  .nav-links button i {
+    top: 9px;
+    right: 24%;
   }
 
   .planner {
@@ -821,6 +834,7 @@ h1 {
   }
 
   .mobile-section-tabs button {
+    position: relative;
     min-height: 56px;
     border: 1px solid rgba(232, 226, 216, 0.78);
     border-radius: var(--radius-sm);
@@ -838,6 +852,11 @@ h1 {
   .mobile-section-tabs button.active {
     border-color: transparent;
     background: #e0f2e8;
+  }
+
+  .mobile-section-tabs button i {
+    top: 8px;
+    right: 8px;
   }
 
   .mobile-section-tabs span,
@@ -891,11 +910,6 @@ h1 {
     grid-column: 1 / -1;
   }
 
-  .macro-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
   .today-card {
     padding: 0;
     background: transparent;
@@ -912,56 +926,45 @@ h1 {
     line-height: 1.5;
   }
 
-  .macro-grid div {
-    padding: 16px;
-  }
-
-  .macro-grid strong {
-    font-size: 27px;
-  }
-
-  .bar-set {
+  .nutrition-list {
     gap: 9px;
-    margin-top: 10px;
+    margin-top: 12px;
   }
 
-  .macro-assessment {
-    grid-template-columns: 1fr;
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .assessment-item {
+  .nutrition-row {
     display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr);
-    gap: 5px 7px;
-    align-items: center;
-    padding: 9px 11px;
+    grid-template-columns: minmax(50px, 0.72fr) minmax(86px, 1fr) auto;
+    min-height: 58px;
+    padding: 11px 12px;
   }
 
-  .assessment-item b {
-    margin: 0;
-    padding: 3px 7px;
+  .nutrition-row strong {
+    font-size: 21px;
+  }
+
+  .nutrition-row p {
+    grid-column: 2 / -1;
+  }
+
+  .meal-flow article {
+    padding: 18px;
+  }
+
+  .meal-flow b {
+    font-size: 17px;
+  }
+
+  .daily-tip {
+    gap: 4px;
+    padding: 14px 16px;
+  }
+
+  .daily-tip b {
+    font-size: 15px;
+  }
+
+  .daily-tip p {
     font-size: 12px;
-  }
-
-  .assessment-item em {
-    text-align: right;
-  }
-
-  .assessment-item p {
-    grid-column: 1 / -1;
-    font-size: 12px;
-    line-height: 1.35;
-  }
-
-  .assessment-item.good p {
-    display: none;
-  }
-
-  .bar-line {
-    grid-template-columns: 1fr;
-    gap: 7px;
   }
 
   .knowledge-tabs {

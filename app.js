@@ -224,22 +224,15 @@ const els = {
   dailyTipTitle: document.querySelector("#dailyTipTitle"),
   dailyTipText: document.querySelector("#dailyTipText"),
   statusPill: document.querySelector("#statusPill"),
-  kcalValue: document.querySelector("#kcalValue"),
-  proteinValue: document.querySelector("#proteinValue"),
-  carbValue: document.querySelector("#carbValue"),
-  fatValue: document.querySelector("#fatValue"),
-  proteinBar: document.querySelector("#proteinBar"),
-  carbBar: document.querySelector("#carbBar"),
-  proteinRatio: document.querySelector("#proteinRatio"),
-  carbRatio: document.querySelector("#carbRatio"),
-  proteinAssessment: document.querySelector("#proteinAssessment"),
-  carbAssessment: document.querySelector("#carbAssessment"),
-  fatAssessment: document.querySelector("#fatAssessment"),
+  nutritionList: document.querySelector("#nutritionList"),
   firstMealText: document.querySelector("#firstMealText"),
   firstMealHint: document.querySelector("#firstMealHint"),
+  firstMealMeta: document.querySelector("#firstMealMeta"),
   secondMealText: document.querySelector("#secondMealText"),
+  secondMealMeta: document.querySelector("#secondMealMeta"),
   thirdMealText: document.querySelector("#thirdMealText"),
   thirdMealHint: document.querySelector("#thirdMealHint"),
+  thirdMealMeta: document.querySelector("#thirdMealMeta"),
   knowledgeTabs: document.querySelector("#knowledgeTabs"),
   knowledgeType: document.querySelector("#knowledgeType"),
   knowledgeTitle: document.querySelector("#knowledgeTitle"),
@@ -341,10 +334,53 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
   return { protein, carb, fat };
 }
 
-function renderAssessment(el, title, value, unit, assessment) {
-  const [status, detail] = assessment;
-  el.className = `assessment-item ${assessmentClass(status)}`;
-  el.innerHTML = `<span>${title}</span><b>${status}</b><em>${value}${unit}</em><p>${detail}</p>`;
+function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
+  const rows = [
+    {
+      name: "热量",
+      value: `${round(total.kcal)}`,
+      unit: "kcal",
+      status: "计划内",
+      note: "按当前方案计入"
+    },
+    {
+      name: "蛋白质",
+      value: formatDecimal(total.protein),
+      unit: "g",
+      status: assessment.protein[0],
+      note: `${formatDecimal(proteinRatio)} g/kg`
+    },
+    {
+      name: "碳水",
+      value: `${round(total.carbs)}`,
+      unit: "g",
+      status: assessment.carb[0],
+      note: `${formatDecimal(carbRatio)} g/kg`
+    },
+    {
+      name: "脂肪",
+      value: formatDecimal(total.fat),
+      unit: "g",
+      status: assessment.fat[0],
+      note: assessment.fat[0] === "合理" ? "减脂期可持续" : assessment.fat[1]
+    }
+  ];
+
+  els.nutritionList.innerHTML = rows.map((row) => (
+    `<div class="nutrition-row ${assessmentClass(row.status)}">
+      <span>${row.name}</span>
+      <strong>${row.value}<small>${row.unit}</small></strong>
+      <em>${row.status}</em>
+      <p>${row.note}</p>
+    </div>`
+  )).join("");
+}
+
+function setNutritionAlert(hasAlert) {
+  const todayButton = els.viewControls.querySelector('[data-view="today"]');
+  const totalButton = els.mobileSectionTabs.querySelector('[data-mobile-panel="totals"]');
+  todayButton.classList.toggle("has-alert", hasAlert);
+  totalButton.classList.toggle("has-alert", hasAlert);
 }
 
 function renderPlanner() {
@@ -354,39 +390,30 @@ function renderPlanner() {
   const total = calculate();
   const proteinRatio = total.protein / PROFILE_WEIGHT_KG;
   const carbRatio = total.carbs / PROFILE_WEIGHT_KG;
-  const proteinPercent = Math.min(100, Math.max(18, (proteinRatio / 1.8) * 100));
-  const carbPercent = Math.min(100, Math.max(18, (carbRatio / 2.2) * 100));
+  const assessment = buildMacroAssessment(total, proteinRatio, carbRatio);
+  const macroIssue = [assessment.protein, assessment.carb, assessment.fat].find(([status]) => status !== "合理");
 
   els.plannerLead.textContent = day.lead;
   els.waterTarget.textContent = day.water;
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
   els.statusPill.textContent = state.proteinK ? "已启用 K" : day.status;
-  els.dailyTipTitle.textContent = state.proteinK ? "恢复压力大时保留 K" : day.lead;
-  els.dailyTipText.textContent = `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`;
+  els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue[0]}` : (state.proteinK ? "恢复压力大时保留 K" : day.lead);
+  els.dailyTipText.textContent = macroIssue ? macroIssue[1] : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`;
   els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${state.proteinK ? "K" : "F"} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
   els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
   els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白`;
   els.todaySummary.textContent = `${staple.description}，早餐为${breakfast.label}，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
-
-  els.kcalValue.textContent = round(total.kcal);
-  els.proteinValue.textContent = formatDecimal(total.protein);
-  els.carbValue.textContent = round(total.carbs);
-  els.fatValue.textContent = formatDecimal(total.fat);
-  els.proteinRatio.textContent = `${formatDecimal(proteinRatio)} g/kg`;
-  els.carbRatio.textContent = `${formatDecimal(carbRatio)} g/kg`;
-  els.proteinBar.style.width = `${proteinPercent}%`;
-  els.carbBar.style.width = `${carbPercent}%`;
-
-  const assessment = buildMacroAssessment(total, proteinRatio, carbRatio);
-  renderAssessment(els.proteinAssessment, "蛋白质", formatDecimal(total.protein), "g", assessment.protein);
-  renderAssessment(els.carbAssessment, "碳水", round(total.carbs), "g", assessment.carb);
-  renderAssessment(els.fatAssessment, "脂肪", formatDecimal(total.fat), "g", assessment.fat);
+  setNutritionAlert(Boolean(macroIssue));
+  renderNutritionRows(total, assessment, proteinRatio, carbRatio);
 
   els.firstMealText.textContent = breakfast.meal;
   els.firstMealHint.textContent = breakfast.hint;
   els.secondMealText.textContent = staple.secondMeal;
   els.thirdMealText.textContent = state.proteinK ? "方案 K：鸡蛋3个 + 鸡胸100g" : "方案 F：鸡蛋4个";
   els.thirdMealHint.textContent = state.proteinK ? "今天属于跑步、高疲劳或恢复压力日。" : "跑步、力量明显累或睡眠差时再升到K。";
+  els.firstMealMeta.textContent = `约 ${round(380 + breakfast.kcal)} kcal · 蛋白 ${formatDecimal(22 + breakfast.protein)}g`;
+  els.secondMealMeta.textContent = `约 ${state.staple === "rice" ? 550 : state.staple === "potato" ? 560 : 555} kcal · 蛋白 62g`;
+  els.thirdMealMeta.textContent = state.proteinK ? "约 432 kcal · 蛋白 41g" : "约 358 kcal · 蛋白 24g";
 }
 
 function renderMobilePanel() {

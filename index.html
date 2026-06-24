@@ -19,9 +19,9 @@
         </span>
       </a>
       <nav class="nav-links" aria-label="页面导航" id="viewControls">
-        <button type="button" data-view="today" class="active">今日</button>
-        <button type="button" data-view="rules">规则</button>
-        <button type="button" data-view="knowledge">知识库</button>
+        <button type="button" data-view="today" class="active"><span>今日</span><i aria-hidden="true"></i></button>
+        <button type="button" data-view="rules"><span>规则</span></button>
+        <button type="button" data-view="knowledge"><span>知识库</span></button>
       </nav>
     </header>
 
@@ -51,6 +51,7 @@
           <button type="button" data-mobile-panel="totals">
             <span>营养总计</span>
             <b id="mobileTotalHint">1318 kcal · 108.8g蛋白</b>
+            <i aria-hidden="true"></i>
           </button>
         </div>
 
@@ -98,19 +99,22 @@
 
         <div class="meal-flow mobile-panel" data-mobile-panel-content="meals" aria-label="三餐结构">
           <article>
-            <span>第一餐</span>
+            <div class="meal-card-head"><span>第一餐</span><time>约 7:00</time></div>
             <b id="firstMealText">麦片100g + 牛奶125ml + 鸡蛋1个</b>
             <p id="firstMealHint">保留口感和钙，减少牛奶成本。</p>
+            <small id="firstMealMeta">约 380 kcal · 蛋白 22g</small>
           </article>
           <article>
-            <span>第二餐</span>
+            <div class="meal-card-head"><span>第二餐</span><time>约 12:00</time></div>
             <b id="secondMealText">鸡胸150g + 鸭胸100g · 土豆150g</b>
             <p>想省事时改成鸡胸4天、鸭胸3天轮换。</p>
+            <small id="secondMealMeta">约 580 kcal · 蛋白 62g</small>
           </article>
           <article>
-            <span>第三餐</span>
+            <div class="meal-card-head"><span>第三餐</span><time>约 18:00</time></div>
             <b id="thirdMealText">方案 F：鸡蛋4个</b>
             <p id="thirdMealHint">跑步、力量明显累或睡眠差时再升到 K。</p>
+            <small id="thirdMealMeta">约 358 kcal · 蛋白 24g</small>
           </article>
         </div>
 
@@ -122,47 +126,7 @@
             </div>
             <p class="today-summary" id="todaySummary"></p>
 
-            <div class="macro-grid" aria-label="今日营养总计">
-              <div>
-                <span>热量</span>
-                <strong id="kcalValue">1318</strong>
-                <small>kcal</small>
-              </div>
-              <div>
-                <span>蛋白质</span>
-                <strong id="proteinValue">108.8</strong>
-                <small>g</small>
-              </div>
-              <div>
-                <span>碳水</span>
-                <strong id="carbValue">115</strong>
-                <small>g</small>
-              </div>
-              <div>
-                <span>脂肪</span>
-                <strong id="fatValue">50.0</strong>
-                <small>g</small>
-              </div>
-            </div>
-
-            <div class="bar-set">
-              <div class="bar-line">
-                <span>蛋白质</span>
-                <div class="bar-track"><div id="proteinBar"></div></div>
-                <b id="proteinRatio">1.45 g/kg</b>
-              </div>
-              <div class="bar-line">
-                <span>碳水</span>
-                <div class="bar-track"><div id="carbBar"></div></div>
-                <b id="carbRatio">1.53 g/kg</b>
-              </div>
-            </div>
-
-            <div class="macro-assessment" aria-label="蛋白质碳水脂肪评估">
-              <div id="proteinAssessment"></div>
-              <div id="carbAssessment"></div>
-              <div id="fatAssessment"></div>
-            </div>
+            <div class="nutrition-list" id="nutritionList" aria-label="今日营养总计"></div>
           </article>
         </div>
 
