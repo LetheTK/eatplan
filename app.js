@@ -206,6 +206,7 @@ const state = {
 const els = {
   viewControls: document.querySelector("#viewControls"),
   viewPanels: document.querySelectorAll("[data-view-panel]"),
+  mobileBottomNav: document.querySelector("#mobileBottomNav"),
   mobileSectionTabs: document.querySelector("#mobileSectionTabs"),
   mobilePanels: document.querySelectorAll("[data-mobile-panel-content]"),
   mobileDietHint: document.querySelector("#mobileDietHint"),
@@ -383,8 +384,10 @@ function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
 function setNutritionAlert(hasAlert) {
   const todayButton = els.viewControls.querySelector('[data-view="today"]');
   const totalButton = els.mobileSectionTabs.querySelector('[data-mobile-panel="totals"]');
+  const nutritionButton = els.mobileBottomNav.querySelector('[data-mobile-panel="totals"]');
   todayButton.classList.toggle("has-alert", hasAlert);
   totalButton.classList.toggle("has-alert", hasAlert);
+  nutritionButton.classList.toggle("has-alert", hasAlert);
 }
 
 function renderPlanner() {
@@ -433,6 +436,18 @@ function renderMobilePanel() {
   els.mobilePanels.forEach((panel) => {
     panel.classList.toggle("active", panel.dataset.mobilePanelContent === state.mobilePanel);
   });
+  renderMobileBottomNav();
+}
+
+function renderMobileBottomNav() {
+  els.mobileBottomNav.querySelectorAll("button").forEach((button) => {
+    const targetView = button.dataset.view;
+    const active = targetView === "today"
+      ? state.view === "today" && button.dataset.mobilePanel === state.mobilePanel
+      : state.view === targetView;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "page" : "false");
+  });
 }
 
 function renderView() {
@@ -447,6 +462,7 @@ function renderView() {
     panel.hidden = !active;
     panel.classList.toggle("active", active);
   });
+  renderMobileBottomNav();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -532,6 +548,17 @@ els.mobileSectionTabs.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-mobile-panel]");
   if (!button) return;
   state.mobilePanel = button.dataset.mobilePanel;
+  renderMobilePanel();
+});
+
+els.mobileBottomNav.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-view]");
+  if (!button) return;
+  state.view = button.dataset.view;
+  if (button.dataset.mobilePanel) {
+    state.mobilePanel = button.dataset.mobilePanel;
+  }
+  renderView();
   renderMobilePanel();
 });
 

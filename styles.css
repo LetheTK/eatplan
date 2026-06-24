@@ -168,7 +168,8 @@ button {
 }
 
 .nav-links button i,
-.mobile-section-tabs button i {
+.mobile-section-tabs button i,
+.mobile-bottom-nav button i {
   display: none;
   position: absolute;
   width: 8px;
@@ -178,7 +179,8 @@ button {
 }
 
 .nav-links button.has-alert i,
-.mobile-section-tabs button.has-alert i {
+.mobile-section-tabs button.has-alert i,
+.mobile-bottom-nav button.has-alert i {
   display: block;
 }
 
@@ -299,6 +301,10 @@ h1 {
 }
 
 .mobile-section-tabs {
+  display: none;
+}
+
+.mobile-bottom-nav {
   display: none;
 }
 
@@ -800,10 +806,6 @@ h1 {
     padding: max(10px, env(safe-area-inset-top)) 10px calc(98px + env(safe-area-inset-bottom));
   }
 
-  body[data-view="today"] .app-shell {
-    padding-bottom: calc(152px + env(safe-area-inset-bottom));
-  }
-
   .topbar {
     position: static;
     align-items: stretch;
@@ -814,7 +816,14 @@ h1 {
   }
 
   .nav-links {
+    display: none;
+  }
+
+  .mobile-bottom-nav {
     position: fixed;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
     left: 10px;
     right: 10px;
     bottom: max(10px, env(safe-area-inset-bottom));
@@ -829,19 +838,37 @@ h1 {
     padding: 7px;
   }
 
-  .nav-links button {
+  .mobile-bottom-nav button {
+    position: relative;
+    min-width: 0;
     min-height: 50px;
-    border-radius: 16px;
+    border: 0;
+    border-radius: 15px;
+    background: transparent;
+    color: #475147;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0 4px;
+    font-size: 12px;
+    font-weight: 760;
+    transition: background 180ms ease, color 180ms ease, transform 160ms ease;
   }
 
-  .nav-links button.active {
+  .mobile-bottom-nav button.active {
     background: #e0f2e8;
     color: #24724e;
   }
 
-  .nav-links button i {
+  .mobile-bottom-nav button i {
     top: 9px;
-    right: 24%;
+    right: 18%;
+  }
+
+  .mobile-bottom-nav span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .planner {
@@ -898,21 +925,7 @@ h1 {
   }
 
   .mobile-section-tabs {
-    position: fixed;
-    left: 10px;
-    right: 10px;
-    bottom: calc(82px + env(safe-area-inset-bottom));
-    z-index: 19;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    margin: 0;
-    border: 1px solid rgba(232, 226, 216, 0.72);
-    border-radius: 20px;
-    background: rgba(255, 254, 250, 0.94);
-    box-shadow: 0 12px 30px rgba(33, 31, 26, 0.11);
-    backdrop-filter: blur(18px);
-    padding: 6px;
+    display: none;
   }
 
   .mobile-section-tabs button {
