@@ -634,3 +634,11 @@ renderPlanner();
 renderMobilePanel();
 renderKnowledge();
 renderView();
+
+if ("serviceWorker" in navigator && ["https:", "http:"].includes(window.location.protocol)) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      // The page still works normally if installation support is unavailable.
+    });
+  });
+}
