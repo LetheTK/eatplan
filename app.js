@@ -125,6 +125,7 @@ const breakfasts = {
 const banana = { kcal: 105, protein: 1.3, carbs: 27, fat: 0.3 };
 const buffer = { kcal: 45, protein: 0, carbs: 10, fat: 0 };
 const planKDelta = { kcal: 74, protein: 16.8, carbs: -0.5, fat: -1.1 };
+const STORAGE_KEY = "eatplan.dashboard.state.v1";
 
 const knowledgeItems = [
   {
@@ -191,7 +192,7 @@ const knowledgeItems = [
   }
 ];
 
-const state = {
+const defaultState = {
   view: "today",
   mobilePanel: "settings",
   day: "daily",
@@ -201,6 +202,34 @@ const state = {
   buffer: false,
   proteinK: false,
   knowledge: "plan"
+};
+
+function readSavedState() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const saved = JSON.parse(raw);
+    if (!saved || typeof saved !== "object") return {};
+
+    const next = {};
+    if (["today", "rules", "knowledge"].includes(saved.view)) next.view = saved.view;
+    if (["settings", "meals", "totals"].includes(saved.mobilePanel)) next.mobilePanel = saved.mobilePanel;
+    if (dayTypes[saved.day]) next.day = saved.day;
+    if (staples[saved.staple]) next.staple = saved.staple;
+    if (breakfasts[saved.breakfast]) next.breakfast = saved.breakfast;
+    if (knowledgeItems.some((item) => item.id === saved.knowledge)) next.knowledge = saved.knowledge;
+    ["banana", "buffer", "proteinK"].forEach((key) => {
+      if (typeof saved[key] === "boolean") next[key] = saved[key];
+    });
+    return next;
+  } catch {
+    return {};
+  }
+}
+
+const state = {
+  ...defaultState,
+  ...readSavedState()
 };
 
 const els = {
@@ -254,6 +283,24 @@ function formatDecimal(value) {
   return value.toFixed(1);
 }
 
+function saveState() {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      view: state.view,
+      mobilePanel: state.mobilePanel,
+      day: state.day,
+      staple: state.staple,
+      breakfast: state.breakfast,
+      banana: state.banana,
+      buffer: state.buffer,
+      proteinK: state.proteinK,
+      knowledge: state.knowledge
+    }));
+  } catch {
+    // localStorage may be unavailable in restricted browser modes.
+  }
+}
+
 function calculate() {
   const staple = staples[state.staple];
   const breakfast = breakfasts[state.breakfast];
@@ -290,6 +337,15 @@ function setActive(container, attr, value) {
   container.querySelectorAll("button").forEach((button) => {
     button.classList.toggle("active", button.dataset[attr] === value);
   });
+}
+
+function syncControls() {
+  setActive(els.dayControls, "day", state.day);
+  setActive(els.stapleControls, "staple", state.staple);
+  setActive(els.breakfastControls, "breakfast", state.breakfast);
+  els.bananaToggle.checked = state.banana;
+  els.bufferToggle.checked = state.buffer;
+  els.proteinToggle.checked = state.proteinK;
 }
 
 function assessmentClass(status) {
@@ -496,6 +552,7 @@ els.dayControls.addEventListener("click", (event) => {
   els.bananaToggle.checked = state.banana;
   els.proteinToggle.checked = state.proteinK;
   setActive(els.dayControls, "day", state.day);
+  saveState();
   renderPlanner();
 });
 
@@ -504,6 +561,7 @@ els.stapleControls.addEventListener("click", (event) => {
   if (!button) return;
   state.staple = button.dataset.staple;
   setActive(els.stapleControls, "staple", state.staple);
+  saveState();
   renderPlanner();
 });
 
@@ -512,21 +570,25 @@ els.breakfastControls.addEventListener("click", (event) => {
   if (!button) return;
   state.breakfast = button.dataset.breakfast;
   setActive(els.breakfastControls, "breakfast", state.breakfast);
+  saveState();
   renderPlanner();
 });
 
 els.bananaToggle.addEventListener("change", () => {
   state.banana = els.bananaToggle.checked;
+  saveState();
   renderPlanner();
 });
 
 els.bufferToggle.addEventListener("change", () => {
   state.buffer = els.bufferToggle.checked;
+  saveState();
   renderPlanner();
 });
 
 els.proteinToggle.addEventListener("change", () => {
   state.proteinK = els.proteinToggle.checked;
+  saveState();
   renderPlanner();
 });
 
@@ -534,6 +596,7 @@ els.knowledgeTabs.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-knowledge]");
   if (!button) return;
   state.knowledge = button.dataset.knowledge;
+  saveState();
   renderKnowledge();
 });
 
@@ -541,6 +604,7 @@ els.viewControls.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-view]");
   if (!button) return;
   state.view = button.dataset.view;
+  saveState();
   renderView();
 });
 
@@ -548,6 +612,7 @@ els.mobileSectionTabs.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-mobile-panel]");
   if (!button) return;
   state.mobilePanel = button.dataset.mobilePanel;
+  saveState();
   renderMobilePanel();
 });
 
@@ -558,11 +623,13 @@ els.mobileBottomNav.addEventListener("click", (event) => {
   if (button.dataset.mobilePanel) {
     state.mobilePanel = button.dataset.mobilePanel;
   }
+  saveState();
   renderView();
   renderMobilePanel();
 });
 
 renderKnowledgeTabs();
+syncControls();
 renderPlanner();
 renderMobilePanel();
 renderKnowledge();

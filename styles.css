@@ -875,7 +875,7 @@ h1 {
     width: 100%;
     max-width: 100%;
     min-height: auto;
-    padding: 14px;
+    padding: 4px 14px 14px;
     background: transparent;
     overflow-x: hidden;
   }
@@ -889,8 +889,7 @@ h1 {
   }
 
   .planner-head {
-    gap: 7px;
-    margin-bottom: 8px;
+    display: none;
   }
 
   .kicker {
