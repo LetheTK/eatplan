@@ -66,7 +66,7 @@ const staples = {
     protein: 108.8,
     carbs: 108,
     fat: 50.0,
-    secondMeal: "鸡胸150g + 鸭胸100g · 糙米100g",
+    secondMeal: "鸡胸150g + 鸭胸100g · 蔬菜200g · 糙米100g · 橄榄油1汤匙",
     description: "糙米基础日"
   },
   potato: {
@@ -75,7 +75,7 @@ const staples = {
     protein: 108.8,
     carbs: 115,
     fat: 50.0,
-    secondMeal: "鸡胸150g + 鸭胸100g · 土豆150g",
+    secondMeal: "鸡胸150g + 鸭胸100g · 蔬菜200g · 土豆150g · 橄榄油1汤匙",
     description: "土豆基础日"
   },
   mixed: {
@@ -84,7 +84,7 @@ const staples = {
     protein: 108.8,
     carbs: 112,
     fat: 50.0,
-    secondMeal: "鸡胸150g + 鸭胸100g · 主食混搭",
+    secondMeal: "鸡胸150g + 鸭胸100g · 蔬菜200g · 主食混搭 · 橄榄油1汤匙",
     description: "主食混搭日"
   }
 };
@@ -402,7 +402,7 @@ function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
       value: `${round(total.kcal)}`,
       unit: "kcal",
       status: "计划内",
-      note: "按当前方案计入"
+      note: "含第二餐蔬菜"
     },
     {
       name: "蛋白质",
@@ -465,7 +465,7 @@ function renderPlanner() {
   els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${state.proteinK ? "K" : "F"} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
   els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
   els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白`;
-  els.todaySummary.textContent = `${staple.description}，早餐为${breakfast.label}，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
+  els.todaySummary.textContent = `${staple.description}，第二餐蔬菜约200g已计入，早餐为${breakfast.label}，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
   setNutritionAlert(Boolean(macroIssue));
   renderNutritionRows(total, assessment, proteinRatio, carbRatio);
   els.proteinRatio.textContent = `${formatDecimal(proteinRatio)} g/kg`;
@@ -479,7 +479,7 @@ function renderPlanner() {
   els.thirdMealText.textContent = state.proteinK ? "方案 K：鸡蛋3个 + 鸡胸100g" : "方案 F：鸡蛋4个";
   els.thirdMealHint.textContent = state.proteinK ? "今天属于跑步、高疲劳或恢复压力日。" : "跑步、力量明显累或睡眠差时再升到K。";
   els.firstMealMeta.textContent = `约 ${round(380 + breakfast.kcal)} kcal · 蛋白 ${formatDecimal(22 + breakfast.protein)}g`;
-  els.secondMealMeta.textContent = `约 ${state.staple === "rice" ? 550 : state.staple === "potato" ? 560 : 555} kcal · 蛋白 62g`;
+  els.secondMealMeta.textContent = `约 ${state.staple === "rice" ? 550 : state.staple === "potato" ? 560 : 555} kcal · 蛋白 60.5g · 含蔬菜`;
   els.thirdMealMeta.textContent = state.proteinK ? "约 432 kcal · 蛋白 41g" : "约 358 kcal · 蛋白 24g";
 }
 
