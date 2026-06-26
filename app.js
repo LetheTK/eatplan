@@ -17,16 +17,17 @@ const dayTypes = {
   },
   run: {
     label: "跑步",
-    status: "跑前香蕉",
+    status: "按状态补碳",
     water: "2.5-3L 水",
-    bananaDefault: true,
-    proteinDefault: true,
-    lead: "5km 跑步日先补香蕉，恢复压力大时第三餐升到 K。",
+    bananaDefault: false,
+    proteinDefault: false,
+    lead: "5km 慢跑不固定加碳水；空腹、间隔久、恢复慢时再补。",
     actions: [
-      "跑前30-60分钟吃1根香蕉。",
-      "第三餐默认升到K：鸡蛋3个 + 鸡胸100g。",
-      "第二餐仍只吃一份主食，不把土豆和米饭完整叠加。",
-      "跑后超过1小时仍腿沉，再打开50g主食缓冲。"
+      "状态正常的5km慢跑，不必固定加香蕉。",
+      "空腹跑、距上一餐超过4小时、跑后1小时仍腿沉时，再补碳。",
+      "补碳可选香蕉1根，或土豆100g、糙米饭75-100g、紫薯80-100g。",
+      "第三餐先按方案F；当天还做力量或连续疲劳时再升到K。",
+      "第二餐仍只吃一份主食，不把土豆和米饭完整叠加。"
     ]
   },
   strength: {
@@ -132,11 +133,11 @@ const knowledgeItems = [
     id: "plan",
     type: "总表",
     title: "当前总控",
-    summary: "日常默认方案F，跑步日先加香蕉，恢复压力大时再升到K。主食保持一份，状态差时才加50g熟重缓冲。",
+    summary: "日常默认方案F，5km慢跑不固定加碳水；空腹、距上一餐久、跑后恢复慢或叠加力量时再补。主食保持一份，额外补碳单独计入。",
     facts: [
       ["日常蛋白", "约108.8g，约1.45g/kg"],
-      ["跑步日", "香蕉 + 可选K，碳水约142g起"],
-      ["主食缓冲", "只在腿沉、训练掉力、跑后疲劳时启用"]
+      ["补碳触发", "空腹、间隔超过4小时、跑后1小时仍腿沉、叠加力量"],
+      ["换算", "香蕉1根 ≈ 土豆100g / 糙米饭75-100g / 紫薯80-100g"]
     ],
     note: "来源：总表-v4。页面已把常用结论压缩成执行规则。"
   },
@@ -144,10 +145,10 @@ const knowledgeItems = [
     id: "protein",
     type: "蛋白质",
     title: "F/K 蛋白档",
-    summary: "方案F是日常默认，方案K是触发档。牛奶不作为主要蛋白性价比来源，早餐用牛奶125ml + 鸡蛋1个更平衡。",
+    summary: "方案F是日常默认，方案K是触发档。跑步日先看是否需要补碳，不默认靠K解决；早餐用牛奶125ml + 鸡蛋1个更平衡。",
     facts: [
       ["方案F", "鸡蛋4个，日常够用"],
-      ["方案K", "鸡蛋3个 + 鸡胸100g，用于跑步或高疲劳"],
+      ["方案K", "鸡蛋3个 + 鸡胸100g，用于跑步叠加力量或高疲劳"],
       ["牛奶替换", "综合最优是牛奶125ml + 鸡蛋1个"]
     ],
     note: "来源：蛋白质补充方案、采购价格与替换规则。"
@@ -366,11 +367,11 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
 
   let carb;
   if (state.day === "run") {
-    carb = carbRatio < 1.8
-      ? ["偏低", mixedLowCarbHint || "跑步日碳水偏紧，建议香蕉或50g主食缓冲。"]
+    carb = carbRatio < 1.4
+      ? ["偏低", mixedLowCarbHint || "跑步日碳水偏紧，建议补香蕉或一点主食。"]
       : carbRatio > 2.3
         ? ["偏高", "跑步日也不必继续加主食。"]
-        : ["合理", "适合5km跑步和恢复。"];
+        : ["合理", "5km慢跑可用；空腹、间隔久或跑后恢复慢时再补碳。"];
   } else if (state.day === "strength") {
     carb = carbRatio < 1.5
       ? ["偏低", mixedLowCarbHint || "力量日可能影响训练状态，掉力时加50g主食。"]
@@ -477,7 +478,7 @@ function renderPlanner() {
   els.firstMealHint.textContent = breakfast.hint;
   els.secondMealText.textContent = staple.secondMeal;
   els.thirdMealText.textContent = state.proteinK ? "方案 K：鸡蛋3个 + 鸡胸100g" : "方案 F：鸡蛋4个";
-  els.thirdMealHint.textContent = state.proteinK ? "今天属于跑步、高疲劳或恢复压力日。" : "跑步、力量明显累或睡眠差时再升到K。";
+  els.thirdMealHint.textContent = state.proteinK ? "今天属于跑步+力量、高疲劳或恢复压力日。" : "力量明显累、跑步叠加力量或睡眠差时再升到K。";
   els.firstMealMeta.textContent = `约 ${round(380 + breakfast.kcal)} kcal · 蛋白 ${formatDecimal(22 + breakfast.protein)}g`;
   els.secondMealMeta.textContent = `约 ${state.staple === "rice" ? 550 : state.staple === "potato" ? 560 : 555} kcal · 蛋白 60.5g · 含蔬菜`;
   els.thirdMealMeta.textContent = state.proteinK ? "约 432 kcal · 蛋白 41g" : "约 358 kcal · 蛋白 24g";
