@@ -155,6 +155,57 @@ const braiseOptionLabels = {
 
 const validBraiseOptions = Object.keys(braiseOptionLabels);
 
+const vegetableItems = {
+  tomato: { label: "番茄", group: "汤底", short: "番茄" },
+  cabbage: { label: "甘蓝", group: "十字花科", short: "甘蓝" },
+  cauliflower: { label: "菜花", group: "十字花科", short: "菜花" },
+  carrot: { label: "胡萝卜", group: "橙色甜味", short: "胡萝卜" },
+  bellPepper: { label: "彩椒", group: "椒类", short: "彩椒" },
+  greenPepper: { label: "青椒", group: "椒类", short: "青椒" },
+  onion: { label: "洋葱", group: "葱属", short: "洋葱" },
+  babyCabbage: { label: "娃娃菜", group: "出水嫩菜", short: "娃娃菜" },
+  zucchini: { label: "西葫芦", group: "出水嫩菜", short: "西葫芦" },
+  shanghaiGreen: { label: "上海青", group: "深绿叶菜", short: "上海青" },
+  spinach: { label: "菠菜", group: "深绿叶菜", short: "菠菜" },
+  bokChoy: { label: "小白菜", group: "深绿叶菜", short: "小白菜" },
+  eggplant: { label: "茄子", group: "口感轮换", short: "茄子" },
+  okra: { label: "秋葵", group: "口感轮换", short: "秋葵" },
+  edamame: { label: "毛豆仁", group: "加量包", short: "毛豆仁" },
+  peas: { label: "青豆粒", group: "加量包", short: "青豆粒" },
+  mixedVeg: { label: "三色豆", group: "加量包", short: "三色豆" }
+};
+
+const vegetableGroups = [
+  ["汤底", ["tomato"]],
+  ["十字花科", ["cabbage", "cauliflower"]],
+  ["甜味/颜色", ["carrot", "bellPepper", "greenPepper"]],
+  ["出汁增香", ["onion", "babyCabbage", "zucchini"]],
+  ["深绿叶菜", ["shanghaiGreen", "spinach", "bokChoy"]],
+  ["口感轮换", ["eggplant", "okra"]],
+  ["加量包", ["edamame", "peas", "mixedVeg"]]
+];
+
+const validVegetableOptions = Object.keys(vegetableItems);
+
+const practiceCombos = [
+  { level: "A 主力", score: 94, name: "番茄 + 甘蓝 + 胡萝卜 + 洋葱", options: ["tomato", "cabbage", "carrot", "onion"], flavor: "地中海清淡风", note: "十字花科、橙色蔬菜和葱属蔬菜都有，适合高频吃。" },
+  { level: "A 主力", score: 92, name: "番茄 + 甘蓝 + 胡萝卜 + 彩椒", options: ["tomato", "cabbage", "carrot", "bellPepper"], flavor: "地中海清淡风", note: "颜色、甜味和脆感都比较完整。" },
+  { level: "A 主力", score: 91, name: "番茄 + 娃娃菜 + 彩椒 + 胡萝卜", options: ["tomato", "babyCabbage", "bellPepper", "carrot"], flavor: "地中海清淡风", note: "清甜多汁，适合不想吃重口时。" },
+  { level: "A 主力", score: 90, name: "番茄 + 甘蓝 + 胡萝卜 + 青椒", options: ["tomato", "cabbage", "carrot", "greenPepper"], flavor: "地中海清淡风 / 川贵微辣风", note: "清爽、有青椒香，想换口时可走川贵微辣。" },
+  { level: "A 主力", score: 89, name: "番茄 + 甘蓝 + 青椒 + 洋葱", options: ["tomato", "cabbage", "greenPepper", "onion"], flavor: "地中海清淡风", note: "十字花科、青椒和洋葱兼顾。" },
+  { level: "A 主力", score: 88, name: "番茄 + 深绿叶菜 + 西葫芦 + 洋葱", options: ["tomato", "leafy", "zucchini", "onion"], flavor: "地中海清淡风", note: "深绿叶菜补强日，汤底和叶菜都更完整。" },
+  { level: "A 主力", score: 86, name: "甘蓝 + 胡萝卜 + 洋葱", options: ["cabbage", "carrot", "onion"], flavor: "地中海无番茄简易版", note: "无番茄时仍有洋葱甜汁支撑。" },
+  { level: "B 轮换", score: 84, name: "娃娃菜 + 彩椒 + 胡萝卜", options: ["babyCabbage", "bellPepper", "carrot"], flavor: "地中海无番茄简易版", note: "清甜多汁，适合清淡日。" },
+  { level: "B 轮换", score: 83, name: "番茄 + 茄子 + 青椒", options: ["tomato", "eggplant", "greenPepper"], flavor: "川贵微辣风", note: "口味反差强，适合换口味。" },
+  { level: "B 轮换", score: 82, name: "甘蓝 + 青椒 + 洋葱", options: ["cabbage", "greenPepper", "onion"], flavor: "地中海无番茄简易版", note: "不加番茄也有个性，甘蓝香、青椒爽和洋葱甜比较清楚。" },
+  { level: "B 轮换", score: 80, name: "番茄 + 西葫芦 + 茄子 + 青椒", options: ["tomato", "zucchini", "eggplant", "greenPepper"], flavor: "地中海清淡风", note: "质地和颜色丰富，适合作为轮换。" },
+  { level: "B 轮换", score: 79, name: "番茄 + 秋葵 + 茄子", options: ["tomato", "okra", "eggplant"], flavor: "川贵微辣风", note: "秋葵让汤汁更稠，茄子负责绵软口感。" },
+  { level: "B 轮换", score: 75, name: "番茄 + 菜花 + 洋葱", options: ["tomato", "cauliflower", "onion"], flavor: "地中海清淡风", note: "菜花吸汁能力强，番茄能改善口感。" },
+  { level: "C 调剂", score: 71, name: "茄子 + 青椒", options: ["eggplant", "greenPepper"], flavor: "中式 / 中西结合风", note: "家常味不错，但容易偏干，建议补番茄或清水。" }
+];
+
+const leafyOptions = ["shanghaiGreen", "spinach", "bokChoy"];
+
 const knowledgeItems = [
   {
     id: "plan",
@@ -232,6 +283,8 @@ const defaultState = {
   buffer: false,
   proteinK: false,
   knowledge: "plan",
+  vegetableOptions: [],
+  vegetableStarted: false,
   braiseGarlicBase: "none",
   braiseOptions: [],
   braiseOpenPanels: ["garlic", "soup", "spices"],
@@ -246,13 +299,17 @@ function readSavedState() {
     if (!saved || typeof saved !== "object") return {};
 
     const next = {};
-    if (["today", "braise", "rules"].includes(saved.view)) next.view = saved.view;
+    if (["today", "vegetables", "braise", "rules"].includes(saved.view)) next.view = saved.view;
     if (saved.view === "knowledge") next.view = "rules";
     if (["settings", "meals", "totals"].includes(saved.mobilePanel)) next.mobilePanel = saved.mobilePanel;
     if (dayTypes[saved.day]) next.day = saved.day;
     if (staples[saved.staple]) next.staple = saved.staple;
     if (breakfasts[saved.breakfast]) next.breakfast = saved.breakfast;
     if (knowledgeItems.some((item) => item.id === saved.knowledge)) next.knowledge = saved.knowledge;
+    if (Array.isArray(saved.vegetableOptions)) {
+      next.vegetableOptions = saved.vegetableOptions.filter((option) => validVegetableOptions.includes(option));
+    }
+    if (typeof saved.vegetableStarted === "boolean") next.vegetableStarted = saved.vegetableStarted;
     if (garlicBases[saved.braiseGarlicBase]) next.braiseGarlicBase = saved.braiseGarlicBase;
     if (Array.isArray(saved.braiseOptions)) {
       next.braiseOptions = saved.braiseOptions.filter((option) => validBraiseOptions.includes(option));
@@ -317,6 +374,22 @@ const els = {
   knowledgeSummary: document.querySelector("#knowledgeSummary"),
   knowledgeFacts: document.querySelector("#knowledgeFacts"),
   knowledgeNote: document.querySelector("#knowledgeNote"),
+  vegetableGroups: document.querySelector("#vegetableGroups"),
+  vegetableStatusPill: document.querySelector("#vegetableStatusPill"),
+  vegetableCountPill: document.querySelector("#vegetableCountPill"),
+  vegetableFlavorList: document.querySelector("#vegetableFlavorList"),
+  vegetableImproveList: document.querySelector("#vegetableImproveList"),
+  vegetableResultTitle: document.querySelector("#vegetableResultTitle"),
+  vegetableResultSummary: document.querySelector("#vegetableResultSummary"),
+  vegetableComboTitle: document.querySelector("#vegetableComboTitle"),
+  vegetableComboSummary: document.querySelector("#vegetableComboSummary"),
+  vegetablePrepList: document.querySelector("#vegetablePrepList"),
+  vegetableCurrentText: document.querySelector("#vegetableCurrentText"),
+  vegetableToBraiseButton: document.querySelector("#vegetableToBraiseButton"),
+  vegetableSummaryBar: document.querySelector("#vegetableSummaryBar"),
+  vegetableSummaryTitle: document.querySelector("#vegetableSummaryTitle"),
+  vegetableSummaryMeta: document.querySelector("#vegetableSummaryMeta"),
+  vegetableSummaryHint: document.querySelector("#vegetableSummaryHint"),
   braisePanels: document.querySelectorAll("[data-braise-panel]"),
   braisePanelToggles: document.querySelectorAll("[data-braise-panel-toggle]"),
   braiseGarlicBaseControls: document.querySelector("#braiseGarlicBaseControls"),
@@ -361,6 +434,8 @@ function saveState() {
       buffer: state.buffer,
       proteinK: state.proteinK,
       knowledge: state.knowledge,
+      vegetableOptions: state.vegetableOptions,
+      vegetableStarted: state.vegetableStarted,
       braiseGarlicBase: state.braiseGarlicBase,
       braiseOptions: state.braiseOptions,
       braiseOpenPanels: state.braiseOpenPanels,
@@ -414,10 +489,21 @@ function syncControls() {
   setActive(els.stapleControls, "staple", state.staple);
   setActive(els.breakfastControls, "breakfast", state.breakfast);
   setActive(els.braiseGarlicBaseControls, "garlicBase", state.braiseGarlicBase);
+  syncVegetableOptionButtons();
   syncBraiseOptionButtons();
   els.bananaToggle.checked = state.banana;
   els.bufferToggle.checked = state.buffer;
   els.proteinToggle.checked = state.proteinK;
+}
+
+function syncVegetableOptionButtons() {
+  if (!els.vegetableGroups) return;
+  const selected = new Set(state.vegetableOptions);
+  els.vegetableGroups.querySelectorAll("button[data-vegetable-option]").forEach((button) => {
+    const active = selected.has(button.dataset.vegetableOption);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
 }
 
 function syncBraiseOptionButtons() {
@@ -650,6 +736,211 @@ function renderKnowledge() {
     `<div><dt>${term}</dt><dd>${detail}</dd></div>`
   )).join("");
   els.knowledgeNote.textContent = item.note;
+}
+
+function hasVegetableOption(key) {
+  return state.vegetableOptions.includes(key);
+}
+
+function selectedVegetableLabels() {
+  return state.vegetableOptions.map((option) => vegetableItems[option].short);
+}
+
+function selectedVegetableSet() {
+  const selected = new Set(state.vegetableOptions);
+  if (leafyOptions.some((option) => selected.has(option))) selected.add("leafy");
+  return selected;
+}
+
+function comboMatchInfo(combo, selected) {
+  const missing = combo.options.filter((option) => !selected.has(option));
+  const matched = combo.options.length - missing.length;
+  return { combo, missing, matched };
+}
+
+function findBestVegetableCombo() {
+  const selected = selectedVegetableSet();
+  return practiceCombos
+    .map((combo) => comboMatchInfo(combo, selected))
+    .filter((item) => item.matched > 0)
+    .sort((a, b) => {
+      if (a.missing.length !== b.missing.length) return a.missing.length - b.missing.length;
+      if (b.matched !== a.matched) return b.matched - a.matched;
+      return b.combo.score - a.combo.score;
+    })[0] || null;
+}
+
+function formatMissingVegetables(missing) {
+  return missing.map((option) => option === "leafy" ? "上海青/菠菜/小白菜" : vegetableItems[option].short).join("、");
+}
+
+function vegetableNeedsTomato(selected) {
+  const needs = ["cauliflower", "eggplant", "okra", "zucchini"];
+  return needs.some((option) => selected.has(option)) && !selected.has("tomato");
+}
+
+function buildPrepOrder(selected) {
+  const first = ["carrot", "cauliflower", "cabbage", "eggplant"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
+  const middle = ["onion", "greenPepper", "bellPepper", "zucchini", "babyCabbage", "okra", "edamame", "peas", "mixedVeg"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
+  const last = leafyOptions.filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
+  const rows = [];
+  if (first.length) rows.push(`先放：${first.join("、")}，耐熟或吸汁，需要先焖。`);
+  if (middle.length) rows.push(`中段：${middle.join("、")}，翻拌后继续焖。`);
+  if (last.length) rows.push(`最后：${last.join("、")}，叶菜最后1-2分钟放。`);
+  if (!rows.length) rows.push("选择蔬菜后显示备菜顺序。");
+  return rows;
+}
+
+function buildVegetableRecommendation() {
+  const selected = selectedVegetableSet();
+  const selectedCount = state.vegetableOptions.length;
+  if (!state.vegetableStarted || !selectedCount) {
+    return {
+      status: "待选择",
+      title: "先选蔬菜",
+      flavor: "选择后显示",
+      summary: "先点今天有的蔬菜，再判断接近哪组实践版组合。",
+      comboTitle: "选择后显示",
+      comboSummary: "优先参考水油焖菜一周实践版里的主力和轮换组合。",
+      soup: "选择后显示汤底建议。",
+      improve: [],
+      prep: ["选择蔬菜后显示备菜顺序。"],
+      carry: { flavor: "mediterranean", soup: null }
+    };
+  }
+
+  const best = selectedCount >= 2 ? findBestVegetableCombo() : null;
+  const exact = best && best.missing.length === 0;
+  const near = best && best.missing.length === 1;
+  const hasTomato = selected.has("tomato");
+  const hasEggplantGreenPepper = selected.has("eggplant") && selected.has("greenPepper");
+  const hasOkraEggplant = selected.has("okra") && selected.has("eggplant");
+  const needsTomato = vegetableNeedsTomato(selected);
+
+  let flavor = exact ? best.combo.flavor : "地中海清淡风";
+  if (!exact && (hasEggplantGreenPepper || hasOkraEggplant)) flavor = "川贵微辣风";
+  if (!exact && !hasTomato && (selected.has("cabbage") || selected.has("babyCabbage")) && (selected.has("onion") || selected.has("carrot") || selected.has("bellPepper"))) {
+    flavor = "地中海无番茄简易版";
+  }
+
+  let soup = hasTomato ? "番茄已够，不必额外补水。" : "没有番茄，焖时看锅底补1-3汤匙水。";
+  if (!hasTomato && needsTomato) soup = "建议加番茄；不加时至少补2-3汤匙水。";
+  if (!hasTomato && (selected.has("okra") && selected.has("eggplant"))) soup = "强烈建议加番茄，秋葵和茄子更需要汤底。";
+  if (!hasTomato && selected.has("cauliflower")) soup = "建议加番茄，菜花吸汁，单靠洋葱容易偏干。";
+
+  const improve = [];
+  if (near) {
+    addSuggestion(improve, formatMissingVegetables(best.missing), `补上后接近 ${best.combo.level}：${best.combo.name}。`);
+  } else if (!exact && best && best.missing.length <= 2) {
+    addSuggestion(improve, formatMissingVegetables(best.missing), `补齐后更接近实践版高分组合：${best.combo.name}。`);
+  }
+  if (!hasTomato && needsTomato && !improve.some((item) => item.name.includes("番茄"))) {
+    addSuggestion(improve, "番茄", "这组菜偏吸水或汤底弱，加番茄能减少干锅和单调感。");
+  }
+  if (!selected.has("leafy") && !selected.has("cabbage") && !selected.has("cauliflower")) {
+    addSuggestion(improve, "甘蓝 / 上海青", "如果本周叶菜少，可补一个结构型绿菜；不是每锅必加。");
+  }
+  if (!selected.has("edamame") && !selected.has("peas") && !selected.has("mixedVeg") && selectedCount <= 3) {
+    addSuggestion(improve, "毛豆仁 / 青豆粒", "想增加颗粒感时加30-50g即可，计入全天摄入。");
+  }
+
+  const status = exact ? best.combo.level : near ? "接近好组合" : selectedCount >= 3 ? "可优化" : "先补齐";
+  const title = exact ? best.combo.level : near ? "差一个菜就很完整" : selectedCount >= 3 ? "当前可用，建议微调" : "先补一个关键菜";
+  const comboTitle = best ? `${best.combo.level} · ${best.combo.name}` : "暂无接近组合";
+  const comboSummary = exact
+    ? best.combo.note
+    : near
+      ? `当前很接近这组，建议补：${formatMissingVegetables(best.missing)}。`
+      : best
+        ? `最接近：${best.combo.name}；可按建议补齐，也可以直接做当前组合。`
+        : "当前组合不在实践版主力表里，建议补番茄、甘蓝或洋葱这类结构菜。";
+
+  return {
+    status,
+    title,
+    flavor,
+    summary: `${soup} 推荐风味：${flavor}。`,
+    comboTitle,
+    comboSummary,
+    soup,
+    improve,
+    prep: buildPrepOrder(selected),
+    carry: {
+      flavor: flavor.includes("川贵") ? "sichuan" : flavor.includes("中式") ? "chinese" : "mediterranean",
+      soup: hasTomato || needsTomato ? "tomato" : "water"
+    }
+  };
+}
+
+function renderVegetableGroups() {
+  els.vegetableGroups.innerHTML = vegetableGroups.map(([group, options], index) => (
+    `<article class="braise-panel vegetable-panel">
+      <div class="panel-head static-head">
+        <span>${String(index + 1).padStart(2, "0")}</span>
+        <div><h3>${group}：</h3></div>
+      </div>
+      <div class="option-grid vegetable-options">
+        ${options.map((option) => (
+          `<button type="button" data-vegetable-option="${option}">
+            <b>${vegetableItems[option].label}</b>
+            <small>${vegetableItems[option].group}</small>
+          </button>`
+        )).join("")}
+      </div>
+    </article>`
+  )).join("");
+}
+
+function renderVegetables() {
+  const recommendation = buildVegetableRecommendation();
+  const selectedLabels = selectedVegetableLabels();
+  const ready = state.vegetableStarted && state.vegetableOptions.length > 0;
+  syncVegetableOptionButtons();
+  els.vegetableStatusPill.textContent = recommendation.status;
+  els.vegetableCountPill.textContent = `${state.vegetableOptions.length} 项`;
+  els.vegetableFlavorList.innerHTML = ready
+    ? renderAddItems([{ name: recommendation.flavor, detail: recommendation.soup }])
+    : listItems(["选择蔬菜后显示推荐风味。"]);
+  els.vegetableImproveList.innerHTML = ready
+    ? renderAddItems(recommendation.improve.length ? recommendation.improve : [{ name: "可以直接备菜", detail: "当前组合已经够用，不需要为了完整度强行加菜。" }])
+    : listItems(["选择蔬菜后显示建议补齐项。"]);
+  els.vegetableResultTitle.textContent = recommendation.title;
+  els.vegetableResultSummary.textContent = recommendation.summary;
+  els.vegetableComboTitle.textContent = recommendation.comboTitle;
+  els.vegetableComboSummary.textContent = recommendation.comboSummary;
+  els.vegetablePrepList.innerHTML = listItems(recommendation.prep);
+  els.vegetableCurrentText.textContent = selectedLabels.length ? selectedLabels.join(" / ") : "未选择";
+  els.vegetableSummaryTitle.textContent = recommendation.status;
+  els.vegetableSummaryMeta.textContent = recommendation.flavor;
+  els.vegetableSummaryHint.textContent = ready ? recommendation.soup : "选择后显示";
+  els.vegetableSummaryBar.hidden = !ready;
+  els.vegetableToBraiseButton.disabled = !ready;
+}
+
+function applyVegetablesToBraise() {
+  const recommendation = buildVegetableRecommendation();
+  const next = new Set(state.braiseOptions);
+  if (recommendation.carry.soup === "tomato") next.add("tomato");
+  if (recommendation.carry.soup === "water") next.add("water");
+  if (recommendation.carry.flavor === "sichuan") {
+    next.add("guizhouDip");
+    next.add("water");
+    ["thyme", "basil", "parsley", "blackPepper"].forEach((option) => next.delete(option));
+  } else if (recommendation.carry.flavor === "chinese") {
+    next.add("soySauce");
+    next.add("water");
+  } else {
+    next.add("onionPowder");
+    next.add("blackPepper");
+    next.add("thyme");
+  }
+  state.braiseOptions = validBraiseOptions.filter((option) => next.has(option));
+  state.braiseStarted = true;
+  state.braiseOpenPanels = ["garlic", "soup", "spices"];
+  state.view = "braise";
+  saveState();
+  renderBraise();
+  renderView();
 }
 
 function hasBraiseOption(key) {
@@ -966,6 +1257,30 @@ els.knowledgeTabs.addEventListener("click", (event) => {
   renderKnowledge();
 });
 
+els.vegetableGroups.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-vegetable-option]");
+  if (!button) return;
+  const option = button.dataset.vegetableOption;
+  const selected = new Set(state.vegetableOptions);
+  if (selected.has(option)) {
+    selected.delete(option);
+  } else {
+    selected.add(option);
+  }
+  state.vegetableOptions = validVegetableOptions.filter((item) => selected.has(item));
+  state.vegetableStarted = true;
+  saveState();
+  renderVegetables();
+});
+
+els.vegetableSummaryBar.addEventListener("click", () => {
+  document.querySelector(".vegetable-result").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+els.vegetableToBraiseButton.addEventListener("click", () => {
+  applyVegetablesToBraise();
+});
+
 els.braisePanelToggles.forEach((toggle) => {
   toggle.addEventListener("click", () => {
     const panel = toggle.dataset.braisePanelToggle;
@@ -1054,8 +1369,10 @@ els.mobileBottomNav.addEventListener("click", (event) => {
 });
 
 renderKnowledgeTabs();
+renderVegetableGroups();
 syncControls();
 renderPlanner();
+renderVegetables();
 renderBraise();
 renderMobilePanel();
 renderKnowledge();

@@ -26,6 +26,7 @@
       </a>
       <nav class="nav-links" aria-label="页面导航" id="viewControls">
         <button type="button" data-view="today" class="active"><span>今日</span><i aria-hidden="true"></i></button>
+        <button type="button" data-view="vegetables"><span>蔬菜</span></button>
         <button type="button" data-view="braise"><span>焖菜</span></button>
         <button type="button" data-view="rules"><span>规则</span></button>
       </nav>
@@ -35,6 +36,7 @@
       <button type="button" data-view="today" data-mobile-panel="settings" class="active"><span>饮食</span></button>
       <button type="button" data-view="today" data-mobile-panel="meals"><span>三餐</span></button>
       <button type="button" data-view="today" data-mobile-panel="totals"><span>营养</span><i aria-hidden="true"></i></button>
+      <button type="button" data-view="vegetables"><span>蔬菜</span></button>
       <button type="button" data-view="braise"><span>焖菜</span></button>
       <button type="button" data-view="rules"><span>规则</span></button>
     </nav>
@@ -161,6 +163,63 @@
           <b id="dailyTipTitle">按日常方案 F 执行</b>
           <p id="dailyTipText">碳水 115g · 脂肪 50.0g · 蛋白 1.45g/kg</p>
         </div>
+      </section>
+
+      <section class="vegetables view-section" data-view-panel="vegetables" id="vegetables" aria-labelledby="vegetables-title" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="kicker">备菜选择</p>
+            <h2 id="vegetables-title">蔬菜</h2>
+          </div>
+          <div class="status-stack">
+            <span id="vegetableStatusPill">待选择</span>
+            <b id="vegetableCountPill">0 项</b>
+          </div>
+        </div>
+
+        <div class="braise-layout vegetable-layout">
+          <div class="braise-picker vegetable-picker" id="vegetableGroups" aria-label="蔬菜选择"></div>
+
+          <aside class="braise-result vegetable-result" aria-live="polite">
+            <p class="kicker">推荐结果</p>
+            <div class="result-block add-block">
+              <span>推荐风味</span>
+              <ul id="vegetableFlavorList"></ul>
+            </div>
+
+            <div class="result-block finish-block">
+              <span>建议补齐</span>
+              <ul id="vegetableImproveList"></ul>
+            </div>
+
+            <h3 id="vegetableResultTitle">先选蔬菜</h3>
+            <p id="vegetableResultSummary">选择已有蔬菜后，判断接近哪组实践版组合、适合什么风味，以及要不要番茄或补水。</p>
+
+            <div class="variant-card">
+              <span>接近组合</span>
+              <b id="vegetableComboTitle">选择后显示</b>
+              <p id="vegetableComboSummary">优先参考水油焖菜一周实践版里的主力和轮换组合。</p>
+            </div>
+
+            <div class="result-block">
+              <span>备菜顺序</span>
+              <ul id="vegetablePrepList"></ul>
+            </div>
+            <div class="result-block">
+              <span>当前选择</span>
+              <p id="vegetableCurrentText">未选择</p>
+            </div>
+
+            <button type="button" class="handoff-button" id="vegetableToBraiseButton">带到焖菜</button>
+          </aside>
+        </div>
+
+        <button type="button" class="braise-floating-summary vegetable-floating-summary" id="vegetableSummaryBar" aria-label="查看蔬菜推荐结果" hidden>
+          <span>推荐</span>
+          <strong id="vegetableSummaryTitle">A 主力</strong>
+          <small id="vegetableSummaryMeta">地中海清淡风</small>
+          <em id="vegetableSummaryHint">建议：番茄已够</em>
+        </button>
       </section>
 
       <section class="braise view-section" data-view-panel="braise" id="braise" aria-labelledby="braise-title" hidden>

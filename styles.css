@@ -624,7 +624,8 @@ h1 {
   font-size: 13px;
 }
 
-.braise-layout {
+.braise-layout,
+.vegetable-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.38fr);
   gap: 12px;
@@ -632,7 +633,8 @@ h1 {
   min-width: 0;
 }
 
-.braise-picker {
+.braise-picker,
+.vegetable-picker {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -640,7 +642,8 @@ h1 {
 }
 
 .braise-panel,
-.braise-result {
+.braise-result,
+.vegetable-result {
   border: 0;
   border-radius: var(--radius-lg);
   background: var(--panel);
@@ -648,7 +651,8 @@ h1 {
   min-width: 0;
 }
 
-.braise-panel {
+.braise-panel,
+.vegetable-panel {
   padding: 14px;
 }
 
@@ -740,6 +744,10 @@ h1 {
   display: none;
 }
 
+.static-head {
+  cursor: default;
+}
+
 .option-grid {
   display: grid;
   gap: 7px;
@@ -752,6 +760,10 @@ h1 {
 
 .spice-options {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.vegetable-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .option-grid button {
@@ -779,6 +791,26 @@ h1 {
   color: #286b62;
 }
 
+.vegetable-options button.active {
+  background: #e3f3e6;
+  color: #276b42;
+}
+
+.vegetable-panel:nth-child(1) .vegetable-options button.active {
+  background: #f4e7dc;
+  color: #9a5721;
+}
+
+.vegetable-panel:nth-child(5) .vegetable-options button.active {
+  background: #dff0ea;
+  color: #246b5b;
+}
+
+.vegetable-panel:nth-child(7) .vegetable-options button.active {
+  background: #eee7db;
+  color: #8a5d2a;
+}
+
 .option-grid button b,
 .option-grid button small {
   display: block;
@@ -796,19 +828,22 @@ h1 {
   color: #398260;
 }
 
-.braise-result {
+.braise-result,
+.vegetable-result {
   position: sticky;
   top: 94px;
   padding: clamp(18px, 3vw, 24px);
 }
 
-.braise-result h3 {
+.braise-result h3,
+.vegetable-result h3 {
   margin-bottom: 10px;
   font-size: clamp(24px, 3.3vw, 34px);
   line-height: 1.08;
 }
 
-.braise-result > p:not(.kicker) {
+.braise-result > p:not(.kicker),
+.vegetable-result > p:not(.kicker) {
   color: #4f584f;
   line-height: 1.62;
 }
@@ -960,6 +995,28 @@ h1 {
 
 .braise-floating-summary[hidden] {
   display: none !important;
+}
+
+.handoff-button {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--dark);
+  color: #f8f5ee;
+  cursor: pointer;
+  font-weight: 820;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.handoff-button:active {
+  transform: translateY(1px);
+}
+
+.handoff-button:disabled {
+  cursor: default;
+  opacity: 0.42;
 }
 
 .meal-flow {
@@ -1125,14 +1182,17 @@ h1 {
   .control-strip,
   .daily-layout,
   .braise-layout,
+  .vegetable-layout,
   .braise-picker,
+  .vegetable-picker,
   .meal-flow,
   .rule-grid,
   .knowledge-layout {
     grid-template-columns: 1fr;
   }
 
-  .braise-result {
+  .braise-result,
+  .vegetable-result {
     position: static;
   }
 
@@ -1168,7 +1228,8 @@ h1 {
     padding: max(10px, env(safe-area-inset-top)) 10px calc(98px + env(safe-area-inset-bottom));
   }
 
-  body[data-view="braise"] .app-shell {
+  body[data-view="braise"] .app-shell,
+  body[data-view="vegetables"] .app-shell {
     padding-bottom: calc(178px + env(safe-area-inset-bottom));
   }
 
@@ -1188,7 +1249,7 @@ h1 {
   .mobile-bottom-nav {
     position: fixed;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 4px;
     left: 10px;
     right: 10px;
@@ -1247,6 +1308,7 @@ h1 {
   }
 
   .braise,
+  .vegetables,
   .rules {
     width: 100%;
     max-width: 100%;
@@ -1380,12 +1442,15 @@ h1 {
 
   .base-options,
   .compact-options,
-  .spice-options {
+  .spice-options,
+  .vegetable-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .braise-panel,
-  .braise-result {
+  .vegetable-panel,
+  .braise-result,
+  .vegetable-result {
     padding: 15px;
     border-radius: 18px;
   }
@@ -1395,11 +1460,13 @@ h1 {
     font-size: 12px;
   }
 
-  .braise .section-heading {
+  .braise .section-heading,
+  .vegetables .section-heading {
     margin-bottom: 8px;
   }
 
-  .braise .section-heading h2 {
+  .braise .section-heading h2,
+  .vegetables .section-heading h2 {
     font-size: 25px;
   }
 
