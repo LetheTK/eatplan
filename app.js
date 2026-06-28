@@ -156,32 +156,41 @@ const braiseOptionLabels = {
 const validBraiseOptions = Object.keys(braiseOptionLabels);
 
 const vegetableItems = {
-  tomato: { label: "番茄", group: "颜色甜味", short: "番茄" },
-  cabbage: { label: "甘蓝", group: "主体/十字花科", short: "甘蓝" },
-  cauliflower: { label: "菜花", group: "主体/十字花科", short: "菜花" },
-  babyCabbage: { label: "娃娃菜", group: "主体/十字花科", short: "娃娃菜" },
-  carrot: { label: "胡萝卜", group: "颜色甜味", short: "胡萝卜" },
-  bellPepper: { label: "彩椒", group: "颜色甜味", short: "彩椒" },
-  greenPepper: { label: "青椒", group: "清爽椒香", short: "青椒" },
+  tomato: { label: "番茄", group: "颜色/椒香", short: "番茄" },
+  cabbage: { label: "甘蓝", group: "主体菜", short: "甘蓝" },
+  baoCabbage: { label: "包菜", group: "主体菜", short: "包菜" },
+  napaCabbage: { label: "大白菜", group: "主体菜", short: "大白菜" },
+  cauliflower: { label: "菜花", group: "主体菜", short: "菜花" },
+  babyCabbage: { label: "娃娃菜", group: "主体菜", short: "娃娃菜" },
+  carrot: { label: "胡萝卜", group: "颜色/椒香", short: "胡萝卜" },
+  bellPepper: { label: "彩椒", group: "颜色/椒香", short: "彩椒" },
+  greenPepper: { label: "青椒", group: "颜色/椒香", short: "青椒" },
   onion: { label: "洋葱", group: "出汁增香", short: "洋葱" },
   zucchini: { label: "西葫芦", group: "出汁增香", short: "西葫芦" },
+  celery: { label: "芹菜", group: "出汁增香", short: "芹菜" },
+  kingOysterMushroom: { label: "杏鲍菇", group: "菌菇/软嫩", short: "杏鲍菇" },
+  loofah: { label: "丝瓜", group: "菌菇/软嫩", short: "丝瓜" },
   shanghaiGreen: { label: "上海青", group: "深绿叶菜", short: "上海青" },
   spinach: { label: "菠菜", group: "深绿叶菜", short: "菠菜" },
   bokChoy: { label: "小白菜", group: "深绿叶菜", short: "小白菜" },
+  romaineLettuce: { label: "油麦菜", group: "深绿叶菜", short: "油麦菜" },
   eggplant: { label: "茄子", group: "口感轮换", short: "茄子" },
   okra: { label: "秋葵", group: "口感轮换", short: "秋葵" },
+  garlicScape: { label: "蒜薹", group: "北方家常", short: "蒜薹" },
+  greenBeans: { label: "豆角", group: "北方家常", short: "豆角" },
+  kidneyBeans: { label: "芸豆", group: "北方家常", short: "芸豆" },
   edamame: { label: "毛豆仁", group: "纤维颗粒补强", short: "毛豆仁" },
   peas: { label: "青豆粒", group: "纤维颗粒补强", short: "青豆粒" },
   mixedVeg: { label: "三色豆", group: "纤维颗粒补强", short: "三色豆" }
 };
 
 const vegetableGroups = [
-  { id: "main", label: "主体/十字花科", options: ["cabbage", "cauliflower", "babyCabbage"] },
-  { id: "color", label: "颜色甜味", options: ["tomato", "carrot", "bellPepper"] },
-  { id: "pepper", label: "清爽椒香", options: ["greenPepper"] },
-  { id: "juice", label: "出汁增香", options: ["onion", "zucchini"] },
-  { id: "texture", label: "口感轮换", options: ["eggplant", "okra"] },
-  { id: "leafy", label: "深绿叶菜", options: ["shanghaiGreen", "spinach", "bokChoy"] },
+  { id: "main", label: "主体菜", options: ["cabbage", "baoCabbage", "napaCabbage", "cauliflower", "babyCabbage"] },
+  { id: "color", label: "颜色/椒香", options: ["tomato", "carrot", "bellPepper", "greenPepper"] },
+  { id: "juice", label: "出汁增香", options: ["onion", "zucchini", "celery"] },
+  { id: "texture", label: "菌菇/软嫩", options: ["kingOysterMushroom", "loofah", "eggplant", "okra"] },
+  { id: "home", label: "北方家常", options: ["garlicScape", "greenBeans", "kidneyBeans"] },
+  { id: "leafy", label: "深绿叶菜", options: ["shanghaiGreen", "spinach", "bokChoy", "romaineLettuce"] },
   { id: "boost", label: "纤维颗粒补强", options: ["edamame", "peas", "mixedVeg"] }
 ];
 
@@ -190,22 +199,32 @@ const validVegetablePanels = vegetableGroups.map((group) => group.id);
 
 const practiceCombos = [
   { level: "A 主力", score: 94, name: "番茄 + 甘蓝 + 胡萝卜 + 洋葱", options: ["tomato", "cabbage", "carrot", "onion"], flavor: "地中海清淡风", note: "十字花科、橙色蔬菜和葱属蔬菜都有，适合高频吃。" },
+  { level: "A 主力", score: 93, name: "番茄 + 包菜 + 胡萝卜 + 洋葱", options: ["tomato", "baoCabbage", "carrot", "onion"], flavor: "地中海清淡风 / 中式轻酱香版", note: "包菜更家常耐放，适合作为省心主力。" },
   { level: "A 主力", score: 92, name: "番茄 + 甘蓝 + 胡萝卜 + 彩椒", options: ["tomato", "cabbage", "carrot", "bellPepper"], flavor: "地中海清淡风", note: "颜色、甜味和脆感都比较完整。" },
   { level: "A 主力", score: 91, name: "番茄 + 娃娃菜 + 彩椒 + 胡萝卜", options: ["tomato", "babyCabbage", "bellPepper", "carrot"], flavor: "地中海清淡风", note: "清甜多汁，适合不想吃重口时。" },
   { level: "A 主力", score: 90, name: "番茄 + 甘蓝 + 胡萝卜 + 青椒", options: ["tomato", "cabbage", "carrot", "greenPepper"], flavor: "地中海清淡风 / 川贵微辣风", note: "清爽、有青椒香，想换口时可走川贵微辣。" },
+  { level: "A 主力", score: 90, name: "番茄 + 包菜 + 杏鲍菇 + 胡萝卜", options: ["tomato", "baoCabbage", "kingOysterMushroom", "carrot"], flavor: "地中海清淡风 / 中式轻酱香版", note: "包菜做体积，杏鲍菇补鲜味和咬劲。" },
   { level: "A 主力", score: 89, name: "番茄 + 甘蓝 + 青椒 + 洋葱", options: ["tomato", "cabbage", "greenPepper", "onion"], flavor: "地中海清淡风", note: "十字花科、青椒和洋葱兼顾。" },
   { level: "A 主力", score: 88, name: "番茄 + 深绿叶菜 + 西葫芦 + 洋葱", options: ["tomato", "leafy", "zucchini", "onion"], flavor: "地中海清淡风", note: "深绿叶菜补强日，汤底和叶菜都更完整。" },
+  { level: "A 主力", score: 88, name: "番茄 + 大白菜 + 油麦菜 + 杏鲍菇", options: ["tomato", "napaCabbage", "romaineLettuce", "kingOysterMushroom"], flavor: "地中海清淡风（控盐执行）", note: "大白菜出水、油麦菜补深绿叶菜、杏鲍菇补鲜味。" },
   { level: "A 主力", score: 86, name: "甘蓝 + 胡萝卜 + 洋葱", options: ["cabbage", "carrot", "onion"], flavor: "地中海无番茄简易版", note: "无番茄时仍有洋葱甜汁支撑。" },
+  { level: "B 轮换", score: 85, name: "番茄 + 丝瓜 + 杏鲍菇 + 洋葱", options: ["tomato", "loofah", "kingOysterMushroom", "onion"], flavor: "地中海清淡风 / 中式轻酱香版", note: "丝瓜出水、杏鲍菇吸汁，口感一软一韧。" },
   { level: "B 轮换", score: 84, name: "娃娃菜 + 彩椒 + 胡萝卜", options: ["babyCabbage", "bellPepper", "carrot"], flavor: "地中海无番茄简易版", note: "清甜多汁，适合清淡日。" },
   { level: "B 轮换", score: 83, name: "番茄 + 茄子 + 青椒", options: ["tomato", "eggplant", "greenPepper"], flavor: "川贵微辣风", note: "口味反差强，适合换口味。" },
+  { level: "B 轮换", score: 83, name: "包菜 + 蒜薹 + 胡萝卜 + 青椒", options: ["baoCabbage", "garlicScape", "carrot", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "北方家常感强，蒜薹和青椒撑香味。" },
   { level: "B 轮换", score: 82, name: "甘蓝 + 青椒 + 洋葱", options: ["cabbage", "greenPepper", "onion"], flavor: "地中海无番茄简易版", note: "不加番茄也有个性，甘蓝香、青椒爽和洋葱甜比较清楚。" },
+  { level: "B 轮换", score: 82, name: "番茄 + 大白菜 + 芹菜 + 胡萝卜", options: ["tomato", "napaCabbage", "celery", "carrot"], flavor: "地中海清淡风（控盐执行） / 中式轻酱香版", note: "大白菜出水，芹菜提清香，适合控盐。" },
+  { level: "B 轮换", score: 81, name: "番茄 + 豆角 + 胡萝卜 + 蒜薹", options: ["tomato", "greenBeans", "carrot", "garlicScape"], flavor: "中式 / 中西结合风、川贵微辣风", note: "豆角必须充分熟透，蒜薹补香。" },
   { level: "B 轮换", score: 80, name: "番茄 + 西葫芦 + 茄子 + 青椒", options: ["tomato", "zucchini", "eggplant", "greenPepper"], flavor: "地中海清淡风", note: "质地和颜色丰富，适合作为轮换。" },
+  { level: "B 轮换", score: 80, name: "番茄 + 芸豆 + 包菜 + 青椒", options: ["tomato", "kidneyBeans", "baoCabbage", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "芸豆更厚实，必须焖透；包菜和番茄负责汤底与体积。" },
   { level: "B 轮换", score: 79, name: "番茄 + 秋葵 + 茄子", options: ["tomato", "okra", "eggplant"], flavor: "川贵微辣风", note: "秋葵让汤汁更稠，茄子负责绵软口感。" },
+  { level: "B 轮换", score: 79, name: "大白菜 + 芹菜 + 杏鲍菇", options: ["napaCabbage", "celery", "kingOysterMushroom"], flavor: "地中海无番茄简易版 / 中式轻酱香版", note: "不加番茄也能靠大白菜出水，杏鲍菇吸汁。" },
   { level: "B 轮换", score: 75, name: "番茄 + 菜花 + 洋葱", options: ["tomato", "cauliflower", "onion"], flavor: "地中海清淡风", note: "菜花吸汁能力强，番茄能改善口感。" },
+  { level: "B 轮换", score: 76, name: "番茄 + 丝瓜 + 油麦菜 + 芹菜", options: ["tomato", "loofah", "romaineLettuce", "celery"], flavor: "地中海清淡风（控盐执行）", note: "低负担、出水多，油麦菜最后短焖。" },
   { level: "C 调剂", score: 71, name: "茄子 + 青椒", options: ["eggplant", "greenPepper"], flavor: "中式 / 中西结合风", note: "家常味不错，但容易偏干，建议补番茄或清水。" }
 ];
 
-const leafyOptions = ["shanghaiGreen", "spinach", "bokChoy"];
+const leafyOptions = ["shanghaiGreen", "spinach", "bokChoy", "romaineLettuce"];
 
 const knowledgeItems = [
   {
@@ -285,7 +304,7 @@ const defaultState = {
   proteinK: false,
   knowledge: "plan",
   vegetableOptions: [],
-  vegetableOpenPanels: ["main", "color", "pepper", "juice", "texture"],
+  vegetableOpenPanels: ["main", "color", "juice", "texture", "home"],
   vegetableStarted: false,
   braiseGarlicBase: "none",
   braiseOptions: [],
@@ -778,11 +797,11 @@ function findBestVegetableCombo() {
 }
 
 function formatMissingVegetables(missing) {
-  return missing.map((option) => option === "leafy" ? "上海青/菠菜/小白菜" : vegetableItems[option].short).join("、");
+  return missing.map((option) => option === "leafy" ? "上海青/菠菜/小白菜/油麦菜" : vegetableItems[option].short).join("、");
 }
 
 function vegetableNeedsTomato(selected) {
-  const needs = ["cauliflower", "eggplant", "okra", "zucchini"];
+  const needs = ["cauliflower", "eggplant", "okra", "zucchini", "loofah", "greenBeans", "kidneyBeans"];
   return needs.some((option) => selected.has(option)) && !selected.has("tomato");
 }
 
@@ -797,8 +816,8 @@ function setVegetablePanelOpen(panel, open) {
 }
 
 function buildPrepOrder(selected) {
-  const first = ["carrot", "cauliflower", "cabbage", "eggplant"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
-  const middle = ["onion", "greenPepper", "bellPepper", "zucchini", "babyCabbage", "okra", "edamame", "peas", "mixedVeg"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
+  const first = ["carrot", "cauliflower", "cabbage", "baoCabbage", "greenBeans", "kidneyBeans", "kingOysterMushroom", "eggplant"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
+  const middle = ["onion", "greenPepper", "bellPepper", "zucchini", "napaCabbage", "babyCabbage", "celery", "garlicScape", "loofah", "okra", "edamame", "peas", "mixedVeg"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
   const last = leafyOptions.filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
   const rows = [];
   if (first.length) rows.push(`先放：${first.join("、")}，耐熟或吸汁，需要先焖。`);
@@ -836,7 +855,7 @@ function buildVegetableRecommendation() {
 
   let flavor = exact ? best.combo.flavor : "地中海清淡风";
   if (!exact && (hasEggplantGreenPepper || hasOkraEggplant)) flavor = "川贵微辣风";
-  if (!exact && !hasTomato && (selected.has("cabbage") || selected.has("babyCabbage")) && (selected.has("onion") || selected.has("carrot") || selected.has("bellPepper"))) {
+  if (!exact && !hasTomato && (selected.has("cabbage") || selected.has("baoCabbage") || selected.has("napaCabbage") || selected.has("babyCabbage")) && (selected.has("onion") || selected.has("carrot") || selected.has("bellPepper") || selected.has("celery"))) {
     flavor = "地中海无番茄简易版";
   }
 
@@ -844,6 +863,7 @@ function buildVegetableRecommendation() {
   if (!hasTomato && needsTomato) soup = "建议加番茄；不加时走清水焖菜汁，至少补2-3汤匙水。";
   if (!hasTomato && (selected.has("okra") && selected.has("eggplant"))) soup = "强烈建议加番茄；不加时清水焖菜汁要足，秋葵和茄子更需要汁底。";
   if (!hasTomato && selected.has("cauliflower")) soup = "建议加番茄；不加时用清水焖菜汁，菜花吸汁，单靠洋葱容易偏干。";
+  if (!hasTomato && (selected.has("greenBeans") || selected.has("kidneyBeans"))) soup = "建议加番茄或清水焖菜汁；豆角/芸豆必须充分焖熟，锅底要有汁。";
 
   const improve = [];
   if (near) {
@@ -854,8 +874,8 @@ function buildVegetableRecommendation() {
   if (!hasTomato && needsTomato && !improve.some((item) => item.name.includes("番茄"))) {
     addSuggestion(improve, "番茄", "这组菜偏吸水或汁底弱，加番茄能减少干锅和单调感；不加就用清水焖菜汁。");
   }
-  if (!selected.has("leafy") && !selected.has("cabbage") && !selected.has("cauliflower")) {
-    addSuggestion(improve, "甘蓝 / 上海青", "如果本周叶菜少，可补一个结构型绿菜；不是每锅必加。");
+  if (!selected.has("leafy") && !selected.has("cabbage") && !selected.has("baoCabbage") && !selected.has("napaCabbage") && !selected.has("cauliflower")) {
+    addSuggestion(improve, "包菜 / 油麦菜", "如果本周叶菜少，可补一个结构型绿菜；不是每锅必加。");
   }
   if (!selected.has("edamame") && !selected.has("peas") && !selected.has("mixedVeg") && selectedCount <= 3) {
     addSuggestion(improve, "毛豆仁 / 青豆粒", "想增加颗粒感时加30-50g即可，计入全天摄入。");
