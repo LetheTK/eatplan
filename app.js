@@ -169,28 +169,27 @@ const vegetableItems = {
   zucchini: { label: "西葫芦", group: "出汁增香", short: "西葫芦" },
   celery: { label: "芹菜", group: "出汁增香", short: "芹菜" },
   loofah: { label: "丝瓜", group: "出汁增香", short: "丝瓜" },
-  kingOysterMushroom: { label: "杏鲍菇", group: "口感轮换", short: "杏鲍菇" },
+  garlicScape: { label: "蒜薹", group: "出汁增香", short: "蒜薹" },
+  kingOysterMushroom: { label: "杏鲍菇", group: "主体菜", short: "杏鲍菇" },
   shanghaiGreen: { label: "上海青", group: "深绿叶菜", short: "上海青" },
   spinach: { label: "菠菜", group: "深绿叶菜", short: "菠菜" },
   bokChoy: { label: "小白菜", group: "深绿叶菜", short: "小白菜" },
   romaineLettuce: { label: "油麦菜", group: "深绿叶菜", short: "油麦菜" },
-  eggplant: { label: "茄子", group: "口感轮换", short: "茄子" },
-  okra: { label: "秋葵", group: "口感轮换", short: "秋葵" },
-  garlicScape: { label: "蒜薹", group: "口感轮换", short: "蒜薹" },
-  greenBeans: { label: "豆角", group: "口感轮换", short: "豆角" },
-  kidneyBeans: { label: "芸豆", group: "口感轮换", short: "芸豆" },
-  edamame: { label: "毛豆仁", group: "纤维颗粒补强", short: "毛豆仁" },
-  peas: { label: "青豆粒", group: "纤维颗粒补强", short: "青豆粒" },
-  mixedVeg: { label: "三色豆", group: "纤维颗粒补强", short: "三色豆" }
+  eggplant: { label: "茄子", group: "主体菜", short: "茄子" },
+  greenBeans: { label: "豆角", group: "主体菜", short: "豆角" },
+  kidneyBeans: { label: "芸豆", group: "主体菜", short: "芸豆" },
+  okra: { label: "秋葵", group: "补强菜", short: "秋葵" },
+  edamame: { label: "毛豆仁", group: "补强菜", short: "毛豆仁" },
+  peas: { label: "青豆粒", group: "补强菜", short: "青豆粒" },
+  mixedVeg: { label: "三色豆", group: "补强菜", short: "三色豆" }
 };
 
 const vegetableGroups = [
-  { id: "main", label: "主体菜", options: ["cabbage", "baoCabbage", "napaCabbage", "cauliflower", "babyCabbage"] },
+  { id: "main", label: "主体菜", options: ["cabbage", "baoCabbage", "napaCabbage", "cauliflower", "babyCabbage", "eggplant", "kingOysterMushroom", "greenBeans", "kidneyBeans"] },
   { id: "color", label: "颜色/椒香", options: ["tomato", "carrot", "bellPepper", "greenPepper"] },
-  { id: "juice", label: "出汁增香", options: ["onion", "zucchini", "celery", "loofah"] },
-  { id: "texture", label: "口感轮换", options: ["kingOysterMushroom", "eggplant", "okra", "garlicScape", "greenBeans", "kidneyBeans"] },
+  { id: "juice", label: "出汁增香", options: ["onion", "zucchini", "celery", "loofah", "garlicScape"] },
   { id: "leafy", label: "深绿叶菜", options: ["shanghaiGreen", "spinach", "bokChoy", "romaineLettuce"] },
-  { id: "boost", label: "纤维颗粒补强", options: ["edamame", "peas", "mixedVeg"] }
+  { id: "boost", label: "补强菜", options: ["okra", "edamame", "peas", "mixedVeg"] }
 ];
 
 const validVegetableOptions = Object.keys(vegetableItems);
@@ -303,7 +302,7 @@ const defaultState = {
   proteinK: false,
   knowledge: "plan",
   vegetableOptions: [],
-  vegetableOpenPanels: ["main", "color", "juice", "texture"],
+  vegetableOpenPanels: ["main", "color", "juice"],
   vegetableStarted: false,
   braiseGarlicBase: "none",
   braiseOptions: [],
