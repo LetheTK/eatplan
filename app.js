@@ -233,7 +233,8 @@ const defaultState = {
   proteinK: false,
   knowledge: "plan",
   braiseGarlicBase: "olivePowder",
-  braiseOptions: []
+  braiseOptions: [],
+  braiseOpenPanels: ["garlic", "soup", "spices"]
 };
 
 function readSavedState() {
@@ -254,6 +255,10 @@ function readSavedState() {
     if (garlicBases[saved.braiseGarlicBase]) next.braiseGarlicBase = saved.braiseGarlicBase;
     if (Array.isArray(saved.braiseOptions)) {
       next.braiseOptions = saved.braiseOptions.filter((option) => validBraiseOptions.includes(option));
+    }
+    if (Array.isArray(saved.braiseOpenPanels)) {
+      const panels = saved.braiseOpenPanels.filter((panel) => ["garlic", "soup", "spices"].includes(panel));
+      next.braiseOpenPanels = panels;
     }
     ["banana", "buffer", "proteinK"].forEach((key) => {
       if (typeof saved[key] === "boolean") next[key] = saved[key];
@@ -310,13 +315,20 @@ const els = {
   knowledgeSummary: document.querySelector("#knowledgeSummary"),
   knowledgeFacts: document.querySelector("#knowledgeFacts"),
   knowledgeNote: document.querySelector("#knowledgeNote"),
+  braisePanels: document.querySelectorAll("[data-braise-panel]"),
+  braisePanelToggles: document.querySelectorAll("[data-braise-panel-toggle]"),
   braiseGarlicBaseControls: document.querySelector("#braiseGarlicBaseControls"),
   braiseSoupControls: document.querySelector("#braiseSoupControls"),
   braiseSpiceControls: document.querySelector("#braiseSpiceControls"),
+  braiseGarlicSummary: document.querySelector("#braiseGarlicSummary"),
+  braiseSoupSummary: document.querySelector("#braiseSoupSummary"),
+  braiseSpiceSummary: document.querySelector("#braiseSpiceSummary"),
   braiseStatusPill: document.querySelector("#braiseStatusPill"),
   braiseCountPill: document.querySelector("#braiseCountPill"),
   braiseFlavorTitle: document.querySelector("#braiseFlavorTitle"),
   braiseFlavorSummary: document.querySelector("#braiseFlavorSummary"),
+  braiseVariantTitle: document.querySelector("#braiseVariantTitle"),
+  braiseVariantSummary: document.querySelector("#braiseVariantSummary"),
   braiseAddList: document.querySelector("#braiseAddList"),
   braiseAvoidList: document.querySelector("#braiseAvoidList"),
   braiseCurrentText: document.querySelector("#braiseCurrentText")
@@ -343,7 +355,8 @@ function saveState() {
       proteinK: state.proteinK,
       knowledge: state.knowledge,
       braiseGarlicBase: state.braiseGarlicBase,
-      braiseOptions: state.braiseOptions
+      braiseOptions: state.braiseOptions,
+      braiseOpenPanels: state.braiseOpenPanels
     }));
   } catch {
     // localStorage may be unavailable in restricted browser modes.
@@ -407,6 +420,33 @@ function syncBraiseOptionButtons() {
       button.classList.toggle("active", active);
       button.setAttribute("aria-pressed", active ? "true" : "false");
     });
+  });
+}
+
+function setBraisePanelOpen(panel, open) {
+  const next = new Set(state.braiseOpenPanels);
+  if (open) {
+    next.add(panel);
+  } else {
+    next.delete(panel);
+  }
+  state.braiseOpenPanels = ["garlic", "soup", "spices"].filter((item) => next.has(item));
+}
+
+function autoAdvanceBraisePanel(current, next) {
+  setBraisePanelOpen(current, false);
+  if (next) setBraisePanelOpen(next, true);
+}
+
+function renderBraisePanels() {
+  const openPanels = new Set(state.braiseOpenPanels);
+  els.braisePanels.forEach((panel) => {
+    const open = openPanels.has(panel.dataset.braisePanel);
+    panel.classList.toggle("collapsed", !open);
+  });
+  els.braisePanelToggles.forEach((button) => {
+    const open = openPanels.has(button.dataset.braisePanelToggle);
+    button.setAttribute("aria-expanded", open ? "true" : "false");
   });
 }
 
@@ -612,6 +652,16 @@ function listItems(items) {
   return items.map((item) => `<li>${item}</li>`).join("");
 }
 
+function addSuggestion(list, name, detail) {
+  list.push({ name, detail });
+}
+
+function renderAddItems(items) {
+  return items.map((item) => (
+    `<li><strong>${item.name}</strong><span>${item.detail}</span></li>`
+  )).join("");
+}
+
 function buildBraiseRecommendation() {
   const hasTomato = hasBraiseOption("tomato");
   const hasWater = hasBraiseOption("water");
@@ -625,9 +675,17 @@ function buildBraiseRecommendation() {
   const hasGuizhou = hasBraiseOption("guizhouDip");
   const hasSesame = hasBraiseOption("sesameOil");
   const hasGarlicBase = state.braiseGarlicBase !== "none";
+  const hasParsley = hasBraiseOption("parsley");
+  const hasThyme = hasBraiseOption("thyme");
+  const hasBasil = hasBraiseOption("basil");
+  const hasChineseSeasoning = hasSoy || hasOyster || hasGuizhou || hasSesame;
+  const hasMediterraneanSeasoning = hasOnionPowder || hasBlackPepper || hasHerb || hasTomato;
+  const isMixed = hasGuizhou && (hasHerb || hasBlackPepper) || hasChineseSeasoning && hasHerb && hasParsleyGarlicSalt;
 
   let title = "地中海清淡风";
-  if (hasGuizhou) {
+  if (isMixed) {
+    title = "风味混杂，建议收敛";
+  } else if (hasGuizhou) {
     title = "川贵微辣风";
   } else if (hasSoy || hasOyster || hasSesame) {
     title = "中式 / 中西结合风";
@@ -639,11 +697,11 @@ function buildBraiseRecommendation() {
   const avoid = [];
 
   if (!hasGarlicBase) {
-    add.push("先定一个蒜香基底：橄榄油+蒜粉、橄榄油+鲜蒜或油浸蒜三选一。");
+    addSuggestion(add, "蒜香基底", "橄榄油+蒜粉、橄榄油+鲜蒜或油浸蒜三选一。");
   }
 
   if (!hasTomato && !hasWater) {
-    add.push("补番茄或清水做汤底，避免锅底太干。");
+    addSuggestion(add, "番茄 / 清水", "至少补一个汤底，番茄负责酸鲜，清水负责防干锅。");
   }
 
   if (state.braiseGarlicBase === "infusedGarlic") {
@@ -662,13 +720,30 @@ function buildBraiseRecommendation() {
     avoid.push("生抽和蚝油二选一，避免酱香和钠都偏重。");
   }
 
+  if (isMixed) {
+    addSuggestion(add, "先删减再补香", "保留一条主线：地中海留番茄草本，中式留生抽/蚝油，川贵留贵州蘸水。");
+    return {
+      title,
+      status: "需要收敛",
+      variant: "收敛重选版",
+      variantSummary: "当前同时出现辣香、草本或酱香，先减少冲突项，再按一条路线补香。",
+      summary: "风味混在一起时，继续加料通常不会更好吃；先确定今天想吃清淡草本、轻酱香还是微辣。",
+      add,
+      avoid
+    };
+  }
+
   if (title === "川贵微辣风") {
-    if (!hasSoy && !hasOyster) add.push("需要酱香时，生抽或蚝油二选一，不超过1茶匙。");
-    if (!hasWater && !hasTomato) add.push("补1-3汤匙清水，让蘸水和酱香能化开。");
+    if (!hasSoy && !hasOyster) addSuggestion(add, "生抽 / 蚝油", "需要酱香时二选一，不超过1茶匙。");
+    if (!hasWater && !hasTomato) addSuggestion(add, "清水", "补1-3汤匙，让蘸水和酱香能化开。");
     if (hasBlackPepper || hasHerb) avoid.push("川贵微辣风默认不加黑胡椒、欧芹碎、百里香或罗勒。");
     return {
       title,
       status: "微辣路线",
+      variant: hasSesame ? "川贵香油收尾版" : "川贵微辣焖菜版",
+      variantSummary: hasSesame
+        ? "贵州蘸水定主味，香油只放出锅几滴，不做主要油脂。"
+        : "贵州蘸水少量化开，咸味来源保持单一，适合想吃微辣时。",
       summary: "当前组合会走向贵州蘸水的糊辣香，重点是少量、化开、不叠盐。",
       add,
       avoid
@@ -676,30 +751,57 @@ function buildBraiseRecommendation() {
   }
 
   if (title === "中式 / 中西结合风") {
-    if (!hasSoy && !hasOyster) add.push("咸鲜来源建议生抽或蚝油二选一，不超过1茶匙。");
-    if (!hasBlackPepper) add.push("可加少量黑胡椒，但取低值，避免抢酱香。");
-    if (!hasTomato && !hasWater) add.push("补少量番茄或清水做焖制汁底。");
+    if (!hasSoy && !hasOyster) addSuggestion(add, "生抽 / 蚝油", "咸鲜来源二选一，不超过1茶匙。");
+    if (!hasBlackPepper) addSuggestion(add, "黑胡椒", "可少量加入，但取低值，避免抢酱香。");
+    if (!hasTomato && !hasWater) addSuggestion(add, "少量番茄 / 清水", "补焖制汁底，避免锅底偏干。");
     if (hasHerb) avoid.push("欧芹碎、百里香、罗勒在中式酱香里退到可选，不要同时当主角。");
     return {
       title,
       status: "酱香路线",
+      variant: hasTomato ? "番茄轻酱香版" : hasSesame ? "香油收尾轻酱版" : "中式轻酱香版",
+      variantSummary: hasTomato
+        ? "番茄保留一点酸鲜，生抽或蚝油只放少量，适合想要熟悉口味但不重口。"
+        : hasSesame
+          ? "酱香做主体，香油只负责出锅尾香，不再额外叠盐。"
+          : "生抽或蚝油二选一，黑胡椒取低值，做成轻酱香。",
       summary: "当前组合更偏熟悉的中式酱香，控制重点是咸味来源只留一个。",
       add,
       avoid
     };
   }
 
-  if (!hasOnionPowder) add.push("加洋葱粉 1/8-1/4 茶匙，补甜香和底味。");
-  if (!hasBlackPepper) add.push("加黑胡椒，地中海清淡风可取到 1/4 茶匙。");
-  if (!hasHerb) add.push("欧芹碎、百里香或罗勒至少选一种，建议百里香/欧芹碎优先。");
-  if (!hasTomato && title !== "地中海无番茄简易版") add.push("有番茄时优先加番茄，酸鲜和汁水会更完整。");
+  if (!hasOnionPowder) addSuggestion(add, "洋葱粉", "1/8-1/4茶匙，补甜香和底味。");
+  if (!hasBlackPepper) addSuggestion(add, "黑胡椒", "地中海清淡风可取到1/4茶匙。");
+  if (!hasHerb) addSuggestion(add, "草本香", "欧芹碎、百里香或罗勒至少选一种，百里香/欧芹碎优先。");
+  if (!hasTomato && title !== "地中海无番茄简易版") addSuggestion(add, "番茄", "优先用番茄补酸鲜和汁水，味道比清水版更完整。");
   if (hasSoy || hasOyster || hasGuizhou || hasSesame) {
     avoid.push("想保持地中海清淡风，就不要加生抽、蚝油、贵州蘸水或香油。");
+  }
+
+  let variant = "地中海基础补香版";
+  let variantSummary = "先补齐番茄、洋葱粉、黑胡椒和一种草本香，作为日常默认。";
+  if (state.braiseGarlicBase === "infusedGarlic" && hasTomato) {
+    variant = "油浸蒜番茄草本版";
+    variantSummary = "油浸蒜负责浓蒜香，番茄负责酸鲜，再用洋葱粉和草本香补完整度。";
+  } else if (hasTomato && hasBasil) {
+    variant = "罗勒番茄版";
+    variantSummary = "番茄和罗勒搭配清爽，适合彩椒、西葫芦、茄子这类菜。";
+  } else if (hasTomato && (hasThyme || hasParsley)) {
+    variant = "地中海番茄草本版";
+    variantSummary = "番茄、黑胡椒、洋葱粉和百里香/欧芹碎齐了，日常最稳。";
+  } else if (!hasTomato && hasWater) {
+    variant = "地中海无番茄蒜香版";
+    variantSummary = "没有番茄时用清水防干锅，需要黑胡椒、洋葱粉和草本香撑住味道。";
+  } else if (hasMediterraneanSeasoning) {
+    variant = "地中海日常版";
+    variantSummary = "当前已经在清淡草本方向上，缺什么就按建议增加补齐。";
   }
 
   return {
     title,
     status: title === "地中海无番茄简易版" ? "清淡备用" : "清淡路线",
+    variant,
+    variantSummary,
     summary: title === "地中海无番茄简易版"
       ? "当前没有番茄，仍可做清淡版，但需要洋葱粉、黑胡椒和草本香补厚度。"
       : "当前组合优先走地中海清淡风，番茄、洋葱粉、黑胡椒和草本香越齐，味道越完整。",
@@ -711,16 +813,28 @@ function buildBraiseRecommendation() {
 function renderBraise() {
   const recommendation = buildBraiseRecommendation();
   const selectedLabels = state.braiseOptions.map((option) => braiseOptionLabels[option]);
+  const soupLabels = state.braiseOptions
+    .filter((option) => ["tomato", "water"].includes(option))
+    .map((option) => braiseOptionLabels[option]);
+  const spiceLabels = state.braiseOptions
+    .filter((option) => !["tomato", "water"].includes(option))
+    .map((option) => braiseOptionLabels[option]);
   const baseLabel = garlicBases[state.braiseGarlicBase];
   const selectedCount = selectedLabels.length + (state.braiseGarlicBase === "none" ? 0 : 1);
 
+  renderBraisePanels();
   setActive(els.braiseGarlicBaseControls, "garlicBase", state.braiseGarlicBase);
   syncBraiseOptionButtons();
+  els.braiseGarlicSummary.textContent = baseLabel;
+  els.braiseSoupSummary.textContent = soupLabels.length ? soupLabels.join(" + ") : "未选择";
+  els.braiseSpiceSummary.textContent = spiceLabels.length ? spiceLabels.join("、") : "未选择";
   els.braiseStatusPill.textContent = recommendation.status;
   els.braiseCountPill.textContent = `${selectedCount} 项`;
   els.braiseFlavorTitle.textContent = recommendation.title;
   els.braiseFlavorSummary.textContent = recommendation.summary;
-  els.braiseAddList.innerHTML = listItems(recommendation.add.length ? recommendation.add : ["当前香气结构基本够用，出锅前尝味再微调。"]);
+  els.braiseVariantTitle.textContent = recommendation.variant;
+  els.braiseVariantSummary.textContent = recommendation.variantSummary;
+  els.braiseAddList.innerHTML = renderAddItems(recommendation.add.length ? recommendation.add : [{ name: "暂不加", detail: "当前香气结构基本够用，出锅前尝味再微调。" }]);
   els.braiseAvoidList.innerHTML = listItems(recommendation.avoid.length ? recommendation.avoid : ["暂无明显冲突，注意不要继续叠加咸味来源。"]);
   els.braiseCurrentText.textContent = [baseLabel, ...selectedLabels].join(" / ");
 }
@@ -783,29 +897,56 @@ els.knowledgeTabs.addEventListener("click", (event) => {
   renderKnowledge();
 });
 
+els.braisePanelToggles.forEach((toggle) => {
+  toggle.addEventListener("click", () => {
+    const panel = toggle.dataset.braisePanelToggle;
+    setBraisePanelOpen(panel, !state.braiseOpenPanels.includes(panel));
+    saveState();
+    renderBraisePanels();
+  });
+});
+
 els.braiseGarlicBaseControls.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-garlic-base]");
   if (!button) return;
   state.braiseGarlicBase = button.dataset.garlicBase;
+  autoAdvanceBraisePanel("garlic", "soup");
   saveState();
   renderBraise();
 });
 
-[els.braiseSoupControls, els.braiseSpiceControls].forEach((container) => {
-  container.addEventListener("click", (event) => {
-    const button = event.target.closest("button[data-braise-option]");
-    if (!button) return;
-    const option = button.dataset.braiseOption;
-    const selected = new Set(state.braiseOptions);
-    if (selected.has(option)) {
-      selected.delete(option);
-    } else {
-      selected.add(option);
-    }
-    state.braiseOptions = validBraiseOptions.filter((item) => selected.has(item));
-    saveState();
-    renderBraise();
-  });
+els.braiseSoupControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-braise-option]");
+  if (!button) return;
+  const option = button.dataset.braiseOption;
+  const selected = new Set(state.braiseOptions);
+  if (selected.has(option)) {
+    selected.delete(option);
+  } else {
+    selected.add(option);
+  }
+  state.braiseOptions = validBraiseOptions.filter((item) => selected.has(item));
+  autoAdvanceBraisePanel("soup", "spices");
+  saveState();
+  renderBraise();
+});
+
+els.braiseSpiceControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-braise-option]");
+  if (!button) return;
+  const option = button.dataset.braiseOption;
+  const selected = new Set(state.braiseOptions);
+  if (selected.has(option)) {
+    selected.delete(option);
+  } else {
+    selected.add(option);
+  }
+  state.braiseOptions = validBraiseOptions.filter((item) => selected.has(item));
+  setBraisePanelOpen("garlic", false);
+  setBraisePanelOpen("soup", false);
+  setBraisePanelOpen("spices", true);
+  saveState();
+  renderBraise();
 });
 
 els.viewControls.addEventListener("click", (event) => {

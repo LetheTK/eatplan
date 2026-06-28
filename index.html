@@ -177,15 +177,17 @@
 
         <div class="braise-layout">
           <div class="braise-picker" aria-label="焖菜调料选择">
-            <article class="braise-panel">
-              <div class="panel-head">
+            <article class="braise-panel" data-braise-panel="garlic">
+              <button type="button" class="panel-head" data-braise-panel-toggle="garlic" aria-expanded="true">
                 <span>01</span>
                 <div>
                   <h3>蒜香基底</h3>
                   <p>四选一。油浸蒜已经包含油脂和蒜香，不再叠加橄榄油。</p>
+                  <b id="braiseGarlicSummary">橄榄油 + 蒜粉</b>
                 </div>
-              </div>
-              <div class="option-grid base-options" id="braiseGarlicBaseControls">
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="option-grid base-options panel-body" id="braiseGarlicBaseControls">
                 <button type="button" data-garlic-base="olivePowder" class="active">
                   <b>橄榄油 + 蒜粉</b>
                   <small>日常最稳</small>
@@ -205,29 +207,33 @@
               </div>
             </article>
 
-            <article class="braise-panel">
-              <div class="panel-head">
+            <article class="braise-panel" data-braise-panel="soup">
+              <button type="button" class="panel-head" data-braise-panel-toggle="soup" aria-expanded="true">
                 <span>02</span>
                 <div>
                   <h3>汤底基底</h3>
                   <p>可多选。番茄负责酸鲜和出水，清水只负责防干锅。</p>
+                  <b id="braiseSoupSummary">未选择</b>
                 </div>
-              </div>
-              <div class="option-grid compact-options" id="braiseSoupControls">
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="option-grid compact-options panel-body" id="braiseSoupControls">
                 <button type="button" data-braise-option="tomato">番茄</button>
                 <button type="button" data-braise-option="water">清水</button>
               </div>
             </article>
 
-            <article class="braise-panel wide-panel">
-              <div class="panel-head">
+            <article class="braise-panel wide-panel" data-braise-panel="spices">
+              <button type="button" class="panel-head" data-braise-panel-toggle="spices" aria-expanded="true">
                 <span>03</span>
                 <div>
                   <h3>基础调料</h3>
                   <p>多选。选完后自动判断更接近哪条路线，以及是否还缺香料。</p>
+                  <b id="braiseSpiceSummary">未选择</b>
                 </div>
-              </div>
-              <div class="option-grid spice-options" id="braiseSpiceControls">
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="option-grid spice-options panel-body" id="braiseSpiceControls">
                 <button type="button" data-braise-option="salt">盐</button>
                 <button type="button" data-braise-option="parsleyGarlicSalt">欧芹大蒜盐</button>
                 <button type="button" data-braise-option="blackPepper">黑胡椒</button>
@@ -248,7 +254,13 @@
             <h3 id="braiseFlavorTitle">地中海清淡风</h3>
             <p id="braiseFlavorSummary">橄榄油蒜香基底已经有了，建议补番茄、洋葱粉和草本香。</p>
 
-            <div class="result-block">
+            <div class="variant-card">
+              <span>推荐变体</span>
+              <b id="braiseVariantTitle">地中海基础补香版</b>
+              <p id="braiseVariantSummary">先补齐番茄、洋葱粉、黑胡椒和草本香。</p>
+            </div>
+
+            <div class="result-block add-block">
               <span>建议增加</span>
               <ul id="braiseAddList"></ul>
             </div>
