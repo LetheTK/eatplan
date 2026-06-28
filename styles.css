@@ -884,6 +884,10 @@ h1 {
   line-height: 1.45;
 }
 
+.braise-floating-summary {
+  display: none;
+}
+
 .meal-flow {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1088,6 +1092,10 @@ h1 {
     max-width: 100%;
     overflow-x: hidden;
     padding: max(10px, env(safe-area-inset-top)) 10px calc(98px + env(safe-area-inset-bottom));
+  }
+
+  body[data-view="braise"] .app-shell {
+    padding-bottom: calc(178px + env(safe-area-inset-bottom));
   }
 
   .topbar {
@@ -1311,6 +1319,96 @@ h1 {
   .option-grid button {
     min-height: 44px;
     font-size: 12px;
+  }
+
+  .braise .section-heading {
+    margin-bottom: 8px;
+  }
+
+  .braise .section-heading h2 {
+    font-size: 25px;
+  }
+
+  .panel-head {
+    margin-bottom: 10px;
+  }
+
+  .panel-head h3 {
+    margin-bottom: 0;
+    font-size: 18px;
+  }
+
+  .panel-head p {
+    display: none;
+  }
+
+  .braise-floating-summary {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    z-index: 19;
+    display: grid;
+    grid-template-columns: minmax(68px, auto) minmax(0, 1fr);
+    gap: 4px 10px;
+    align-items: center;
+    min-height: 74px;
+    border: 0;
+    border-radius: 20px;
+    background: rgba(255, 254, 250, 0.96);
+    box-shadow: 0 18px 42px rgba(33, 31, 26, 0.16);
+    color: var(--ink);
+    padding: 12px 14px;
+    text-align: left;
+    backdrop-filter: blur(18px);
+  }
+
+  .braise-floating-summary span {
+    align-self: start;
+    width: fit-content;
+    border-radius: 999px;
+    background: #d9f1e5;
+    color: #24724e;
+    padding: 5px 9px;
+    font-size: 12px;
+    font-weight: 820;
+    line-height: 1;
+  }
+
+  .braise-floating-summary strong {
+    min-width: 0;
+    color: #178052;
+    font-size: 20px;
+    line-height: 1.18;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .braise-floating-summary small,
+  .braise-floating-summary em {
+    grid-column: 2;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .braise-floating-summary small {
+    color: #5f675d;
+    font-weight: 760;
+  }
+
+  .braise-floating-summary em {
+    color: #8a6f56;
+    font-style: normal;
+    font-weight: 680;
+  }
+
+  .braise-floating-summary.no-avoid em {
+    display: none;
   }
 
   .today-card {

@@ -331,7 +331,11 @@ const els = {
   braiseVariantSummary: document.querySelector("#braiseVariantSummary"),
   braiseAddList: document.querySelector("#braiseAddList"),
   braiseAvoidList: document.querySelector("#braiseAvoidList"),
-  braiseCurrentText: document.querySelector("#braiseCurrentText")
+  braiseCurrentText: document.querySelector("#braiseCurrentText"),
+  braiseSummaryBar: document.querySelector("#braiseSummaryBar"),
+  braiseSummaryAdd: document.querySelector("#braiseSummaryAdd"),
+  braiseSummaryMeta: document.querySelector("#braiseSummaryMeta"),
+  braiseSummaryAvoid: document.querySelector("#braiseSummaryAvoid")
 };
 
 function round(value, digits = 0) {
@@ -662,6 +666,11 @@ function renderAddItems(items) {
   )).join("");
 }
 
+function formatAddNames(items) {
+  if (!items.length) return "暂不加";
+  return items.map((item) => item.name).join("、");
+}
+
 function buildBraiseRecommendation() {
   const hasTomato = hasBraiseOption("tomato");
   const hasWater = hasBraiseOption("water");
@@ -837,6 +846,10 @@ function renderBraise() {
   els.braiseAddList.innerHTML = renderAddItems(recommendation.add.length ? recommendation.add : [{ name: "暂不加", detail: "当前香气结构基本够用，出锅前尝味再微调。" }]);
   els.braiseAvoidList.innerHTML = listItems(recommendation.avoid.length ? recommendation.avoid : ["暂无明显冲突，注意不要继续叠加咸味来源。"]);
   els.braiseCurrentText.textContent = [baseLabel, ...selectedLabels].join(" / ");
+  els.braiseSummaryAdd.textContent = formatAddNames(recommendation.add);
+  els.braiseSummaryMeta.textContent = `${recommendation.variant} · ${recommendation.title}`;
+  els.braiseSummaryAvoid.textContent = recommendation.avoid.length ? `避免：${recommendation.avoid[0]}` : "避免：暂无明显冲突";
+  els.braiseSummaryBar.classList.toggle("no-avoid", !recommendation.avoid.length);
 }
 
 els.dayControls.addEventListener("click", (event) => {
@@ -947,6 +960,10 @@ els.braiseSpiceControls.addEventListener("click", (event) => {
   setBraisePanelOpen("spices", true);
   saveState();
   renderBraise();
+});
+
+els.braiseSummaryBar.addEventListener("click", () => {
+  document.querySelector(".braise-result").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
 els.viewControls.addEventListener("click", (event) => {

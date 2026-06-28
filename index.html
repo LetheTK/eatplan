@@ -167,7 +167,7 @@
         <div class="section-heading">
           <div>
             <p class="kicker">焖菜调味</p>
-            <h2 id="braise-title">先选已有调料，再判断风味和补香。</h2>
+            <h2 id="braise-title">焖菜</h2>
           </div>
           <div class="status-stack">
             <span id="braiseStatusPill">待选择</span>
@@ -181,8 +181,7 @@
               <button type="button" class="panel-head" data-braise-panel-toggle="garlic" aria-expanded="true">
                 <span>01</span>
                 <div>
-                  <h3>蒜香基底</h3>
-                  <p>四选一。油浸蒜已经包含油脂和蒜香，不再叠加橄榄油。</p>
+                  <h3>蒜香</h3>
                   <b id="braiseGarlicSummary">橄榄油 + 蒜粉</b>
                 </div>
                 <i aria-hidden="true"></i>
@@ -211,8 +210,7 @@
               <button type="button" class="panel-head" data-braise-panel-toggle="soup" aria-expanded="true">
                 <span>02</span>
                 <div>
-                  <h3>汤底基底</h3>
-                  <p>可多选。番茄负责酸鲜和出水，清水只负责防干锅。</p>
+                  <h3>汤底</h3>
                   <b id="braiseSoupSummary">未选择</b>
                 </div>
                 <i aria-hidden="true"></i>
@@ -228,7 +226,6 @@
                 <span>03</span>
                 <div>
                   <h3>基础调料</h3>
-                  <p>多选。选完后自动判断更接近哪条路线，以及是否还缺香料。</p>
                   <b id="braiseSpiceSummary">未选择</b>
                 </div>
                 <i aria-hidden="true"></i>
@@ -274,6 +271,13 @@
             </div>
           </aside>
         </div>
+
+        <button type="button" class="braise-floating-summary" id="braiseSummaryBar" aria-label="查看完整推荐结果">
+          <span>建议加</span>
+          <strong id="braiseSummaryAdd">洋葱粉、草本香</strong>
+          <small id="braiseSummaryMeta">地中海基础补香版 · 地中海清淡风</small>
+          <em id="braiseSummaryAvoid">避免：暂无明显冲突</em>
+        </button>
       </section>
 
       <section class="rules view-section" data-view-panel="rules" id="rules" aria-labelledby="rules-title" hidden>
