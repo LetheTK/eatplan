@@ -26,8 +26,8 @@
       </a>
       <nav class="nav-links" aria-label="页面导航" id="viewControls">
         <button type="button" data-view="today" class="active"><span>今日</span><i aria-hidden="true"></i></button>
+        <button type="button" data-view="braise"><span>焖菜</span></button>
         <button type="button" data-view="rules"><span>规则</span></button>
-        <button type="button" data-view="knowledge"><span>知识库</span></button>
       </nav>
     </header>
 
@@ -35,8 +35,8 @@
       <button type="button" data-view="today" data-mobile-panel="settings" class="active"><span>饮食</span></button>
       <button type="button" data-view="today" data-mobile-panel="meals"><span>三餐</span></button>
       <button type="button" data-view="today" data-mobile-panel="totals"><span>营养</span><i aria-hidden="true"></i></button>
+      <button type="button" data-view="braise"><span>焖菜</span></button>
       <button type="button" data-view="rules"><span>规则</span></button>
-      <button type="button" data-view="knowledge"><span>知识</span></button>
     </nav>
 
     <main id="top">
@@ -163,10 +163,111 @@
         </div>
       </section>
 
+      <section class="braise view-section" data-view-panel="braise" id="braise" aria-labelledby="braise-title" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="kicker">焖菜调味</p>
+            <h2 id="braise-title">先选已有调料，再判断风味和补香。</h2>
+          </div>
+          <div class="status-stack">
+            <span id="braiseStatusPill">待选择</span>
+            <b id="braiseCountPill">0 项</b>
+          </div>
+        </div>
+
+        <div class="braise-layout">
+          <div class="braise-picker" aria-label="焖菜调料选择">
+            <article class="braise-panel">
+              <div class="panel-head">
+                <span>01</span>
+                <div>
+                  <h3>蒜香基底</h3>
+                  <p>四选一。油浸蒜已经包含油脂和蒜香，不再叠加橄榄油。</p>
+                </div>
+              </div>
+              <div class="option-grid base-options" id="braiseGarlicBaseControls">
+                <button type="button" data-garlic-base="olivePowder" class="active">
+                  <b>橄榄油 + 蒜粉</b>
+                  <small>日常最稳</small>
+                </button>
+                <button type="button" data-garlic-base="oliveFresh">
+                  <b>橄榄油 + 鲜蒜</b>
+                  <small>蒜味更明显</small>
+                </button>
+                <button type="button" data-garlic-base="infusedGarlic">
+                  <b>油浸蒜</b>
+                  <small>蒜香升级</small>
+                </button>
+                <button type="button" data-garlic-base="none">
+                  <b>暂不选</b>
+                  <small>稍后再定</small>
+                </button>
+              </div>
+            </article>
+
+            <article class="braise-panel">
+              <div class="panel-head">
+                <span>02</span>
+                <div>
+                  <h3>汤底基底</h3>
+                  <p>可多选。番茄负责酸鲜和出水，清水只负责防干锅。</p>
+                </div>
+              </div>
+              <div class="option-grid compact-options" id="braiseSoupControls">
+                <button type="button" data-braise-option="tomato">番茄</button>
+                <button type="button" data-braise-option="water">清水</button>
+              </div>
+            </article>
+
+            <article class="braise-panel wide-panel">
+              <div class="panel-head">
+                <span>03</span>
+                <div>
+                  <h3>基础调料</h3>
+                  <p>多选。选完后自动判断更接近哪条路线，以及是否还缺香料。</p>
+                </div>
+              </div>
+              <div class="option-grid spice-options" id="braiseSpiceControls">
+                <button type="button" data-braise-option="salt">盐</button>
+                <button type="button" data-braise-option="parsleyGarlicSalt">欧芹大蒜盐</button>
+                <button type="button" data-braise-option="blackPepper">黑胡椒</button>
+                <button type="button" data-braise-option="onionPowder">洋葱粉</button>
+                <button type="button" data-braise-option="parsley">欧芹碎</button>
+                <button type="button" data-braise-option="thyme">百里香</button>
+                <button type="button" data-braise-option="basil">罗勒</button>
+                <button type="button" data-braise-option="soySauce">生抽</button>
+                <button type="button" data-braise-option="oysterSauce">蚝油</button>
+                <button type="button" data-braise-option="guizhouDip">贵州蘸水</button>
+                <button type="button" data-braise-option="sesameOil">香油</button>
+              </div>
+            </article>
+          </div>
+
+          <aside class="braise-result" aria-live="polite">
+            <p class="kicker">推荐结果</p>
+            <h3 id="braiseFlavorTitle">地中海清淡风</h3>
+            <p id="braiseFlavorSummary">橄榄油蒜香基底已经有了，建议补番茄、洋葱粉和草本香。</p>
+
+            <div class="result-block">
+              <span>建议增加</span>
+              <ul id="braiseAddList"></ul>
+            </div>
+            <div class="result-block">
+              <span>注意避免</span>
+              <ul id="braiseAvoidList"></ul>
+            </div>
+            <div class="result-block">
+              <span>当前组合</span>
+              <p id="braiseCurrentText"></p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
       <section class="rules view-section" data-view-panel="rules" id="rules" aria-labelledby="rules-title" hidden>
         <div class="section-heading">
           <p class="kicker">执行规则</p>
-          <h2 id="rules-title">只保留会改变今天吃法的规则。</h2>
+          <h2 id="rules-title">只保留会改变今天吃法的规则，知识依据放在下面。</h2>
         </div>
         <div class="rule-grid">
           <article>
@@ -205,25 +306,24 @@
             <p>日常2-2.5L，力量2.3-2.8L，跑步2.5-3L。跑后小口慢饮。</p>
           </article>
         </div>
-      </section>
 
-      <section class="knowledge view-section" data-view-panel="knowledge" id="knowledge" aria-labelledby="knowledge-title" hidden>
-        <div class="section-heading">
-          <p class="kicker">知识库</p>
-          <h2 id="knowledge-title">不用打开 Markdown，也能看懂依据。</h2>
-        </div>
-
-        <div class="knowledge-layout">
-          <div class="knowledge-tabs" id="knowledgeTabs" aria-label="知识库分类"></div>
-          <article class="knowledge-reader">
-            <div class="reader-head">
-              <p class="kicker" id="knowledgeType">总表</p>
-              <h3 id="knowledgeTitle">当前总控</h3>
-            </div>
-            <p id="knowledgeSummary"></p>
-            <dl id="knowledgeFacts"></dl>
-            <div class="reader-note" id="knowledgeNote"></div>
-          </article>
+        <div class="knowledge-compact" id="knowledge" aria-labelledby="knowledge-title">
+          <div class="section-heading">
+            <p class="kicker">知识依据</p>
+            <h2 id="knowledge-title">需要时点开看依据，不单独占一个导航。</h2>
+          </div>
+          <div class="knowledge-layout">
+            <div class="knowledge-tabs" id="knowledgeTabs" aria-label="知识库分类"></div>
+            <article class="knowledge-reader">
+              <div class="reader-head">
+                <p class="kicker" id="knowledgeType">总表</p>
+                <h3 id="knowledgeTitle">当前总控</h3>
+              </div>
+              <p id="knowledgeSummary"></p>
+              <dl id="knowledgeFacts"></dl>
+              <div class="reader-note" id="knowledgeNote"></div>
+            </article>
+          </div>
         </div>
       </section>
     </main>
