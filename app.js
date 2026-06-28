@@ -208,18 +208,18 @@ const practiceCombos = [
   { level: "A 主力", score: 86, name: "甘蓝 + 胡萝卜 + 洋葱", options: ["cabbage", "carrot", "onion"], flavor: "地中海无番茄简易版", note: "无番茄时仍有洋葱甜汁支撑。" },
   { level: "B 轮换", score: 85, name: "番茄 + 丝瓜 + 杏鲍菇 + 洋葱", options: ["tomato", "loofah", "kingOysterMushroom", "onion"], flavor: "地中海清淡风 / 中式轻酱香版", note: "丝瓜出水、杏鲍菇吸汁，口感一软一韧。" },
   { level: "B 轮换", score: 84, name: "娃娃菜 + 彩椒 + 胡萝卜", options: ["babyCabbage", "bellPepper", "carrot"], flavor: "地中海无番茄简易版", note: "清甜多汁，适合清淡日。" },
-  { level: "B 轮换", score: 83, name: "番茄 + 茄子 + 青椒", options: ["tomato", "eggplant", "greenPepper"], flavor: "川贵微辣风", note: "口味反差强，适合换口味。" },
+  { level: "B 轮换", score: 83, name: "番茄 + 茄子 + 青椒", options: ["tomato", "eggplant", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "下饭感强；地中海清淡风也能做，但要靠番茄、黑胡椒和香草拉清爽。" },
   { level: "B 轮换", score: 83, name: "包菜 + 蒜薹 + 胡萝卜 + 青椒", options: ["baoCabbage", "garlicScape", "carrot", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "家常香气明显，蒜薹和青椒撑味。" },
   { level: "B 轮换", score: 82, name: "甘蓝 + 青椒 + 洋葱", options: ["cabbage", "greenPepper", "onion"], flavor: "地中海无番茄简易版", note: "不加番茄也有个性，甘蓝香、青椒爽和洋葱甜比较清楚。" },
   { level: "B 轮换", score: 82, name: "番茄 + 大白菜 + 芹菜 + 胡萝卜", options: ["tomato", "napaCabbage", "celery", "carrot"], flavor: "地中海清淡风（控盐执行） / 中式轻酱香版", note: "大白菜出水，芹菜提清香，适合控盐。" },
   { level: "B 轮换", score: 81, name: "番茄 + 豆角 + 胡萝卜 + 蒜薹", options: ["tomato", "greenBeans", "carrot", "garlicScape"], flavor: "中式 / 中西结合风、川贵微辣风", note: "豆角必须充分熟透，蒜薹补香。" },
-  { level: "B 轮换", score: 80, name: "番茄 + 西葫芦 + 茄子 + 青椒", options: ["tomato", "zucchini", "eggplant", "greenPepper"], flavor: "地中海清淡风", note: "质地和颜色丰富，适合作为轮换。" },
+  { level: "B 轮换", score: 80, name: "番茄 + 西葫芦 + 茄子 + 青椒", options: ["tomato", "zucchini", "eggplant", "greenPepper"], flavor: "地中海清淡风 / 中式轻酱香版", note: "质地和颜色丰富；想更下饭时可转中式或川贵微辣。" },
   { level: "B 轮换", score: 80, name: "番茄 + 芸豆 + 包菜 + 青椒", options: ["tomato", "kidneyBeans", "baoCabbage", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "芸豆更厚实，必须焖透；包菜和番茄负责汤底与体积。" },
-  { level: "B 轮换", score: 79, name: "番茄 + 秋葵 + 茄子", options: ["tomato", "okra", "eggplant"], flavor: "川贵微辣风", note: "秋葵让汤汁更稠，茄子负责绵软口感。" },
+  { level: "B 轮换", score: 79, name: "番茄 + 秋葵 + 茄子", options: ["tomato", "okra", "eggplant"], flavor: "地中海清淡风 / 川贵微辣风", note: "秋葵让汤汁更稠；清淡版靠番茄和香草，重口版走川贵。" },
   { level: "B 轮换", score: 79, name: "大白菜 + 芹菜 + 杏鲍菇", options: ["napaCabbage", "celery", "kingOysterMushroom"], flavor: "地中海无番茄简易版 / 中式轻酱香版", note: "不加番茄也能靠大白菜出水，杏鲍菇吸汁。" },
   { level: "B 轮换", score: 75, name: "番茄 + 菜花 + 洋葱", options: ["tomato", "cauliflower", "onion"], flavor: "地中海清淡风", note: "菜花吸汁能力强，番茄能改善口感。" },
   { level: "B 轮换", score: 76, name: "番茄 + 丝瓜 + 油麦菜 + 芹菜", options: ["tomato", "loofah", "romaineLettuce", "celery"], flavor: "地中海清淡风（控盐执行）", note: "低负担、出水多，油麦菜最后短焖。" },
-  { level: "C 调剂", score: 71, name: "茄子 + 青椒", options: ["eggplant", "greenPepper"], flavor: "中式 / 中西结合风", note: "家常味不错，但容易偏干，建议补番茄或清水。" }
+  { level: "C 调剂", score: 71, name: "茄子 + 青椒", options: ["eggplant", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "家常味不错，但容易偏干，建议补番茄或清水。" }
 ];
 
 const leafyOptions = ["shanghaiGreen", "spinach", "bokChoy", "romaineLettuce"];
@@ -803,6 +803,12 @@ function vegetableNeedsTomato(selected) {
   return needs.some((option) => selected.has(option)) && !selected.has("tomato");
 }
 
+function carryFlavorFromLabel(flavor) {
+  if (flavor.startsWith("川贵")) return "sichuan";
+  if (flavor.startsWith("中式")) return "chinese";
+  return "mediterranean";
+}
+
 function setVegetablePanelOpen(panel, open) {
   const next = new Set(state.vegetableOpenPanels);
   if (open) {
@@ -852,7 +858,8 @@ function buildVegetableRecommendation() {
   const needsTomato = vegetableNeedsTomato(selected);
 
   let flavor = exact ? best.combo.flavor : "地中海清淡风";
-  if (!exact && (hasEggplantGreenPepper || hasOkraEggplant)) flavor = "川贵微辣风";
+  if (!exact && hasEggplantGreenPepper) flavor = "中式 / 中西结合风、川贵微辣风";
+  if (!exact && hasOkraEggplant) flavor = hasTomato ? "地中海清淡风 / 川贵微辣风" : "中式 / 中西结合风、川贵微辣风";
   if (!exact && !hasTomato && (selected.has("cabbage") || selected.has("baoCabbage") || selected.has("napaCabbage") || selected.has("babyCabbage")) && (selected.has("onion") || selected.has("carrot") || selected.has("bellPepper") || selected.has("celery"))) {
     flavor = "地中海无番茄简易版";
   }
@@ -901,7 +908,7 @@ function buildVegetableRecommendation() {
     improve,
     prep: buildPrepOrder(selected),
     carry: {
-      flavor: flavor.includes("川贵") ? "sichuan" : flavor.includes("中式") ? "chinese" : "mediterranean",
+      flavor: carryFlavorFromLabel(flavor),
       soup: hasTomato || needsTomato ? "tomato" : "water"
     }
   };
