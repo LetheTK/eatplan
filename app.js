@@ -134,7 +134,7 @@ const garlicBases = {
   olivePowder: "橄榄油 + 蒜粉",
   oliveFresh: "橄榄油 + 鲜蒜",
   infusedGarlic: "油浸蒜",
-  none: "暂不选蒜香基底"
+  none: "未选择"
 };
 
 const braiseOptionLabels = {
@@ -232,9 +232,10 @@ const defaultState = {
   buffer: false,
   proteinK: false,
   knowledge: "plan",
-  braiseGarlicBase: "olivePowder",
+  braiseGarlicBase: "none",
   braiseOptions: [],
-  braiseOpenPanels: ["garlic", "soup", "spices"]
+  braiseOpenPanels: ["garlic", "soup", "spices"],
+  braiseStarted: false
 };
 
 function readSavedState() {
@@ -260,6 +261,7 @@ function readSavedState() {
       const panels = saved.braiseOpenPanels.filter((panel) => ["garlic", "soup", "spices"].includes(panel));
       next.braiseOpenPanels = panels;
     }
+    if (typeof saved.braiseStarted === "boolean") next.braiseStarted = saved.braiseStarted;
     ["banana", "buffer", "proteinK"].forEach((key) => {
       if (typeof saved[key] === "boolean") next[key] = saved[key];
     });
@@ -360,7 +362,8 @@ function saveState() {
       knowledge: state.knowledge,
       braiseGarlicBase: state.braiseGarlicBase,
       braiseOptions: state.braiseOptions,
-      braiseOpenPanels: state.braiseOpenPanels
+      braiseOpenPanels: state.braiseOpenPanels,
+      braiseStarted: state.braiseStarted
     }));
   } catch {
     // localStorage may be unavailable in restricted browser modes.
@@ -668,10 +671,37 @@ function renderAddItems(items) {
 
 function formatAddNames(items) {
   if (!items.length) return "暂不加";
-  return items.map((item) => item.name).join("、");
+  return items.slice(0, 2).map((item) => item.name.split(" / ")[0]).join("、");
+}
+
+function hasBraiseSelection() {
+  return state.braiseStarted && (state.braiseGarlicBase !== "none" || state.braiseOptions.length > 0);
+}
+
+function formatAvoidSummary(items) {
+  if (!items.length) return "";
+  const text = items[0];
+  if (text.includes("油浸蒜")) return "避免：额外橄榄油";
+  if (text.includes("盐和欧芹大蒜盐")) return "避免：叠加盐";
+  if (text.includes("生抽和蚝油")) return "避免：生抽+蚝油";
+  if (text.includes("贵州蘸水")) return "避免：叠加咸味";
+  if (text.includes("黑胡椒") || text.includes("欧芹碎")) return "避免：西式香料混入";
+  return "避免：风味叠加";
 }
 
 function buildBraiseRecommendation() {
+  if (!hasBraiseSelection()) {
+    return {
+      title: "待选择",
+      status: "待选择",
+      variant: "选择后显示",
+      variantSummary: "先选择蒜香、汤底或基础调料。",
+      summary: "选择已有调料后，再判断推荐风格和建议补什么。",
+      add: [],
+      avoid: []
+    };
+  }
+
   const hasTomato = hasBraiseOption("tomato");
   const hasWater = hasBraiseOption("water");
   const hasSalt = hasBraiseOption("salt");
@@ -730,7 +760,7 @@ function buildBraiseRecommendation() {
   }
 
   if (isMixed) {
-    addSuggestion(add, "先删减再补香", "保留一条主线：地中海留番茄草本，中式留生抽/蚝油，川贵留贵州蘸水。");
+    addSuggestion(add, "先删减", "保留一条主线：地中海留番茄、百里香或欧芹碎；中式留生抽/蚝油；川贵留贵州蘸水。");
     return {
       title,
       status: "需要收敛",
@@ -781,17 +811,17 @@ function buildBraiseRecommendation() {
 
   if (!hasOnionPowder) addSuggestion(add, "洋葱粉", "1/8-1/4茶匙，补甜香和底味。");
   if (!hasBlackPepper) addSuggestion(add, "黑胡椒", "地中海清淡风可取到1/4茶匙。");
-  if (!hasHerb) addSuggestion(add, "草本香", "欧芹碎、百里香或罗勒至少选一种，百里香/欧芹碎优先。");
+  if (!hasHerb) addSuggestion(add, "百里香 / 欧芹碎", "二选一即可；番茄明显时也可改用罗勒。");
   if (!hasTomato && title !== "地中海无番茄简易版") addSuggestion(add, "番茄", "优先用番茄补酸鲜和汁水，味道比清水版更完整。");
   if (hasSoy || hasOyster || hasGuizhou || hasSesame) {
     avoid.push("想保持地中海清淡风，就不要加生抽、蚝油、贵州蘸水或香油。");
   }
 
   let variant = "地中海基础补香版";
-  let variantSummary = "先补齐番茄、洋葱粉、黑胡椒和一种草本香，作为日常默认。";
+  let variantSummary = "先补齐番茄、洋葱粉、黑胡椒和百里香/欧芹碎，作为日常默认。";
   if (state.braiseGarlicBase === "infusedGarlic" && hasTomato) {
     variant = "油浸蒜番茄草本版";
-    variantSummary = "油浸蒜负责浓蒜香，番茄负责酸鲜，再用洋葱粉和草本香补完整度。";
+    variantSummary = "油浸蒜负责浓蒜香，番茄负责酸鲜，再用洋葱粉和百里香/欧芹碎补完整度。";
   } else if (hasTomato && hasBasil) {
     variant = "罗勒番茄版";
     variantSummary = "番茄和罗勒搭配清爽，适合彩椒、西葫芦、茄子这类菜。";
@@ -800,7 +830,7 @@ function buildBraiseRecommendation() {
     variantSummary = "番茄、黑胡椒、洋葱粉和百里香/欧芹碎齐了，日常最稳。";
   } else if (!hasTomato && hasWater) {
     variant = "地中海无番茄蒜香版";
-    variantSummary = "没有番茄时用清水防干锅，需要黑胡椒、洋葱粉和草本香撑住味道。";
+    variantSummary = "没有番茄时用清水防干锅，需要黑胡椒、洋葱粉和百里香/欧芹碎撑住味道。";
   } else if (hasMediterraneanSeasoning) {
     variant = "地中海日常版";
     variantSummary = "当前已经在清淡草本方向上，缺什么就按建议增加补齐。";
@@ -812,8 +842,8 @@ function buildBraiseRecommendation() {
     variant,
     variantSummary,
     summary: title === "地中海无番茄简易版"
-      ? "当前没有番茄，仍可做清淡版，但需要洋葱粉、黑胡椒和草本香补厚度。"
-      : "当前组合优先走地中海清淡风，番茄、洋葱粉、黑胡椒和草本香越齐，味道越完整。",
+      ? "当前没有番茄，仍可做清淡版，但需要洋葱粉、黑胡椒和百里香/欧芹碎补厚度。"
+      : "当前组合优先走地中海清淡风，番茄、洋葱粉、黑胡椒和百里香/欧芹碎越齐，味道越完整。",
     add,
     avoid
   };
@@ -830,6 +860,7 @@ function renderBraise() {
     .map((option) => braiseOptionLabels[option]);
   const baseLabel = garlicBases[state.braiseGarlicBase];
   const selectedCount = selectedLabels.length + (state.braiseGarlicBase === "none" ? 0 : 1);
+  const ready = hasBraiseSelection();
 
   renderBraisePanels();
   setActive(els.braiseGarlicBaseControls, "garlicBase", state.braiseGarlicBase);
@@ -843,13 +874,18 @@ function renderBraise() {
   els.braiseFlavorSummary.textContent = recommendation.summary;
   els.braiseVariantTitle.textContent = recommendation.variant;
   els.braiseVariantSummary.textContent = recommendation.variantSummary;
-  els.braiseAddList.innerHTML = renderAddItems(recommendation.add.length ? recommendation.add : [{ name: "暂不加", detail: "当前香气结构基本够用，出锅前尝味再微调。" }]);
-  els.braiseAvoidList.innerHTML = listItems(recommendation.avoid.length ? recommendation.avoid : ["暂无明显冲突，注意不要继续叠加咸味来源。"]);
-  els.braiseCurrentText.textContent = [baseLabel, ...selectedLabels].join(" / ");
+  els.braiseAddList.innerHTML = ready
+    ? renderAddItems(recommendation.add.length ? recommendation.add : [{ name: "暂不加", detail: "当前香气结构基本够用，出锅前尝味再微调。" }])
+    : listItems(["选择调料后显示建议。"]);
+  els.braiseAvoidList.innerHTML = ready
+    ? listItems(recommendation.avoid.length ? recommendation.avoid : ["暂无明显冲突，注意不要继续叠加咸味来源。"])
+    : listItems(["选择调料后显示避免项。"]);
+  els.braiseCurrentText.textContent = ready ? [baseLabel, ...selectedLabels].join(" / ") : "未选择";
   els.braiseSummaryAdd.textContent = formatAddNames(recommendation.add);
-  els.braiseSummaryMeta.textContent = `${recommendation.variant} · ${recommendation.title}`;
-  els.braiseSummaryAvoid.textContent = recommendation.avoid.length ? `避免：${recommendation.avoid[0]}` : "避免：暂无明显冲突";
+  els.braiseSummaryMeta.textContent = `路线：${recommendation.title}`;
+  els.braiseSummaryAvoid.textContent = formatAvoidSummary(recommendation.avoid);
   els.braiseSummaryBar.classList.toggle("no-avoid", !recommendation.avoid.length);
+  els.braiseSummaryBar.hidden = !ready;
 }
 
 els.dayControls.addEventListener("click", (event) => {
@@ -923,6 +959,7 @@ els.braiseGarlicBaseControls.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-garlic-base]");
   if (!button) return;
   state.braiseGarlicBase = button.dataset.garlicBase;
+  state.braiseStarted = true;
   autoAdvanceBraisePanel("garlic", "soup");
   saveState();
   renderBraise();
@@ -939,6 +976,7 @@ els.braiseSoupControls.addEventListener("click", (event) => {
     selected.add(option);
   }
   state.braiseOptions = validBraiseOptions.filter((item) => selected.has(item));
+  state.braiseStarted = true;
   autoAdvanceBraisePanel("soup", "spices");
   saveState();
   renderBraise();
@@ -955,6 +993,7 @@ els.braiseSpiceControls.addEventListener("click", (event) => {
     selected.add(option);
   }
   state.braiseOptions = validBraiseOptions.filter((item) => selected.has(item));
+  state.braiseStarted = true;
   setBraisePanelOpen("garlic", false);
   setBraisePanelOpen("soup", false);
   setBraisePanelOpen("spices", true);

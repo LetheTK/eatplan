@@ -649,7 +649,7 @@ h1 {
 }
 
 .braise-panel {
-  padding: 18px;
+  padding: 14px;
 }
 
 .wide-panel {
@@ -662,7 +662,7 @@ h1 {
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 10px;
   align-items: start;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   border: 0;
   background: transparent;
   color: inherit;
@@ -686,9 +686,16 @@ h1 {
 }
 
 .panel-head h3 {
-  margin-bottom: 5px;
+  margin: 0;
   font-size: 19px;
   line-height: 1.2;
+}
+
+.panel-head > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
 }
 
 .panel-head p {
@@ -702,7 +709,7 @@ h1 {
   display: inline-flex;
   width: fit-content;
   max-width: 100%;
-  margin-top: 8px;
+  margin-top: 0;
   border-radius: 999px;
   background: #f2eee6;
   color: #5a513f;
@@ -735,7 +742,7 @@ h1 {
 
 .option-grid {
   display: grid;
-  gap: 8px;
+  gap: 7px;
 }
 
 .base-options,
@@ -749,7 +756,27 @@ h1 {
 
 .option-grid button {
   align-content: center;
-  min-height: 48px;
+  min-height: 44px;
+}
+
+#braiseGarlicBaseControls button.active {
+  background: #dff3e8;
+  color: #1f7d54;
+}
+
+#braiseSoupControls button[data-braise-option="tomato"].active {
+  background: #f4e7dc;
+  color: #9a5721;
+}
+
+#braiseSoupControls button[data-braise-option="water"].active {
+  background: #e0edf2;
+  color: #356d83;
+}
+
+#braiseSpiceControls button.active {
+  background: #e4f0ed;
+  color: #286b62;
 }
 
 .option-grid button b,
@@ -852,6 +879,10 @@ h1 {
   padding: 13px;
 }
 
+.add-block + h3 {
+  margin-top: 16px;
+}
+
 .add-block > span {
   color: #24724e;
 }
@@ -886,6 +917,10 @@ h1 {
 
 .braise-floating-summary {
   display: none;
+}
+
+.braise-floating-summary[hidden] {
+  display: none !important;
 }
 
 .meal-flow {
