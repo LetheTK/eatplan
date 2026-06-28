@@ -332,6 +332,7 @@ const els = {
   braiseVariantTitle: document.querySelector("#braiseVariantTitle"),
   braiseVariantSummary: document.querySelector("#braiseVariantSummary"),
   braiseAddList: document.querySelector("#braiseAddList"),
+  braiseFinishList: document.querySelector("#braiseFinishList"),
   braiseAvoidList: document.querySelector("#braiseAvoidList"),
   braiseCurrentText: document.querySelector("#braiseCurrentText"),
   braiseSummaryBar: document.querySelector("#braiseSummaryBar"),
@@ -670,8 +671,13 @@ function renderAddItems(items) {
 }
 
 function formatAddNames(items) {
-  if (!items.length) return "暂不加";
+  if (!items.length) return "可以直接焖";
   return items.slice(0, 2).map((item) => item.name.split(" / ")[0]).join("、");
+}
+
+function formatFinishSummary(items) {
+  if (!items.length) return "";
+  return `出锅可补：${items.slice(0, 2).map((item) => item.name.split(" / ")[0]).join("、")}`;
 }
 
 function hasBraiseSelection() {
@@ -696,8 +702,9 @@ function buildBraiseRecommendation() {
       status: "待选择",
       variant: "选择后显示",
       variantSummary: "先选择蒜香、汤底或基础调料。",
-      summary: "选择已有调料后，再判断推荐风格和建议补什么。",
+      summary: "选择已有调料后，再判断料汁可加什么、出锅是否需要补香。",
       add: [],
+      finishAdd: [],
       avoid: []
     };
   }
@@ -717,6 +724,7 @@ function buildBraiseRecommendation() {
   const hasParsley = hasBraiseOption("parsley");
   const hasThyme = hasBraiseOption("thyme");
   const hasBasil = hasBraiseOption("basil");
+  const hasSauceHerb = hasThyme || hasBasil;
   const hasChineseSeasoning = hasSoy || hasOyster || hasGuizhou || hasSesame;
   const hasMediterraneanSeasoning = hasOnionPowder || hasBlackPepper || hasHerb || hasTomato;
   const isMixed = hasGuizhou && (hasHerb || hasBlackPepper) || hasChineseSeasoning && hasHerb && hasParsleyGarlicSalt;
@@ -733,6 +741,7 @@ function buildBraiseRecommendation() {
   }
 
   const add = [];
+  const finishAdd = [];
   const avoid = [];
 
   if (!hasGarlicBase) {
@@ -760,14 +769,15 @@ function buildBraiseRecommendation() {
   }
 
   if (isMixed) {
-    addSuggestion(add, "先删减", "保留一条主线：地中海留番茄、百里香或欧芹碎；中式留生抽/蚝油；川贵留贵州蘸水。");
+    addSuggestion(add, "先删减", "保留一条主线：地中海留番茄和百里香；中式留生抽/蚝油；川贵留贵州蘸水。");
     return {
       title,
       status: "需要收敛",
       variant: "收敛重选版",
-      variantSummary: "当前同时出现辣香、草本或酱香，先减少冲突项，再按一条路线补香。",
-      summary: "风味混在一起时，继续加料通常不会更好吃；先确定今天想吃清淡草本、轻酱香还是微辣。",
+      variantSummary: "当前同时出现辣香、香草或酱香，先减少冲突项，再按一条路线调味。",
+      summary: "风味混在一起时，继续加料通常不会更好吃；先确定今天想吃地中海清淡、轻酱香还是微辣。",
       add,
+      finishAdd,
       avoid
     };
   }
@@ -775,6 +785,7 @@ function buildBraiseRecommendation() {
   if (title === "川贵微辣风") {
     if (!hasSoy && !hasOyster) addSuggestion(add, "生抽 / 蚝油", "需要酱香时二选一，不超过1茶匙。");
     if (!hasWater && !hasTomato) addSuggestion(add, "清水", "补1-3汤匙，让蘸水和酱香能化开。");
+    if (!hasSesame) addSuggestion(finishAdd, "香油", "出锅几滴即可，只做尾香，不做主要油脂。");
     if (hasBlackPepper || hasHerb) avoid.push("川贵微辣风默认不加黑胡椒、欧芹碎、百里香或罗勒。");
     return {
       title,
@@ -785,6 +796,7 @@ function buildBraiseRecommendation() {
         : "贵州蘸水少量化开，咸味来源保持单一，适合想吃微辣时。",
       summary: "当前组合会走向贵州蘸水的糊辣香，重点是少量、化开、不叠盐。",
       add,
+      finishAdd,
       avoid
     };
   }
@@ -793,6 +805,7 @@ function buildBraiseRecommendation() {
     if (!hasSoy && !hasOyster) addSuggestion(add, "生抽 / 蚝油", "咸鲜来源二选一，不超过1茶匙。");
     if (!hasBlackPepper) addSuggestion(add, "黑胡椒", "可少量加入，但取低值，避免抢酱香。");
     if (!hasTomato && !hasWater) addSuggestion(add, "少量番茄 / 清水", "补焖制汁底，避免锅底偏干。");
+    if (!hasSesame) addSuggestion(finishAdd, "香油", "出锅几滴即可，可选，不需要和橄榄油重复追香。");
     if (hasHerb) avoid.push("欧芹碎、百里香、罗勒在中式酱香里退到可选，不要同时当主角。");
     return {
       title,
@@ -805,35 +818,37 @@ function buildBraiseRecommendation() {
           : "生抽或蚝油二选一，黑胡椒取低值，做成轻酱香。",
       summary: "当前组合更偏熟悉的中式酱香，控制重点是咸味来源只留一个。",
       add,
+      finishAdd,
       avoid
     };
   }
 
   if (!hasOnionPowder) addSuggestion(add, "洋葱粉", "1/8-1/4茶匙，补甜香和底味。");
   if (!hasBlackPepper) addSuggestion(add, "黑胡椒", "地中海清淡风可取到1/4茶匙。");
-  if (!hasHerb) addSuggestion(add, "百里香 / 欧芹碎", "二选一即可；番茄明显时也可改用罗勒。");
+  if (!hasSauceHerb) addSuggestion(add, "百里香", "少量进料汁一起焖；比迷迭香柔和，更适合汤底和焖菜。");
   if (!hasTomato && title !== "地中海无番茄简易版") addSuggestion(add, "番茄", "优先用番茄补酸鲜和汁水，味道比清水版更完整。");
+  if (!hasParsley) addSuggestion(finishAdd, "欧芹碎", "出锅撒一点即可，可选；不作为料汁里久焖的必需项。");
   if (hasSoy || hasOyster || hasGuizhou || hasSesame) {
     avoid.push("想保持地中海清淡风，就不要加生抽、蚝油、贵州蘸水或香油。");
   }
 
-  let variant = "地中海基础补香版";
-  let variantSummary = "先补齐番茄、洋葱粉、黑胡椒和百里香/欧芹碎，作为日常默认。";
+  let variant = "地中海基础焖菜版";
+  let variantSummary = "料汁里优先放番茄、洋葱粉、黑胡椒和百里香；欧芹碎只作为出锅可选。";
   if (state.braiseGarlicBase === "infusedGarlic" && hasTomato) {
-    variant = "油浸蒜番茄草本版";
-    variantSummary = "油浸蒜负责浓蒜香，番茄负责酸鲜，再用洋葱粉和百里香/欧芹碎补完整度。";
+    variant = "油浸蒜番茄百里香版";
+    variantSummary = "油浸蒜负责浓蒜香，番茄负责酸鲜；百里香适合进料汁一起焖，欧芹碎留到出锅。";
   } else if (hasTomato && hasBasil) {
     variant = "罗勒番茄版";
-    variantSummary = "番茄和罗勒搭配清爽，适合彩椒、西葫芦、茄子这类菜。";
-  } else if (hasTomato && (hasThyme || hasParsley)) {
-    variant = "地中海番茄草本版";
-    variantSummary = "番茄、黑胡椒、洋葱粉和百里香/欧芹碎齐了，日常最稳。";
+    variantSummary = "番茄和罗勒搭配清爽，适合彩椒、西葫芦、茄子这类菜；不需要再叠迷迭香。";
+  } else if (hasTomato && hasThyme) {
+    variant = "地中海番茄香草版";
+    variantSummary = "番茄、黑胡椒、洋葱粉和百里香齐了就可以直接焖；欧芹碎只看出锅香气再补。";
   } else if (!hasTomato && hasWater) {
     variant = "地中海无番茄蒜香版";
-    variantSummary = "没有番茄时用清水防干锅，需要黑胡椒、洋葱粉和百里香/欧芹碎撑住味道。";
+    variantSummary = "没有番茄时用清水防干锅，料汁更依赖黑胡椒、洋葱粉和百里香撑住味道。";
   } else if (hasMediterraneanSeasoning) {
     variant = "地中海日常版";
-    variantSummary = "当前已经在清淡草本方向上，缺什么就按建议增加补齐。";
+    variantSummary = "当前已经在地中海清淡方向上，料汁缺什么就补什么；出锅补香不是必需。";
   }
 
   return {
@@ -842,15 +857,17 @@ function buildBraiseRecommendation() {
     variant,
     variantSummary,
     summary: title === "地中海无番茄简易版"
-      ? "当前没有番茄，仍可做清淡版，但需要洋葱粉、黑胡椒和百里香/欧芹碎补厚度。"
-      : "当前组合优先走地中海清淡风，番茄、洋葱粉、黑胡椒和百里香/欧芹碎越齐，味道越完整。",
+      ? "当前没有番茄，仍可做清淡版；料汁里用洋葱粉、黑胡椒和百里香补厚度即可。"
+      : "当前组合优先走地中海清淡风；料汁里适合用番茄、洋葱粉、黑胡椒和百里香，欧芹碎只作为出锅可选。",
     add,
+    finishAdd,
     avoid
   };
 }
 
 function renderBraise() {
   const recommendation = buildBraiseRecommendation();
+  const finishAdd = recommendation.finishAdd || [];
   const selectedLabels = state.braiseOptions.map((option) => braiseOptionLabels[option]);
   const soupLabels = state.braiseOptions
     .filter((option) => ["tomato", "water"].includes(option))
@@ -875,16 +892,19 @@ function renderBraise() {
   els.braiseVariantTitle.textContent = recommendation.variant;
   els.braiseVariantSummary.textContent = recommendation.variantSummary;
   els.braiseAddList.innerHTML = ready
-    ? renderAddItems(recommendation.add.length ? recommendation.add : [{ name: "暂不加", detail: "当前香气结构基本够用，出锅前尝味再微调。" }])
-    : listItems(["选择调料后显示建议。"]);
+    ? renderAddItems(recommendation.add.length ? recommendation.add : [{ name: "可以直接焖", detail: "料汁结构已经够用，盖上小火焖，出锅前尝味即可。" }])
+    : listItems(["选择调料后显示料汁可加项。"]);
+  els.braiseFinishList.innerHTML = ready
+    ? renderAddItems(finishAdd.length ? finishAdd : [{ name: "可不补香", detail: "补香不是必须；香气够时直接出锅。" }])
+    : listItems(["选择调料后显示出锅可补项。"]);
   els.braiseAvoidList.innerHTML = ready
     ? listItems(recommendation.avoid.length ? recommendation.avoid : ["暂无明显冲突，注意不要继续叠加咸味来源。"])
     : listItems(["选择调料后显示避免项。"]);
   els.braiseCurrentText.textContent = ready ? [baseLabel, ...selectedLabels].join(" / ") : "未选择";
   els.braiseSummaryAdd.textContent = formatAddNames(recommendation.add);
   els.braiseSummaryMeta.textContent = `路线：${recommendation.title}`;
-  els.braiseSummaryAvoid.textContent = formatAvoidSummary(recommendation.avoid);
-  els.braiseSummaryBar.classList.toggle("no-avoid", !recommendation.avoid.length);
+  els.braiseSummaryAvoid.textContent = formatAvoidSummary(recommendation.avoid) || formatFinishSummary(finishAdd);
+  els.braiseSummaryBar.classList.toggle("no-avoid", !recommendation.avoid.length && !finishAdd.length);
   els.braiseSummaryBar.hidden = !ready;
 }
 

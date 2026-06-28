@@ -1,4 +1,4 @@
-const CACHE_NAME = "eatplan-pwa-v7";
+const CACHE_NAME = "eatplan-pwa-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
