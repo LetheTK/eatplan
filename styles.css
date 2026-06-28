@@ -999,7 +999,6 @@ h1 {
 .handoff-button {
   width: 100%;
   min-height: 46px;
-  margin-top: 14px;
   border: 0;
   border-radius: 14px;
   background: var(--dark);
@@ -1016,6 +1015,30 @@ h1 {
 .handoff-button:disabled {
   cursor: default;
   opacity: 0.42;
+}
+
+.handoff-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.handoff-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 780;
+}
+
+.handoff-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+  gap: 8px;
+}
+
+.handoff-choice {
+  min-height: 42px;
+  border: 1px solid rgba(46, 60, 48, 0.12);
+  background: #2b332c;
 }
 
 .meal-flow {

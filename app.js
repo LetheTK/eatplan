@@ -408,7 +408,7 @@ const els = {
   vegetableComboSummary: document.querySelector("#vegetableComboSummary"),
   vegetablePrepList: document.querySelector("#vegetablePrepList"),
   vegetableCurrentText: document.querySelector("#vegetableCurrentText"),
-  vegetableToBraiseButton: document.querySelector("#vegetableToBraiseButton"),
+  vegetableHandoffActions: document.querySelector("#vegetableHandoffActions"),
   vegetableSummaryBar: document.querySelector("#vegetableSummaryBar"),
   vegetableSummaryTitle: document.querySelector("#vegetableSummaryTitle"),
   vegetableSummaryMeta: document.querySelector("#vegetableSummaryMeta"),
@@ -803,10 +803,33 @@ function vegetableNeedsTomato(selected) {
   return needs.some((option) => selected.has(option)) && !selected.has("tomato");
 }
 
+const carryFlavorLabels = {
+  mediterranean: "地中海",
+  chinese: "中式",
+  sichuan: "川贵"
+};
+
+function carryFlavorOptionsFromLabel(flavor) {
+  const candidates = [
+    { flavor: "mediterranean", patterns: ["地中海", "清淡"] },
+    { flavor: "chinese", patterns: ["中式", "中西", "轻酱香"] },
+    { flavor: "sichuan", patterns: ["川贵"] }
+  ];
+  const matches = candidates
+    .map((candidate) => {
+      const indexes = candidate.patterns
+        .map((pattern) => flavor.indexOf(pattern))
+        .filter((index) => index >= 0);
+      return indexes.length ? { flavor: candidate.flavor, index: Math.min(...indexes) } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.index - b.index)
+    .map((item) => item.flavor);
+  return matches.length ? [...new Set(matches)] : ["mediterranean"];
+}
+
 function carryFlavorFromLabel(flavor) {
-  if (flavor.startsWith("川贵")) return "sichuan";
-  if (flavor.startsWith("中式")) return "chinese";
-  return "mediterranean";
+  return carryFlavorOptionsFromLabel(flavor)[0];
 }
 
 function setVegetablePanelOpen(panel, open) {
@@ -845,7 +868,7 @@ function buildVegetableRecommendation() {
       soup: "选择后显示焖菜汁建议。",
       improve: [],
       prep: ["选择蔬菜后显示备菜顺序。"],
-      carry: { flavor: "mediterranean", soup: null }
+      carry: { flavor: "mediterranean", flavors: ["mediterranean"], soup: null }
     };
   }
 
@@ -909,9 +932,26 @@ function buildVegetableRecommendation() {
     prep: buildPrepOrder(selected),
     carry: {
       flavor: carryFlavorFromLabel(flavor),
+      flavors: carryFlavorOptionsFromLabel(flavor),
       soup: hasTomato || needsTomato ? "tomato" : "water"
     }
   };
+}
+
+function renderVegetableHandoff(recommendation, ready) {
+  if (!ready) {
+    return `<button type="button" class="handoff-button" disabled>带到焖菜</button>`;
+  }
+  const flavors = recommendation.carry.flavors || [recommendation.carry.flavor];
+  if (flavors.length === 1) {
+    return `<button type="button" class="handoff-button" data-vegetable-carry="${flavors[0]}">带到焖菜</button>`;
+  }
+  return `<span class="handoff-label">带到焖菜</span>
+    <div class="handoff-options">
+      ${flavors.map((flavor) => (
+        `<button type="button" class="handoff-button handoff-choice" data-vegetable-carry="${flavor}">${carryFlavorLabels[flavor]}</button>`
+      )).join("")}
+    </div>`;
 }
 
 function renderVegetableGroups() {
@@ -964,21 +1004,22 @@ function renderVegetables() {
   els.vegetableSummaryMeta.textContent = recommendation.flavor;
   els.vegetableSummaryHint.textContent = ready ? recommendation.soup : "选择后显示";
   els.vegetableSummaryBar.hidden = !ready;
-  els.vegetableToBraiseButton.disabled = !ready;
+  els.vegetableHandoffActions.innerHTML = renderVegetableHandoff(recommendation, ready);
 }
 
-function applyVegetablesToBraise() {
+function applyVegetablesToBraise(flavorOverride) {
   const recommendation = buildVegetableRecommendation();
   const next = new Set(state.braiseOptions);
+  const carryFlavor = flavorOverride || recommendation.carry.flavor;
   next.delete("tomato");
   next.delete("water");
+  ["onionPowder", "parsley", "thyme", "basil", "blackPepper", "soySauce", "oysterSauce", "guizhouDip", "sesameOil"].forEach((option) => next.delete(option));
   if (recommendation.carry.soup === "tomato") next.add("tomato");
   if (recommendation.carry.soup === "water") next.add("water");
-  if (recommendation.carry.flavor === "sichuan") {
+  if (carryFlavor === "sichuan") {
     next.add("guizhouDip");
     next.add("water");
-    ["thyme", "basil", "parsley", "blackPepper"].forEach((option) => next.delete(option));
-  } else if (recommendation.carry.flavor === "chinese") {
+  } else if (carryFlavor === "chinese") {
     next.add("soySauce");
     next.add("water");
   } else {
@@ -1339,8 +1380,10 @@ els.vegetableSummaryBar.addEventListener("click", () => {
   document.querySelector(".vegetable-result").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
-els.vegetableToBraiseButton.addEventListener("click", () => {
-  applyVegetablesToBraise();
+els.vegetableHandoffActions.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-vegetable-carry]");
+  if (!button) return;
+  applyVegetablesToBraise(button.dataset.vegetableCarry);
 });
 
 els.braisePanelToggles.forEach((toggle) => {
