@@ -732,20 +732,19 @@ h1 {
   transition: transform 160ms ease;
 }
 
-.braise-panel.collapsed .panel-head {
+.braise-panel.collapsed .panel-head,
+.vegetable-panel.collapsed .panel-head {
   margin-bottom: 0;
 }
 
-.braise-panel.collapsed .panel-head i {
+.braise-panel.collapsed .panel-head i,
+.vegetable-panel.collapsed .panel-head i {
   transform: rotate(-45deg);
 }
 
-.braise-panel.collapsed .panel-body {
+.braise-panel.collapsed .panel-body,
+.vegetable-panel.collapsed .panel-body {
   display: none;
-}
-
-.static-head {
-  cursor: default;
 }
 
 .option-grid {
@@ -796,12 +795,12 @@ h1 {
   color: #276b42;
 }
 
-.vegetable-panel:nth-child(1) .vegetable-options button.active {
+.vegetable-panel:nth-child(2) .vegetable-options button.active {
   background: #f4e7dc;
   color: #9a5721;
 }
 
-.vegetable-panel:nth-child(5) .vegetable-options button.active {
+.vegetable-panel:nth-child(6) .vegetable-options button.active {
   background: #dff0ea;
   color: #246b5b;
 }
