@@ -179,10 +179,13 @@ const secondMeats = {
 };
 const validSecondMeats = Object.keys(secondMeats);
 const standardThirdMealIds = ["eggF", "chickenF", "duckF", "beefF", "porkF", "k"];
-const egg4ThirdMealIds = ["lightChicken", "lightEggs", "chickenF", "duckF", "beefF", "porkF", "k"];
-const lightThirdMealIds = ["lightChicken", "lightEggs"];
+const egg4ThirdMealIds = ["lightChicken", "lightDuck", "lightBeef", "lightPork", "lightEggs"];
+const lightThirdMealIds = ["lightChicken", "lightDuck", "lightBeef", "lightPork", "lightEggs"];
 const thirdMealButtonText = {
   lightChicken: ["轻鸡胸", "70-80g"],
+  lightDuck: ["轻鸭胸", "约85g"],
+  lightBeef: ["轻牛瘦肉", "约80g"],
+  lightPork: ["轻猪瘦肉", "约85g"],
   lightEggs: ["轻鸡蛋", "2个 / 约100g"],
   eggF: ["F鸡蛋", "4个 / 约200g"],
   chickenF: ["F鸡胸", "1份 / 约110g"],
@@ -201,6 +204,36 @@ const thirdMeals = {
     fat: -15.8,
     hint: "早餐已吃4个鸡蛋时的首选第三餐；保住蛋白，同时避免全天8个全蛋和脂肪集中。",
     meta: "约 87 kcal · 蛋白 17g"
+  },
+  lightDuck: {
+    label: "轻补蛋白：去皮鸭胸约85g",
+    shortLabel: "轻鸭胸85g",
+    kcal: -147,
+    protein: -8.2,
+    carbs: -2,
+    fat: -13.5,
+    hint: "早餐4蛋日的换口味轻补选项；只按去皮瘦鸭胸计算，带皮鸭胸不作为默认。",
+    meta: "约 105 kcal · 蛋白 17g"
+  },
+  lightBeef: {
+    label: "轻补蛋白：牛瘦肉约80g",
+    shortLabel: "轻牛瘦肉80g",
+    kcal: -140,
+    protein: -7.6,
+    carbs: -2,
+    fat: -13.6,
+    hint: "早餐4蛋日的红肉轻补选项；更适合晚餐偏早时吃，临睡前仍优先鸡胸或鸡蛋。",
+    meta: "约 112 kcal · 蛋白 17.6g"
+  },
+  lightPork: {
+    label: "轻补蛋白：猪瘦肉约85g",
+    shortLabel: "轻猪瘦肉85g",
+    kcal: -130,
+    protein: -7.9,
+    carbs: -2,
+    fat: -12.3,
+    hint: "早餐4蛋日的红肉轻补选项；选择纯瘦肉，避开肥肉和五花。",
+    meta: "约 122 kcal · 蛋白 17.3g"
   },
   lightEggs: {
     label: "轻补蛋白：鸡蛋2个（约100g）",
@@ -269,7 +302,7 @@ const thirdMeals = {
     protein: 16.8,
     carbs: -0.5,
     fat: -1.1,
-    hint: "用于跑步叠加力量、高疲劳、睡眠差或恢复压力大的日子；早餐已4蛋时通常不必再选K。",
+    hint: "用于跑步叠加力量、高疲劳、睡眠差或恢复压力大的日子。",
     meta: "约 326 kcal · 蛋白 42g"
   }
 };
@@ -1042,7 +1075,7 @@ function renderPlanner() {
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
   els.statusPill.textContent = state.thirdMeal === "k" ? "已选择 K" : (breakfastLinked ? "早餐4蛋 · 第三餐轻补" : day.status);
   els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue.status}` : (breakfastLinked ? "早餐4蛋日，第三餐轻补" : (state.thirdMeal === "k" ? "恢复压力大时保留 K" : day.lead));
-  els.dailyTipText.textContent = macroIssue ? macroIssue.text : (breakfastLinked ? "第三餐优先轻鸡胸；没有备肉再选轻鸡蛋2个。" : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`);
+  els.dailyTipText.textContent = macroIssue ? macroIssue.text : (breakfastLinked ? "第三餐用轻补：鸡胸优先，也可换轻鸭/轻牛/轻猪；无备肉再选轻鸡蛋2个。" : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`);
   els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${secondMeatShortLabel(secondMeatPlan.items)} · ${thirdMeal.shortLabel} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
   els.dietDaySummary.textContent = day.label;
   els.dietStapleSummary.textContent = staple.label;
@@ -1055,7 +1088,7 @@ function renderPlanner() {
   els.mealTotalSummary.textContent = buildMealAlertSummary(macroIssues);
   els.mealTotalSummary.parentElement.hidden = macroIssues.length === 0;
   els.mealTotalSummary.parentElement.classList.toggle("has-alert", macroIssues.length > 0);
-  els.todaySummary.textContent = `${staple.description}，第二餐肉类按${formatSecondMeatItems(secondMeatPlan.items)}执行，蔬菜约200g已计入，早餐为${breakfast.label}，第三餐为${thirdMeal.shortLabel}${breakfastLinked ? "（早餐4蛋日不默认叠加F鸡蛋）" : ""}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
+  els.todaySummary.textContent = `${staple.description}，第二餐肉类按${formatSecondMeatItems(secondMeatPlan.items)}执行，蔬菜约200g已计入，早餐为${breakfast.label}，第三餐为${thirdMeal.shortLabel}${breakfastLinked ? "（早餐4蛋日使用轻补，不叠加F整份）" : ""}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
   setNutritionAlert(Boolean(macroIssue));
   renderNutritionRows(total, assessment, proteinRatio, carbRatio);
   els.proteinRatio.textContent = `${formatDecimal(proteinRatio)} g/kg`;
