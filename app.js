@@ -6,12 +6,12 @@ const dayTypes = {
     status: "日常方案 F",
     water: "2-2.5L 水",
     bananaDefault: false,
-    proteinDefault: false,
+    thirdMealDefault: "eggF",
     lead: "按优化版基础饮食执行，不主动加香蕉和主食缓冲。",
     actions: [
       "早餐吃麦片100g + 牛奶125ml + 鸡蛋1个。",
-      "第二餐用鸡胸150g + 鸭胸100g；想省事可按天轮换。",
-      "第三餐按方案F吃鸡蛋4个。",
+      "第二餐肉类按约55g蛋白折算；可单选鸡胸/鸭胸/牛瘦肉/猪瘦肉，也可多选按蛋白均分。",
+      "第三餐默认按方案F吃鸡蛋4个（约200g）；想减少鸡蛋时可换等蛋白鸡胸1份约110g或去皮鸭胸1份约125g。",
       "今天不主动加香蕉，不主动加50g主食缓冲。"
     ]
   },
@@ -20,14 +20,14 @@ const dayTypes = {
     status: "按状态补碳",
     water: "2.5-3L 水",
     bananaDefault: false,
-    proteinDefault: false,
+    thirdMealDefault: "eggF",
     lead: "5km 慢跑不固定加碳水；空腹、间隔久、恢复慢时再补。",
     actions: [
       "状态正常的5km慢跑，不必固定加香蕉。",
       "空腹跑、距上一餐超过4小时、跑后1小时仍腿沉时，再补碳。",
       "补碳可选香蕉1根，或土豆100g、糙米饭75-100g、紫薯80-100g。",
       "跑后或力量后正好吃饭时，可用1个玉米馒头替代本餐主食。",
-      "第三餐先按方案F；当天还做力量或连续疲劳时再升到K。",
+      "第三餐先按方案F；当天还做力量或连续疲劳时再选K。",
       "第二餐仍只吃一份主食，不把土豆和米饭完整叠加。"
     ]
   },
@@ -36,13 +36,13 @@ const dayTypes = {
     status: "看训练状态",
     water: "2.3-2.8L 水",
     bananaDefault: false,
-    proteinDefault: false,
+    thirdMealDefault: "eggF",
     lead: "力量日先用方案 F；训练掉力或恢复差时再开 K 和主食缓冲。",
     actions: [
       "先按方案F执行，蛋白质已经覆盖日常保肌。",
       "如果今天训练明显掉力，打开50g主食缓冲。",
       "训练日吃1个玉米馒头可以，但把它当本餐主食，不再叠加米饭或土豆。",
-      "如果连续疲劳、睡眠差或酸痛明显，第三餐升到K。",
+      "如果连续疲劳、睡眠差或酸痛明显，第三餐选K。",
       "训练后先补水，再判断是否需要额外主食。"
     ]
   },
@@ -51,7 +51,7 @@ const dayTypes = {
     status: "保留赤字",
     water: "2-2.5L 水",
     bananaDefault: false,
-    proteinDefault: false,
+    thirdMealDefault: "eggF",
     lead: "休息日保持简单，不追求高碳水，重点是蛋白质和饮水。",
     actions: [
       "照日常方案F吃，第三餐不要省。",
@@ -69,7 +69,7 @@ const staples = {
     protein: 108.8,
     carbs: 108,
     fat: 50.0,
-    secondMeal: "鸡胸150g + 鸭胸100g · 蔬菜200g · 糙米100g · 橄榄油1汤匙",
+    secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 糙米100g · 橄榄油1汤匙",
     description: "糙米基础日"
   },
   potato: {
@@ -78,7 +78,7 @@ const staples = {
     protein: 108.8,
     carbs: 115,
     fat: 50.0,
-    secondMeal: "鸡胸150g + 鸭胸100g · 蔬菜200g · 土豆150g · 橄榄油1汤匙",
+    secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 土豆150g · 橄榄油1汤匙",
     description: "土豆基础日"
   },
   mixed: {
@@ -87,7 +87,7 @@ const staples = {
     protein: 108.8,
     carbs: 112,
     fat: 50.0,
-    secondMeal: "鸡胸150g + 鸭胸100g · 蔬菜200g · 主食混搭 · 橄榄油1汤匙",
+    secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 主食混搭 · 橄榄油1汤匙",
     description: "主食混搭日"
   }
 };
@@ -127,8 +127,103 @@ const breakfasts = {
 
 const banana = { kcal: 105, protein: 1.3, carbs: 27, fat: 0.3 };
 const buffer = { kcal: 45, protein: 0, carbs: 10, fat: 0 };
-const planKDelta = { kcal: 74, protein: 16.8, carbs: -0.5, fat: -1.1 };
+const SECOND_MEAT_TARGET_PROTEIN = 55;
+const SECOND_MEAT_BASELINE = { kcal: 290, protein: 55, fat: 6 };
+const secondMeats = {
+  chicken: {
+    label: "鸡胸",
+    shortLabel: "鸡",
+    proteinPer100: 23.1,
+    kcalPer100: 116,
+    fatPer100: 2.4
+  },
+  duck: {
+    label: "去皮鸭胸",
+    shortLabel: "鸭",
+    proteinPer100: 20,
+    kcalPer100: 124,
+    fatPer100: 4.8
+  },
+  beef: {
+    label: "牛瘦肉",
+    shortLabel: "牛",
+    proteinPer100: 22,
+    kcalPer100: 140,
+    fatPer100: 5
+  },
+  pork: {
+    label: "猪瘦肉",
+    shortLabel: "猪",
+    proteinPer100: 20.3,
+    kcalPer100: 143,
+    fatPer100: 6.2
+  }
+};
+const validSecondMeats = Object.keys(secondMeats);
+const thirdMeals = {
+  eggF: {
+    label: "方案 F：鸡蛋4个（约200g）",
+    shortLabel: "F鸡蛋4个/200g",
+    kcal: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+    hint: "日常默认，鸡蛋按约50g/个估算；早餐用平衡版时全天约5个鸡蛋。",
+    meta: "约 252 kcal · 蛋白 25.2g"
+  },
+  chickenF: {
+    label: "F替换：鸡胸1份（约110g）",
+    shortLabel: "F鸡胸110g",
+    kcal: -124,
+    protein: 0.2,
+    carbs: -2,
+    fat: -15,
+    hint: "等蛋白替代4个鸡蛋，热量和脂肪更低，但需要提前备餐。",
+    meta: "约 128 kcal · 蛋白 25g"
+  },
+  duckF: {
+    label: "F替换：去皮鸭胸1份（约125g）",
+    shortLabel: "F鸭胸125g",
+    kcal: -97,
+    protein: -0.2,
+    carbs: -2,
+    fat: -10,
+    hint: "适合换口味；只按去皮瘦鸭胸计算，带皮鸭胸不作为第三餐默认。",
+    meta: "约 155 kcal · 蛋白 25g"
+  },
+  beefF: {
+    label: "F替换：牛瘦肉1份（约115g）",
+    shortLabel: "F牛瘦肉115g",
+    kcal: -91,
+    protein: 0.1,
+    carbs: -2,
+    fat: -11.8,
+    hint: "按瘦牛肉约22g蛋白/100g估算；更适合白天或晚餐偏早时吃。",
+    meta: "约 161 kcal · 蛋白 25.3g"
+  },
+  porkF: {
+    label: "F替换：猪瘦肉1份（约125g）",
+    shortLabel: "F猪瘦肉125g",
+    kcal: -73,
+    protein: 0.2,
+    carbs: -2,
+    fat: -9.8,
+    hint: "按猪瘦肉约20g蛋白/100g估算；选择纯瘦肉，避开肥肉和五花。",
+    meta: "约 179 kcal · 蛋白 25.4g"
+  },
+  k: {
+    label: "方案 K：鸡蛋3个（约150g）+ 鸡胸100g",
+    shortLabel: "K 3蛋150g+鸡胸100g",
+    kcal: 74,
+    protein: 16.8,
+    carbs: -0.5,
+    fat: -1.1,
+    hint: "用于跑步叠加力量、高疲劳、睡眠差或恢复压力大的日子。",
+    meta: "约 326 kcal · 蛋白 42g"
+  }
+};
 const STORAGE_KEY = "eatplan.dashboard.state.v1";
+const BRAISE_PANEL_STATE_VERSION = 2;
 
 const garlicBases = {
   olivePowder: "橄榄油 + 蒜粉",
@@ -154,6 +249,7 @@ const braiseOptionLabels = {
 };
 
 const validBraiseOptions = Object.keys(braiseOptionLabels);
+const validDietPanels = ["day", "staple", "breakfast", "secondMeat", "thirdMeal", "adjust"];
 
 const vegetableItems = {
   tomato: { label: "番茄", group: "颜色/椒香", short: "番茄" },
@@ -242,10 +338,11 @@ const knowledgeItems = [
     id: "protein",
     type: "蛋白质",
     title: "F/K 蛋白档",
-    summary: "方案F是日常默认，方案K是触发档。跑步日先看是否需要补碳，不默认靠K解决；早餐用牛奶125ml + 鸡蛋1个更平衡。",
+    summary: "方案F是日常默认，F的4个鸡蛋可用等蛋白瘦肉替换，方案K仍是触发档。跑步日先看是否需要补碳，不默认靠K解决；早餐用牛奶125ml + 鸡蛋1个更平衡。",
     facts: [
-      ["方案F", "鸡蛋4个，日常够用"],
-      ["方案K", "鸡蛋3个 + 鸡胸100g，用于跑步叠加力量或高疲劳"],
+      ["方案F", "鸡蛋4个（约200g），日常够用，操作最低"],
+      ["F肉类替换", "鸡胸约110g、去皮鸭胸约125g、牛瘦肉约115g、猪瘦肉约125g，蛋白都接近25g"],
+      ["方案K", "鸡蛋3个（约150g）+ 鸡胸100g，用于跑步叠加力量或高疲劳"],
       ["牛奶替换", "综合最优是牛奶125ml + 鸡蛋1个"]
     ],
     note: "来源：蛋白质补充方案、采购价格与替换规则。"
@@ -280,11 +377,12 @@ const knowledgeItems = [
   {
     id: "prep",
     type: "备餐",
-    title: "鸡鸭胸搭配",
-    summary: "每天混搭时用鸡胸150g + 鸭胸100g。若想减少称重，按鸡胸4天、鸭胸3天轮换即可。",
+    title: "第二餐肉类搭配",
+    summary: "第二餐肉类以约55g蛋白为目标。单选时一种肉承担目标；多选时按蛋白均分，再反推每种肉重量。",
     facts: [
-      ["每天混", "鸡胸150g + 鸭胸100g"],
-      ["按天轮换", "鸡胸4天 + 鸭胸3天"],
+      ["目标", "肉类约55g蛋白"],
+      ["多选", "按蛋白均分，不按重量均分"],
+      ["可选", "鸡胸、去皮鸭胸、牛瘦肉、猪瘦肉"],
       ["成本", "优化版蛋白食材约8元/天"]
     ],
     note: "来源：采购价格与替换规则。"
@@ -297,16 +395,18 @@ const defaultState = {
   day: "daily",
   staple: "potato",
   breakfast: "balanced",
+  secondMeats: ["chicken", "duck"],
+  thirdMeal: "eggF",
+  dietOpenPanels: ["day"],
   banana: false,
   buffer: false,
-  proteinK: false,
   knowledge: "plan",
   vegetableOptions: [],
   vegetableOpenPanels: ["main", "color", "juice"],
   vegetableStarted: false,
   braiseGarlicBase: "none",
   braiseOptions: [],
-  braiseOpenPanels: ["garlic", "soup", "spices"],
+  braiseOpenPanels: [],
   braiseStarted: false
 };
 
@@ -320,10 +420,21 @@ function readSavedState() {
     const next = {};
     if (["today", "vegetables", "braise", "rules"].includes(saved.view)) next.view = saved.view;
     if (saved.view === "knowledge") next.view = "rules";
-    if (["settings", "meals", "totals"].includes(saved.mobilePanel)) next.mobilePanel = saved.mobilePanel;
+    if (["settings", "meals"].includes(saved.mobilePanel)) next.mobilePanel = saved.mobilePanel;
+    if (saved.mobilePanel === "totals") next.mobilePanel = "meals";
     if (dayTypes[saved.day]) next.day = saved.day;
     if (staples[saved.staple]) next.staple = saved.staple;
     if (breakfasts[saved.breakfast]) next.breakfast = saved.breakfast;
+    if (Array.isArray(saved.secondMeats)) {
+      const meats = saved.secondMeats.filter((meat) => validSecondMeats.includes(meat));
+      if (meats.length) next.secondMeats = [...new Set(meats)];
+    }
+    if (thirdMeals[saved.thirdMeal]) next.thirdMeal = saved.thirdMeal;
+    if (!saved.thirdMeal && saved.proteinK === true) next.thirdMeal = "k";
+    if (Array.isArray(saved.dietOpenPanels)) {
+      const panels = saved.dietOpenPanels.filter((panel) => validDietPanels.includes(panel));
+      next.dietOpenPanels = panels;
+    }
     if (knowledgeItems.some((item) => item.id === saved.knowledge)) next.knowledge = saved.knowledge;
     if (Array.isArray(saved.vegetableOptions)) {
       next.vegetableOptions = saved.vegetableOptions.filter((option) => validVegetableOptions.includes(option));
@@ -337,12 +448,12 @@ function readSavedState() {
     if (Array.isArray(saved.braiseOptions)) {
       next.braiseOptions = saved.braiseOptions.filter((option) => validBraiseOptions.includes(option));
     }
-    if (Array.isArray(saved.braiseOpenPanels)) {
+    if (saved.braisePanelStateVersion === BRAISE_PANEL_STATE_VERSION && Array.isArray(saved.braiseOpenPanels)) {
       const panels = saved.braiseOpenPanels.filter((panel) => ["garlic", "soup", "spices"].includes(panel));
       next.braiseOpenPanels = panels;
     }
     if (typeof saved.braiseStarted === "boolean") next.braiseStarted = saved.braiseStarted;
-    ["banana", "buffer", "proteinK"].forEach((key) => {
+    ["banana", "buffer"].forEach((key) => {
       if (typeof saved[key] === "boolean") next[key] = saved[key];
     });
     return next;
@@ -364,13 +475,23 @@ const els = {
   mobilePanels: document.querySelectorAll("[data-mobile-panel-content]"),
   mobileDietHint: document.querySelector("#mobileDietHint"),
   mobileTotalHint: document.querySelector("#mobileTotalHint"),
+  mealTotalSummary: document.querySelector("#mealTotalSummary"),
   settingsSummary: document.querySelector("#settingsSummary"),
   dayControls: document.querySelector("#dayTypeControls"),
   stapleControls: document.querySelector("#stapleControls"),
   breakfastControls: document.querySelector("#breakfastControls"),
+  secondMeatControls: document.querySelector("#secondMeatControls"),
+  thirdMealControls: document.querySelector("#thirdMealControls"),
+  dietPanels: document.querySelectorAll("[data-diet-panel]"),
+  dietPanelToggles: document.querySelectorAll("[data-diet-panel-toggle]"),
+  dietDaySummary: document.querySelector("#dietDaySummary"),
+  dietStapleSummary: document.querySelector("#dietStapleSummary"),
+  dietBreakfastSummary: document.querySelector("#dietBreakfastSummary"),
+  dietSecondMeatSummary: document.querySelector("#dietSecondMeatSummary"),
+  dietThirdMealSummary: document.querySelector("#dietThirdMealSummary"),
+  dietAdjustSummary: document.querySelector("#dietAdjustSummary"),
   bananaToggle: document.querySelector("#bananaToggle"),
   bufferToggle: document.querySelector("#bufferToggle"),
-  proteinToggle: document.querySelector("#proteinToggle"),
   plannerLead: document.querySelector("#plannerLead"),
   waterTarget: document.querySelector("#waterTarget"),
   todayTitle: document.querySelector("#todayTitle"),
@@ -387,6 +508,7 @@ const els = {
   firstMealHint: document.querySelector("#firstMealHint"),
   firstMealMeta: document.querySelector("#firstMealMeta"),
   secondMealText: document.querySelector("#secondMealText"),
+  secondMealHint: document.querySelector("#secondMealHint"),
   secondMealMeta: document.querySelector("#secondMealMeta"),
   thirdMealText: document.querySelector("#thirdMealText"),
   thirdMealHint: document.querySelector("#thirdMealHint"),
@@ -445,6 +567,69 @@ function formatDecimal(value) {
   return value.toFixed(1);
 }
 
+function roundToFive(value) {
+  return Math.round(value / 5) * 5;
+}
+
+function getSelectedSecondMeats() {
+  const selected = Array.isArray(state.secondMeats) ? state.secondMeats : defaultState.secondMeats;
+  const valid = selected.filter((meat) => validSecondMeats.includes(meat));
+  return valid.length ? [...new Set(valid)] : [...defaultState.secondMeats];
+}
+
+function calculateSecondMeatPlan() {
+  const selected = getSelectedSecondMeats();
+  const proteinShare = SECOND_MEAT_TARGET_PROTEIN / selected.length;
+  const items = selected.map((id) => {
+    const meat = secondMeats[id];
+    const grams = proteinShare / (meat.proteinPer100 / 100);
+    return {
+      id,
+      label: meat.label,
+      grams,
+      kcal: grams * meat.kcalPer100 / 100,
+      protein: proteinShare,
+      fat: grams * meat.fatPer100 / 100
+    };
+  });
+  const totals = items.reduce((sum, item) => {
+    sum.kcal += item.kcal;
+    sum.protein += item.protein;
+    sum.fat += item.fat;
+    return sum;
+  }, { kcal: 0, protein: 0, fat: 0 });
+
+  return {
+    items,
+    totals,
+    delta: {
+      kcal: totals.kcal - SECOND_MEAT_BASELINE.kcal,
+      protein: totals.protein - SECOND_MEAT_BASELINE.protein,
+      fat: totals.fat - SECOND_MEAT_BASELINE.fat
+    }
+  };
+}
+
+function formatSecondMeatItems(items) {
+  return items.map((item) => `${item.label}约${roundToFive(item.grams)}g`).join(" + ");
+}
+
+function secondMeatShortLabel(items) {
+  return `二餐${items.map((item) => secondMeats[item.id].shortLabel).join("")}`;
+}
+
+function secondMealStapleText(stapleKey) {
+  if (stapleKey === "rice") return "糙米100g";
+  if (stapleKey === "potato") return "土豆150g";
+  return "主食混搭";
+}
+
+function secondMealBaseKcal(stapleKey) {
+  if (stapleKey === "rice") return 550;
+  if (stapleKey === "potato") return 560;
+  return 555;
+}
+
 function saveState() {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -453,9 +638,11 @@ function saveState() {
       day: state.day,
       staple: state.staple,
       breakfast: state.breakfast,
+      secondMeats: state.secondMeats,
+      thirdMeal: state.thirdMeal,
+      dietOpenPanels: state.dietOpenPanels,
       banana: state.banana,
       buffer: state.buffer,
-      proteinK: state.proteinK,
       knowledge: state.knowledge,
       vegetableOptions: state.vegetableOptions,
       vegetableOpenPanels: state.vegetableOpenPanels,
@@ -463,6 +650,7 @@ function saveState() {
       braiseGarlicBase: state.braiseGarlicBase,
       braiseOptions: state.braiseOptions,
       braiseOpenPanels: state.braiseOpenPanels,
+      braisePanelStateVersion: BRAISE_PANEL_STATE_VERSION,
       braiseStarted: state.braiseStarted
     }));
   } catch {
@@ -473,7 +661,12 @@ function saveState() {
 function calculate() {
   const staple = staples[state.staple];
   const breakfast = breakfasts[state.breakfast];
+  const secondMeatPlan = calculateSecondMeatPlan();
   const total = { ...staple };
+
+  total.kcal += secondMeatPlan.delta.kcal;
+  total.protein += secondMeatPlan.delta.protein;
+  total.fat += secondMeatPlan.delta.fat;
 
   total.kcal += breakfast.kcal;
   total.protein += breakfast.protein;
@@ -492,12 +685,11 @@ function calculate() {
     total.carbs += buffer.carbs;
   }
 
-  if (state.proteinK) {
-    total.kcal += planKDelta.kcal;
-    total.protein += planKDelta.protein;
-    total.carbs += planKDelta.carbs;
-    total.fat += planKDelta.fat;
-  }
+  const thirdMeal = thirdMeals[state.thirdMeal] || thirdMeals.eggF;
+  total.kcal += thirdMeal.kcal;
+  total.protein += thirdMeal.protein;
+  total.carbs += thirdMeal.carbs;
+  total.fat += thirdMeal.fat;
 
   return total;
 }
@@ -508,16 +700,50 @@ function setActive(container, attr, value) {
   });
 }
 
+function renderSecondMeatControls() {
+  const selected = getSelectedSecondMeats();
+  state.secondMeats = selected;
+  els.secondMeatControls.querySelectorAll("button[data-second-meat]").forEach((button) => {
+    const active = selected.includes(button.dataset.secondMeat);
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+}
+
+function setDietPanelOpen(panel, open) {
+  const next = new Set(state.dietOpenPanels);
+  if (open) {
+    next.add(panel);
+  } else {
+    next.delete(panel);
+  }
+  state.dietOpenPanels = validDietPanels.filter((item) => next.has(item));
+}
+
+function renderDietPanels() {
+  const openPanels = new Set(state.dietOpenPanels);
+  els.dietPanels.forEach((panel) => {
+    const open = openPanels.has(panel.dataset.dietPanel);
+    panel.classList.toggle("collapsed", !open);
+  });
+  els.dietPanelToggles.forEach((button) => {
+    const open = openPanels.has(button.dataset.dietPanelToggle);
+    button.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+}
+
 function syncControls() {
   setActive(els.dayControls, "day", state.day);
   setActive(els.stapleControls, "staple", state.staple);
   setActive(els.breakfastControls, "breakfast", state.breakfast);
+  renderSecondMeatControls();
+  setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
+  renderDietPanels();
   setActive(els.braiseGarlicBaseControls, "garlicBase", state.braiseGarlicBase);
   syncVegetableOptionButtons();
   syncBraiseOptionButtons();
   els.bananaToggle.checked = state.banana;
   els.bufferToggle.checked = state.buffer;
-  els.proteinToggle.checked = state.proteinK;
 }
 
 function syncVegetableOptionButtons() {
@@ -569,20 +795,41 @@ function renderBraisePanels() {
 }
 
 function assessmentClass(status) {
-  if (status === "偏低") return "warn";
-  if (status === "偏高") return "caution";
+  if (status === "下限以下" || status === "偏低") return "warn";
+  if (["赤字偏大", "偏低边缘", "偏高", "参考上限"].includes(status)) return "caution";
   return "good";
 }
 
 function buildMacroAssessment(total, proteinRatio, carbRatio) {
+  const calorie = total.kcal < 1200
+    ? [
+        "赤字偏大",
+        state.day === "run" || state.day === "strength"
+          ? "训练日热量偏低；若头晕、掉力、持续饥饿、睡眠差或恢复差，优先加50g熟主食或香蕉。"
+          : "减脂期可接受；若头晕、持续饥饿、睡眠变差、怕冷或第二天恢复差，再加50g熟主食或换回F鸡蛋。"
+      ]
+    : total.kcal < 1450
+      ? ["减脂赤字", "处在计划内赤字；没有明显不适时可以保持。"]
+      : total.kcal < 1650
+        ? ["训练友好", "更适合跑步、力量或恢复压力较大的日子。"]
+        : ["偏高", "若非高活动日，优先取消香蕉或主食缓冲。"];
   const mixedLowCarbHint = state.staple === "mixed"
     ? "混搭本身没问题；训练状态差时加50g熟重缓冲。"
     : null;
-  const protein = proteinRatio < 1.3
-    ? ["偏低", "低于减脂保肌下限，优先开K或加蛋白。"]
-    : proteinRatio > 1.7
-      ? ["偏高", "已到高活动上沿，日常不用再加蛋白。"]
-      : ["合理", "落在减脂保肌推荐区间。"];
+  let protein;
+  if (proteinRatio < 1.3) {
+    protein = ["下限以下", "低于减脂保肌下限，优先选F或加蛋白。"];
+  } else if (proteinRatio < 1.4) {
+    protein = ["下限档", "减脂期可接受；训练日建议升到稳妥档。"];
+  } else if (proteinRatio < 1.55) {
+    protein = ["稳妥档", "减脂保肌日常首选区间。"];
+  } else if (proteinRatio < 1.6) {
+    protein = ["稳妥上沿", "仍可执行，日常不必继续加蛋白。"];
+  } else if (proteinRatio <= 1.7) {
+    protein = ["参考上限", "适合跑步+力量、高疲劳或恢复压力大的日子。"];
+  } else {
+    protein = ["偏高", "已超过当前计划参考上沿，日常不用再加蛋白。"];
+  }
 
   let carb;
   if (state.day === "run") {
@@ -608,11 +855,33 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
   const fatRatio = total.fat / PROFILE_WEIGHT_KG;
   const fat = fatRatio < 0.45
     ? ["偏低", "长期过低不利于激素和饱腹感。"]
+    : fatRatio < 0.55
+      ? ["偏低边缘", "偶尔可以；若怕冷、睡眠差或饥饿强，换回F鸡蛋或加少量油脂。"]
     : fatRatio > 0.85
       ? ["偏高", "今天少加油、少鸭皮和坚果。"]
       : ["合理", "处在减脂期可持续范围。"];
 
-  return { protein, carb, fat };
+  return { calorie, protein, carb, fat };
+}
+
+function proteinSummary(status) {
+  if (status === "稳妥档" || status === "稳妥上沿") return "蛋白稳妥";
+  if (status === "参考上限") return "蛋白参考上限";
+  if (status === "下限档") return "蛋白下限";
+  return `蛋白${status}`;
+}
+
+function macroIssueSummary(issue) {
+  if (!issue) return "";
+  if (issue.kind === "calorie") return issue.status === "偏高" ? "热量偏高" : issue.status;
+  if (issue.kind === "protein") return proteinSummary(issue.status);
+  if (issue.kind === "carb") return `碳水${issue.status}`;
+  if (issue.kind === "fat") return `脂肪${issue.status}`;
+  return issue.status;
+}
+
+function buildMealAlertSummary(issues) {
+  return issues.map(macroIssueSummary).join(" · ");
 }
 
 function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
@@ -621,15 +890,15 @@ function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
       name: "热量",
       value: `${round(total.kcal)}`,
       unit: "kcal",
-      status: "计划内",
-      note: "含第二餐蔬菜"
+      status: assessment.calorie[0],
+      note: assessment.calorie[1]
     },
     {
       name: "蛋白质",
       value: formatDecimal(total.protein),
       unit: "g",
       status: assessment.protein[0],
-      note: `${formatDecimal(proteinRatio)} g/kg`
+      note: `${formatDecimal(proteinRatio)} g/kg · ${assessment.protein[1]}`
     },
     {
       name: "碳水",
@@ -659,8 +928,8 @@ function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
 
 function setNutritionAlert(hasAlert) {
   const todayButton = els.viewControls.querySelector('[data-view="today"]');
-  const totalButton = els.mobileSectionTabs.querySelector('[data-mobile-panel="totals"]');
-  const nutritionButton = els.mobileBottomNav.querySelector('[data-mobile-panel="totals"]');
+  const totalButton = els.mobileSectionTabs.querySelector('[data-mobile-panel="meals"]');
+  const nutritionButton = els.mobileBottomNav.querySelector('[data-mobile-panel="meals"]');
   todayButton.classList.toggle("has-alert", hasAlert);
   totalButton.classList.toggle("has-alert", hasAlert);
   nutritionButton.classList.toggle("has-alert", hasAlert);
@@ -670,22 +939,41 @@ function renderPlanner() {
   const day = dayTypes[state.day];
   const staple = staples[state.staple];
   const breakfast = breakfasts[state.breakfast];
+  const thirdMeal = thirdMeals[state.thirdMeal] || thirdMeals.eggF;
+  const secondMeatPlan = calculateSecondMeatPlan();
   const total = calculate();
   const proteinRatio = total.protein / PROFILE_WEIGHT_KG;
   const carbRatio = total.carbs / PROFILE_WEIGHT_KG;
   const assessment = buildMacroAssessment(total, proteinRatio, carbRatio);
-  const macroIssue = [assessment.protein, assessment.carb, assessment.fat].find(([status]) => status !== "合理");
+  const alertStatuses = new Set(["赤字偏大", "下限以下", "偏低", "偏低边缘", "偏高"]);
+  const macroChecks = [
+    { kind: "calorie", status: assessment.calorie[0], text: assessment.calorie[1] },
+    { kind: "protein", status: assessment.protein[0], text: assessment.protein[1] },
+    { kind: "carb", status: assessment.carb[0], text: assessment.carb[1] },
+    { kind: "fat", status: assessment.fat[0], text: assessment.fat[1] }
+  ];
+  const macroIssues = macroChecks.filter((item) => alertStatuses.has(item.status));
+  const macroIssue = macroIssues[0];
 
   els.plannerLead.textContent = day.lead;
   els.waterTarget.textContent = day.water;
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
-  els.statusPill.textContent = state.proteinK ? "已启用 K" : day.status;
-  els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue[0]}` : (state.proteinK ? "恢复压力大时保留 K" : day.lead);
-  els.dailyTipText.textContent = macroIssue ? macroIssue[1] : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`;
-  els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${state.proteinK ? "K" : "F"} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
+  els.statusPill.textContent = state.thirdMeal === "k" ? "已选择 K" : day.status;
+  els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue.status}` : (state.thirdMeal === "k" ? "恢复压力大时保留 K" : day.lead);
+  els.dailyTipText.textContent = macroIssue ? macroIssue.text : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`;
+  els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${secondMeatShortLabel(secondMeatPlan.items)} · ${thirdMeal.shortLabel} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
+  els.dietDaySummary.textContent = day.label;
+  els.dietStapleSummary.textContent = staple.label;
+  els.dietBreakfastSummary.textContent = breakfast.shortLabel;
+  els.dietSecondMeatSummary.textContent = secondMeatPlan.items.map((item) => secondMeats[item.id].shortLabel).join("、");
+  els.dietThirdMealSummary.textContent = thirdMeal.shortLabel;
+  els.dietAdjustSummary.textContent = [state.banana ? "香蕉" : "", state.buffer ? "50g缓冲" : ""].filter(Boolean).join("、") || "无调整";
   els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
   els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白`;
-  els.todaySummary.textContent = `${staple.description}，第二餐蔬菜约200g已计入，早餐为${breakfast.label}，第三餐${state.proteinK ? "启用K" : "使用F"}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
+  els.mealTotalSummary.textContent = buildMealAlertSummary(macroIssues);
+  els.mealTotalSummary.parentElement.hidden = macroIssues.length === 0;
+  els.mealTotalSummary.parentElement.classList.toggle("has-alert", macroIssues.length > 0);
+  els.todaySummary.textContent = `${staple.description}，第二餐肉类按${formatSecondMeatItems(secondMeatPlan.items)}执行，蔬菜约200g已计入，早餐为${breakfast.label}，第三餐为${thirdMeal.shortLabel}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
   setNutritionAlert(Boolean(macroIssue));
   renderNutritionRows(total, assessment, proteinRatio, carbRatio);
   els.proteinRatio.textContent = `${formatDecimal(proteinRatio)} g/kg`;
@@ -695,12 +983,15 @@ function renderPlanner() {
 
   els.firstMealText.textContent = breakfast.meal;
   els.firstMealHint.textContent = breakfast.hint;
-  els.secondMealText.textContent = staple.secondMeal;
-  els.thirdMealText.textContent = state.proteinK ? "方案 K：鸡蛋3个 + 鸡胸100g" : "方案 F：鸡蛋4个";
-  els.thirdMealHint.textContent = state.proteinK ? "今天属于跑步+力量、高疲劳或恢复压力日。" : "力量明显累、跑步叠加力量或睡眠差时再升到K。";
+  els.secondMealText.textContent = `${formatSecondMeatItems(secondMeatPlan.items)} · 蔬菜200g · ${secondMealStapleText(state.staple)} · 橄榄油1汤匙`;
+  els.secondMealHint.textContent = secondMeatPlan.items.length === 1
+    ? "单选时由这一种肉承担第二餐肉类蛋白目标。"
+    : `多选时按蛋白均分，每种约${formatDecimal(SECOND_MEAT_TARGET_PROTEIN / secondMeatPlan.items.length)}g蛋白。`;
+  els.thirdMealText.textContent = thirdMeal.label;
+  els.thirdMealHint.textContent = thirdMeal.hint;
   els.firstMealMeta.textContent = `约 ${round(380 + breakfast.kcal)} kcal · 蛋白 ${formatDecimal(22 + breakfast.protein)}g`;
-  els.secondMealMeta.textContent = `约 ${state.staple === "rice" ? 550 : state.staple === "potato" ? 560 : 555} kcal · 蛋白 60.5g · 含蔬菜`;
-  els.thirdMealMeta.textContent = state.proteinK ? "约 432 kcal · 蛋白 41g" : "约 358 kcal · 蛋白 24g";
+  els.secondMealMeta.textContent = `约 ${round(secondMealBaseKcal(state.staple) + secondMeatPlan.delta.kcal)} kcal · 蛋白 60.5g · 含蔬菜`;
+  els.thirdMealMeta.textContent = thirdMeal.meta;
 }
 
 function renderMobilePanel() {
@@ -1029,7 +1320,7 @@ function applyVegetablesToBraise(flavorOverride) {
   }
   state.braiseOptions = validBraiseOptions.filter((option) => next.has(option));
   state.braiseStarted = true;
-  state.braiseOpenPanels = ["garlic", "soup", "spices"];
+  state.braiseOpenPanels = [];
   state.view = "braise";
   saveState();
   renderBraise();
@@ -1111,6 +1402,7 @@ function buildBraiseRecommendation() {
   const hasSauceHerb = hasThyme || hasBasil;
   const hasChineseSeasoning = hasSoy || hasOyster || hasGuizhou || hasSesame;
   const hasMediterraneanSeasoning = hasOnionPowder || hasBlackPepper || hasHerb || hasTomato;
+  const hasSaltySource = hasSalt || hasParsleyGarlicSalt || hasSoy || hasOyster || hasGuizhou;
   const isMixed = hasGuizhou && (hasHerb || hasBlackPepper) || hasChineseSeasoning && hasHerb && hasParsleyGarlicSalt;
 
   let title = "地中海清淡风";
@@ -1134,6 +1426,11 @@ function buildBraiseRecommendation() {
 
   if (!hasTomato && !hasWater) {
     addSuggestion(add, "番茄 / 清水", "至少补一个汤底，番茄负责酸鲜，清水负责防干锅。");
+  }
+
+  if (!hasSaltySource) {
+    addSuggestion(add, "少量盐", "可进料汁，从1/8茶匙起步；有生抽、蚝油或贵州蘸水时不要再加。");
+    addSuggestion(finishAdd, "欧芹大蒜盐", "可少量进料汁，也可以吃的时候再撒；和盐、生抽、蚝油、贵州蘸水不要叠加。");
   }
 
   if (state.braiseGarlicBase === "infusedGarlic") {
@@ -1298,10 +1595,10 @@ els.dayControls.addEventListener("click", (event) => {
   const day = dayTypes[button.dataset.day];
   state.day = button.dataset.day;
   state.banana = day.bananaDefault;
-  state.proteinK = day.proteinDefault;
+  state.thirdMeal = day.thirdMealDefault;
   els.bananaToggle.checked = state.banana;
-  els.proteinToggle.checked = state.proteinK;
   setActive(els.dayControls, "day", state.day);
+  setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
   saveState();
   renderPlanner();
 });
@@ -1324,6 +1621,31 @@ els.breakfastControls.addEventListener("click", (event) => {
   renderPlanner();
 });
 
+els.secondMeatControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-second-meat]");
+  if (!button) return;
+  const meat = button.dataset.secondMeat;
+  if (!validSecondMeats.includes(meat)) return;
+  const selected = getSelectedSecondMeats();
+  const next = selected.includes(meat)
+    ? selected.filter((item) => item !== meat)
+    : [...selected, meat];
+  if (!next.length) return;
+  state.secondMeats = next;
+  renderSecondMeatControls();
+  saveState();
+  renderPlanner();
+});
+
+els.thirdMealControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-third-meal]");
+  if (!button) return;
+  state.thirdMeal = button.dataset.thirdMeal;
+  setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
+  saveState();
+  renderPlanner();
+});
+
 els.bananaToggle.addEventListener("change", () => {
   state.banana = els.bananaToggle.checked;
   saveState();
@@ -1332,12 +1654,6 @@ els.bananaToggle.addEventListener("change", () => {
 
 els.bufferToggle.addEventListener("change", () => {
   state.buffer = els.bufferToggle.checked;
-  saveState();
-  renderPlanner();
-});
-
-els.proteinToggle.addEventListener("change", () => {
-  state.proteinK = els.proteinToggle.checked;
   saveState();
   renderPlanner();
 });
@@ -1443,6 +1759,15 @@ els.braiseSpiceControls.addEventListener("click", (event) => {
 
 els.braiseSummaryBar.addEventListener("click", () => {
   document.querySelector(".braise-result").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+els.dietPanelToggles.forEach((toggle) => {
+  toggle.addEventListener("click", () => {
+    const panel = toggle.dataset.dietPanelToggle;
+    setDietPanelOpen(panel, !state.dietOpenPanels.includes(panel));
+    saveState();
+    renderDietPanels();
+  });
 });
 
 els.viewControls.addEventListener("click", (event) => {

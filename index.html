@@ -34,8 +34,7 @@
 
     <nav class="mobile-bottom-nav" aria-label="移动端导航" id="mobileBottomNav">
       <button type="button" data-view="today" data-mobile-panel="settings" class="active"><span>饮食</span></button>
-      <button type="button" data-view="today" data-mobile-panel="meals"><span>三餐</span></button>
-      <button type="button" data-view="today" data-mobile-panel="totals"><span>营养</span><i aria-hidden="true"></i></button>
+      <button type="button" data-view="today" data-mobile-panel="meals"><span>三餐</span><i aria-hidden="true"></i></button>
       <button type="button" data-view="vegetables"><span>蔬菜</span></button>
       <button type="button" data-view="braise"><span>焖菜</span></button>
       <button type="button" data-view="rules"><span>规则</span></button>
@@ -61,11 +60,7 @@
             <b id="mobileDietHint">日常 · 土豆 · 平衡</b>
           </button>
           <button type="button" data-mobile-panel="meals">
-            <span>三餐</span>
-            <b>第一餐 · 第二餐 · 第三餐</b>
-          </button>
-          <button type="button" data-mobile-panel="totals">
-            <span>营养总计</span>
+            <span>三餐 + 营养</span>
             <b id="mobileTotalHint">1318 kcal · 108.8g蛋白</b>
             <i aria-hidden="true"></i>
           </button>
@@ -74,88 +69,154 @@
         <details class="settings-panel mobile-panel active" id="settingsPanel" data-mobile-panel-content="settings" open>
           <summary>
             <span>今日饮食</span>
-            <b id="settingsSummary">日常 · 土豆 · 平衡早餐 · F</b>
+            <b id="settingsSummary">日常 · 土豆 · 平衡早餐 · F鸡蛋4个/200g</b>
           </summary>
           <div class="control-strip" aria-label="今日选项">
-            <div class="control-group">
-              <span>当天类型</span>
-              <div class="segmented day-segment" id="dayTypeControls">
+            <article class="braise-panel diet-panel" data-diet-panel="day">
+              <button type="button" class="panel-head" data-diet-panel-toggle="day" aria-expanded="true">
+                <span>01</span>
+                <div>
+                  <h3>当天类型：</h3>
+                  <b id="dietDaySummary">日常</b>
+                </div>
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="segmented day-segment panel-body" id="dayTypeControls">
                 <button type="button" data-day="daily" class="active">日常</button>
                 <button type="button" data-day="run">跑步</button>
                 <button type="button" data-day="strength">力量</button>
                 <button type="button" data-day="rest">休息</button>
               </div>
-            </div>
-            <div class="control-group">
-              <span>主食</span>
-              <div class="segmented" id="stapleControls">
+            </article>
+            <article class="braise-panel diet-panel collapsed" data-diet-panel="staple">
+              <button type="button" class="panel-head" data-diet-panel-toggle="staple" aria-expanded="false">
+                <span>02</span>
+                <div>
+                  <h3>主食：</h3>
+                  <b id="dietStapleSummary">土豆</b>
+                </div>
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="segmented panel-body" id="stapleControls">
                 <button type="button" data-staple="rice">糙米</button>
                 <button type="button" data-staple="potato" class="active">土豆</button>
                 <button type="button" data-staple="mixed">混搭</button>
               </div>
-            </div>
-            <div class="control-group">
-              <span>早餐</span>
-              <div class="segmented breakfast-segment" id="breakfastControls">
+            </article>
+            <article class="braise-panel diet-panel collapsed" data-diet-panel="breakfast">
+              <button type="button" class="panel-head" data-diet-panel-toggle="breakfast" aria-expanded="false">
+                <span>03</span>
+                <div>
+                  <h3>早餐：</h3>
+                  <b id="dietBreakfastSummary">平衡</b>
+                </div>
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="segmented breakfast-segment panel-body" id="breakfastControls">
                 <button type="button" data-breakfast="balanced" class="active">平衡</button>
                 <button type="button" data-breakfast="milk">牛奶</button>
                 <button type="button" data-breakfast="eggs">鸡蛋</button>
               </div>
-            </div>
-            <div class="control-group">
-              <span>调整</span>
-              <div class="toggle-row">
+            </article>
+            <article class="braise-panel diet-panel collapsed" data-diet-panel="secondMeat">
+              <button type="button" class="panel-head" data-diet-panel-toggle="secondMeat" aria-expanded="false">
+                <span>04</span>
+                <div>
+                  <h3>第二餐肉类：</h3>
+                  <b id="dietSecondMeatSummary">鸡、鸭</b>
+                </div>
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="segmented second-meat-segment panel-body" id="secondMeatControls" aria-label="第二餐肉类，可多选">
+                <button type="button" data-second-meat="chicken" class="active">鸡胸</button>
+                <button type="button" data-second-meat="duck" class="active">鸭胸</button>
+                <button type="button" data-second-meat="beef">牛瘦肉</button>
+                <button type="button" data-second-meat="pork">猪瘦肉</button>
+              </div>
+            </article>
+            <article class="braise-panel diet-panel collapsed" data-diet-panel="thirdMeal">
+              <button type="button" class="panel-head" data-diet-panel-toggle="thirdMeal" aria-expanded="false">
+                <span>05</span>
+                <div>
+                  <h3>第三餐：</h3>
+                  <b id="dietThirdMealSummary">F鸡蛋</b>
+                </div>
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="segmented third-meal-segment panel-body" id="thirdMealControls">
+                <button type="button" data-third-meal="eggF" class="active"><strong>F鸡蛋</strong><small>4个 / 约200g</small></button>
+                <button type="button" data-third-meal="chickenF"><strong>F鸡胸</strong><small>1份 / 约110g</small></button>
+                <button type="button" data-third-meal="duckF"><strong>F鸭胸</strong><small>1份 / 约125g</small></button>
+                <button type="button" data-third-meal="beefF"><strong>F牛瘦肉</strong><small>1份 / 约115g</small></button>
+                <button type="button" data-third-meal="porkF"><strong>F猪瘦肉</strong><small>1份 / 约125g</small></button>
+                <button type="button" data-third-meal="k"><strong>K</strong><small>3蛋约150g<br>鸡胸100g</small></button>
+              </div>
+            </article>
+            <article class="braise-panel diet-panel collapsed" data-diet-panel="adjust">
+              <button type="button" class="panel-head" data-diet-panel-toggle="adjust" aria-expanded="false">
+                <span>06</span>
+                <div>
+                  <h3>调整：</h3>
+                  <b id="dietAdjustSummary">无香蕉、无缓冲</b>
+                </div>
+                <i aria-hidden="true"></i>
+              </button>
+              <div class="toggle-row panel-body">
                 <label><input id="bananaToggle" type="checkbox"> 香蕉</label>
                 <label><input id="bufferToggle" type="checkbox"> 50g 缓冲</label>
-                <label><input id="proteinToggle" type="checkbox"> 启用 K</label>
               </div>
-            </div>
+            </article>
           </div>
         </details>
 
-        <div class="meal-flow mobile-panel" data-mobile-panel-content="meals" aria-label="三餐结构">
-          <article>
-            <div class="meal-card-head"><span>第一餐</span><time>约 7:00</time></div>
-            <b id="firstMealText">麦片100g + 牛奶125ml + 鸡蛋1个</b>
-            <p id="firstMealHint">保留口感和钙，减少牛奶成本。</p>
-            <small id="firstMealMeta">约 380 kcal · 蛋白 22g</small>
-          </article>
-          <article>
-            <div class="meal-card-head"><span>第二餐</span><time>约 12:00</time></div>
-            <b id="secondMealText">鸡胸150g + 鸭胸100g · 蔬菜200g · 土豆150g · 橄榄油1汤匙</b>
-            <p>蔬菜和橄榄油计入第二餐；想省事时肉类改成鸡胸4天、鸭胸3天轮换。</p>
-            <small id="secondMealMeta">约 560 kcal · 蛋白 60.5g · 含蔬菜</small>
-          </article>
-          <article>
-            <div class="meal-card-head"><span>第三餐</span><time>约 18:00</time></div>
-            <b id="thirdMealText">方案 F：鸡蛋4个</b>
-            <p id="thirdMealHint">力量明显累、跑步叠加力量或睡眠差时再升到 K。</p>
-            <small id="thirdMealMeta">约 358 kcal · 蛋白 24g</small>
-          </article>
-        </div>
+        <div class="meal-panel mobile-panel" data-mobile-panel-content="meals">
+          <div class="meal-total-strip" aria-label="今日营养提醒" hidden>
+            <p id="mealTotalSummary"></p>
+          </div>
+          <div class="meal-flow" aria-label="三餐结构">
+            <article>
+              <div class="meal-card-head"><span>第一餐</span><time>约 7:00</time></div>
+              <b id="firstMealText">麦片100g + 牛奶125ml + 鸡蛋1个</b>
+              <p id="firstMealHint">保留口感和钙，减少牛奶成本。</p>
+              <small id="firstMealMeta">约 380 kcal · 蛋白 22g</small>
+            </article>
+            <article>
+              <div class="meal-card-head"><span>第二餐</span><time>约 12:00</time></div>
+              <b id="secondMealText">鸡胸约120g + 去皮鸭胸约140g · 蔬菜200g · 土豆150g · 橄榄油1汤匙</b>
+              <p id="secondMealHint">蔬菜和橄榄油计入第二餐；肉类按蛋白目标自动折算重量。</p>
+              <small id="secondMealMeta">约 560 kcal · 蛋白 60.5g · 含蔬菜</small>
+            </article>
+            <article>
+              <div class="meal-card-head"><span>第三餐</span><time>约 18:00</time></div>
+              <b id="thirdMealText">方案 F：鸡蛋4个（约200g）</b>
+              <p id="thirdMealHint">鸡蛋是默认；想减少鸡蛋时可用鸡胸或去皮鸭胸等蛋白替换。</p>
+              <small id="thirdMealMeta">约 252 kcal · 蛋白 25.2g</small>
+            </article>
+          </div>
 
-        <div class="daily-layout mobile-panel" data-mobile-panel-content="totals">
-          <article class="today-card">
-            <div class="today-title">
-              <p class="kicker">营养总计</p>
-              <h2 id="todayTitle">日常 · 土豆主食</h2>
-            </div>
-            <p class="today-summary" id="todaySummary"></p>
+          <div class="daily-layout">
+            <article class="today-card">
+              <div class="today-title">
+                <p class="kicker">营养总计</p>
+                <h2 id="todayTitle">日常 · 土豆主食</h2>
+              </div>
+              <p class="today-summary" id="todaySummary"></p>
 
-            <div class="nutrition-list" id="nutritionList" aria-label="今日营养总计"></div>
-            <div class="ratio-set" aria-label="按体重营养比例">
-              <div class="ratio-line">
-                <span>蛋白质</span>
-                <div class="ratio-track"><div id="proteinRatioBar"></div></div>
-                <b id="proteinRatio">1.5 g/kg</b>
+              <div class="nutrition-list" id="nutritionList" aria-label="今日营养总计"></div>
+              <div class="ratio-set" aria-label="按体重营养比例">
+                <div class="ratio-line">
+                  <span>蛋白质</span>
+                  <div class="ratio-track"><div id="proteinRatioBar"></div></div>
+                  <b id="proteinRatio">1.5 g/kg</b>
+                </div>
+                <div class="ratio-line">
+                  <span>碳水</span>
+                  <div class="ratio-track"><div id="carbRatioBar"></div></div>
+                  <b id="carbRatio">1.5 g/kg</b>
+                </div>
               </div>
-              <div class="ratio-line">
-                <span>碳水</span>
-                <div class="ratio-track"><div id="carbRatioBar"></div></div>
-                <b id="carbRatio">1.5 g/kg</b>
-              </div>
-            </div>
-          </article>
+            </article>
+          </div>
         </div>
 
         <div class="daily-tip" id="dailyTip">
@@ -236,8 +297,8 @@
 
         <div class="braise-layout">
           <div class="braise-picker" aria-label="焖菜调料选择">
-            <article class="braise-panel" data-braise-panel="garlic">
-              <button type="button" class="panel-head" data-braise-panel-toggle="garlic" aria-expanded="true">
+            <article class="braise-panel collapsed" data-braise-panel="garlic">
+              <button type="button" class="panel-head" data-braise-panel-toggle="garlic" aria-expanded="false">
                 <span>01</span>
                 <div>
                   <h3>蒜香：</h3>
@@ -265,8 +326,8 @@
               </div>
             </article>
 
-            <article class="braise-panel" data-braise-panel="soup">
-              <button type="button" class="panel-head" data-braise-panel-toggle="soup" aria-expanded="true">
+            <article class="braise-panel collapsed" data-braise-panel="soup">
+              <button type="button" class="panel-head" data-braise-panel-toggle="soup" aria-expanded="false">
                 <span>02</span>
                 <div>
                   <h3>汤底：</h3>
@@ -280,8 +341,8 @@
               </div>
             </article>
 
-            <article class="braise-panel wide-panel" data-braise-panel="spices">
-              <button type="button" class="panel-head" data-braise-panel-toggle="spices" aria-expanded="true">
+            <article class="braise-panel wide-panel collapsed" data-braise-panel="spices">
+              <button type="button" class="panel-head" data-braise-panel-toggle="spices" aria-expanded="false">
                 <span>03</span>
                 <div>
                   <h3>调料：</h3>
