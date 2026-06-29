@@ -98,6 +98,8 @@ const breakfasts = {
     shortLabel: "平衡",
     meal: "麦片100g + 牛奶125ml + 鸡蛋1个",
     hint: "保留口感和钙，减少牛奶成本。",
+    mealKcal: 506,
+    mealProtein: 23.5,
     kcal: 0,
     protein: 0,
     carbs: 0,
@@ -108,6 +110,8 @@ const breakfasts = {
     shortLabel: "牛奶",
     meal: "麦片100g + 牛奶250ml",
     hint: "操作最简单，但蛋白质性价比最低。",
+    mealKcal: 510,
+    mealProtein: 21.3,
     kcal: 5,
     protein: -2.2,
     carbs: 4.5,
@@ -118,10 +122,24 @@ const breakfasts = {
     shortLabel: "鸡蛋",
     meal: "麦片100g + 鸡蛋2个",
     hint: "更便宜、蛋白更高，但鸡蛋数量增加。",
+    mealKcal: 501,
+    mealProtein: 25.6,
     kcal: -5,
     protein: 2.2,
     carbs: -4.5,
     fat: 1.9
+  },
+  egg4: {
+    label: "高蛋白早餐",
+    shortLabel: "4蛋麦片",
+    meal: "麦片100g + 鸡蛋4个",
+    hint: "早餐已是高蛋白高脂；第三餐自动降为轻补蛋白，不再默认叠加F鸡蛋4个。",
+    mealKcal: 627,
+    mealProtein: 38.2,
+    kcal: 122,
+    protein: 14.8,
+    carbs: -3.5,
+    fat: 10.7
   }
 };
 
@@ -161,6 +179,26 @@ const secondMeats = {
 };
 const validSecondMeats = Object.keys(secondMeats);
 const thirdMeals = {
+  lightChicken: {
+    label: "轻补蛋白：鸡胸70-80g",
+    shortLabel: "轻鸡胸75g",
+    kcal: -165,
+    protein: -7.9,
+    carbs: -2,
+    fat: -15.8,
+    hint: "早餐已吃4个鸡蛋时的首选第三餐；保住蛋白，同时避免全天8个全蛋和脂肪集中。",
+    meta: "约 87 kcal · 蛋白 17g"
+  },
+  lightEggs: {
+    label: "轻补蛋白：鸡蛋2个（约100g）",
+    shortLabel: "轻鸡蛋2个",
+    kcal: -126,
+    protein: -12.6,
+    carbs: -1,
+    fat: -8.8,
+    hint: "没有备肉时使用；早餐4蛋日这样全天约6个鸡蛋，比叠加F更稳。",
+    meta: "约 126 kcal · 蛋白 12.6g"
+  },
   eggF: {
     label: "方案 F：鸡蛋4个（约200g）",
     shortLabel: "F鸡蛋4个/200g",
@@ -168,7 +206,7 @@ const thirdMeals = {
     protein: 0,
     carbs: 0,
     fat: 0,
-    hint: "日常默认，鸡蛋按约50g/个估算；早餐用平衡版时全天约5个鸡蛋。",
+    hint: "日常默认，鸡蛋按约50g/个估算；早餐用平衡版时全天约5个鸡蛋。若早餐已4蛋，优先改轻鸡胸。",
     meta: "约 252 kcal · 蛋白 25.2g"
   },
   chickenF: {
@@ -466,6 +504,7 @@ const state = {
   ...defaultState,
   ...readSavedState()
 };
+state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, state.thirdMeal);
 
 const els = {
   viewControls: document.querySelector("#viewControls"),
@@ -630,6 +669,11 @@ function secondMealBaseKcal(stapleKey) {
   return 555;
 }
 
+function recommendedThirdMealForBreakfast(breakfastKey, currentThirdMeal) {
+  if (breakfastKey === "egg4" && currentThirdMeal === "eggF") return "lightChicken";
+  return currentThirdMeal;
+}
+
 function saveState() {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -686,6 +730,7 @@ function calculate() {
   }
 
   const thirdMeal = thirdMeals[state.thirdMeal] || thirdMeals.eggF;
+  const breakfastLinked = state.breakfast === "egg4";
   total.kcal += thirdMeal.kcal;
   total.protein += thirdMeal.protein;
   total.carbs += thirdMeal.carbs;
@@ -958,9 +1003,9 @@ function renderPlanner() {
   els.plannerLead.textContent = day.lead;
   els.waterTarget.textContent = day.water;
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
-  els.statusPill.textContent = state.thirdMeal === "k" ? "已选择 K" : day.status;
-  els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue.status}` : (state.thirdMeal === "k" ? "恢复压力大时保留 K" : day.lead);
-  els.dailyTipText.textContent = macroIssue ? macroIssue.text : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`;
+  els.statusPill.textContent = state.thirdMeal === "k" ? "已选择 K" : (breakfastLinked ? "早餐4蛋 · 第三餐轻补" : day.status);
+  els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue.status}` : (breakfastLinked ? "早餐4蛋日，第三餐轻补" : (state.thirdMeal === "k" ? "恢复压力大时保留 K" : day.lead));
+  els.dailyTipText.textContent = macroIssue ? macroIssue.text : (breakfastLinked ? "第三餐优先轻鸡胸；没有备肉再选轻鸡蛋2个。" : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`);
   els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${secondMeatShortLabel(secondMeatPlan.items)} · ${thirdMeal.shortLabel} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
   els.dietDaySummary.textContent = day.label;
   els.dietStapleSummary.textContent = staple.label;
@@ -973,7 +1018,7 @@ function renderPlanner() {
   els.mealTotalSummary.textContent = buildMealAlertSummary(macroIssues);
   els.mealTotalSummary.parentElement.hidden = macroIssues.length === 0;
   els.mealTotalSummary.parentElement.classList.toggle("has-alert", macroIssues.length > 0);
-  els.todaySummary.textContent = `${staple.description}，第二餐肉类按${formatSecondMeatItems(secondMeatPlan.items)}执行，蔬菜约200g已计入，早餐为${breakfast.label}，第三餐为${thirdMeal.shortLabel}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
+  els.todaySummary.textContent = `${staple.description}，第二餐肉类按${formatSecondMeatItems(secondMeatPlan.items)}执行，蔬菜约200g已计入，早餐为${breakfast.label}，第三餐为${thirdMeal.shortLabel}${breakfastLinked ? "（早餐4蛋日不默认叠加F鸡蛋）" : ""}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
   setNutritionAlert(Boolean(macroIssue));
   renderNutritionRows(total, assessment, proteinRatio, carbRatio);
   els.proteinRatio.textContent = `${formatDecimal(proteinRatio)} g/kg`;
@@ -989,7 +1034,7 @@ function renderPlanner() {
     : `多选时按蛋白均分，每种约${formatDecimal(SECOND_MEAT_TARGET_PROTEIN / secondMeatPlan.items.length)}g蛋白。`;
   els.thirdMealText.textContent = thirdMeal.label;
   els.thirdMealHint.textContent = thirdMeal.hint;
-  els.firstMealMeta.textContent = `约 ${round(380 + breakfast.kcal)} kcal · 蛋白 ${formatDecimal(22 + breakfast.protein)}g`;
+  els.firstMealMeta.textContent = `约 ${round(breakfast.mealKcal)} kcal · 蛋白 ${formatDecimal(breakfast.mealProtein)}g`;
   els.secondMealMeta.textContent = `约 ${round(secondMealBaseKcal(state.staple) + secondMeatPlan.delta.kcal)} kcal · 蛋白 60.5g · 含蔬菜`;
   els.thirdMealMeta.textContent = thirdMeal.meta;
 }
@@ -1595,7 +1640,7 @@ els.dayControls.addEventListener("click", (event) => {
   const day = dayTypes[button.dataset.day];
   state.day = button.dataset.day;
   state.banana = day.bananaDefault;
-  state.thirdMeal = day.thirdMealDefault;
+  state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, day.thirdMealDefault);
   els.bananaToggle.checked = state.banana;
   setActive(els.dayControls, "day", state.day);
   setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
@@ -1616,7 +1661,9 @@ els.breakfastControls.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-breakfast]");
   if (!button) return;
   state.breakfast = button.dataset.breakfast;
+  state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, state.thirdMeal);
   setActive(els.breakfastControls, "breakfast", state.breakfast);
+  setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
   saveState();
   renderPlanner();
 });
