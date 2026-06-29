@@ -178,6 +178,19 @@ const secondMeats = {
   }
 };
 const validSecondMeats = Object.keys(secondMeats);
+const standardThirdMealIds = ["eggF", "chickenF", "duckF", "beefF", "porkF", "k"];
+const egg4ThirdMealIds = ["lightChicken", "lightEggs", "chickenF", "duckF", "beefF", "porkF", "k"];
+const lightThirdMealIds = ["lightChicken", "lightEggs"];
+const thirdMealButtonText = {
+  lightChicken: ["轻鸡胸", "70-80g"],
+  lightEggs: ["轻鸡蛋", "2个 / 约100g"],
+  eggF: ["F鸡蛋", "4个 / 约200g"],
+  chickenF: ["F鸡胸", "1份 / 约110g"],
+  duckF: ["F鸭胸", "1份 / 约125g"],
+  beefF: ["F牛瘦肉", "1份 / 约115g"],
+  porkF: ["F猪瘦肉", "1份 / 约125g"],
+  k: ["K", "3蛋约150g<br>鸡胸100g"]
+};
 const thirdMeals = {
   lightChicken: {
     label: "轻补蛋白：鸡胸70-80g",
@@ -669,8 +682,17 @@ function secondMealBaseKcal(stapleKey) {
   return 555;
 }
 
+function thirdMealOptionsForBreakfast(breakfastKey) {
+  return breakfastKey === "egg4" ? egg4ThirdMealIds : standardThirdMealIds;
+}
+
 function recommendedThirdMealForBreakfast(breakfastKey, currentThirdMeal) {
-  if (breakfastKey === "egg4" && currentThirdMeal === "eggF") return "lightChicken";
+  const options = thirdMealOptionsForBreakfast(breakfastKey);
+  if (breakfastKey === "egg4") {
+    if (currentThirdMeal === "eggF") return "lightChicken";
+    return options.includes(currentThirdMeal) ? currentThirdMeal : "lightChicken";
+  }
+  if (lightThirdMealIds.includes(currentThirdMeal)) return "eggF";
   return currentThirdMeal;
 }
 
@@ -730,7 +752,6 @@ function calculate() {
   }
 
   const thirdMeal = thirdMeals[state.thirdMeal] || thirdMeals.eggF;
-  const breakfastLinked = state.breakfast === "egg4";
   total.kcal += thirdMeal.kcal;
   total.protein += thirdMeal.protein;
   total.carbs += thirdMeal.carbs;
@@ -741,7 +762,9 @@ function calculate() {
 
 function setActive(container, attr, value) {
   container.querySelectorAll("button").forEach((button) => {
-    button.classList.toggle("active", button.dataset[attr] === value);
+    const active = button.dataset[attr] === value;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
   });
 }
 
@@ -753,6 +776,19 @@ function renderSecondMeatControls() {
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", active ? "true" : "false");
   });
+}
+
+function renderThirdMealControls() {
+  const optionIds = thirdMealOptionsForBreakfast(state.breakfast);
+  if (!optionIds.includes(state.thirdMeal)) {
+    state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, state.thirdMeal);
+  }
+  els.thirdMealControls.dataset.mode = state.breakfast === "egg4" ? "light" : "standard";
+  els.thirdMealControls.innerHTML = optionIds.map((id) => {
+    const [title, detail] = thirdMealButtonText[id];
+    const active = state.thirdMeal === id;
+    return `<button type="button" data-third-meal="${id}" class="${active ? "active" : ""}" aria-pressed="${active ? "true" : "false"}"><strong>${title}</strong><small>${detail}</small></button>`;
+  }).join("");
 }
 
 function setDietPanelOpen(panel, open) {
@@ -782,7 +818,7 @@ function syncControls() {
   setActive(els.stapleControls, "staple", state.staple);
   setActive(els.breakfastControls, "breakfast", state.breakfast);
   renderSecondMeatControls();
-  setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
+  renderThirdMealControls();
   renderDietPanels();
   setActive(els.braiseGarlicBaseControls, "garlicBase", state.braiseGarlicBase);
   syncVegetableOptionButtons();
@@ -1643,7 +1679,7 @@ els.dayControls.addEventListener("click", (event) => {
   state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, day.thirdMealDefault);
   els.bananaToggle.checked = state.banana;
   setActive(els.dayControls, "day", state.day);
-  setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
+  renderThirdMealControls();
   saveState();
   renderPlanner();
 });
@@ -1663,7 +1699,7 @@ els.breakfastControls.addEventListener("click", (event) => {
   state.breakfast = button.dataset.breakfast;
   state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, state.thirdMeal);
   setActive(els.breakfastControls, "breakfast", state.breakfast);
-  setActive(els.thirdMealControls, "thirdMeal", state.thirdMeal);
+  renderThirdMealControls();
   saveState();
   renderPlanner();
 });
