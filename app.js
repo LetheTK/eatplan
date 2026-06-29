@@ -238,7 +238,7 @@ const thirdMeals = {
     kcal: -97,
     protein: -0.2,
     carbs: -2,
-    fat: -10,
+    fat: -11.6,
     hint: "适合换口味；只按去皮瘦鸭胸计算，带皮鸭胸不作为第三餐默认。",
     meta: "约 155 kcal · 蛋白 25g"
   },
@@ -269,7 +269,7 @@ const thirdMeals = {
     protein: 16.8,
     carbs: -0.5,
     fat: -1.1,
-    hint: "用于跑步叠加力量、高疲劳、睡眠差或恢复压力大的日子。",
+    hint: "用于跑步叠加力量、高疲劳、睡眠差或恢复压力大的日子；早餐已4蛋时通常不必再选K。",
     meta: "约 326 kcal · 蛋白 42g"
   }
 };
@@ -1021,6 +1021,7 @@ function renderPlanner() {
   const staple = staples[state.staple];
   const breakfast = breakfasts[state.breakfast];
   const thirdMeal = thirdMeals[state.thirdMeal] || thirdMeals.eggF;
+  const breakfastLinked = state.breakfast === "egg4";
   const secondMeatPlan = calculateSecondMeatPlan();
   const total = calculate();
   const proteinRatio = total.protein / PROFILE_WEIGHT_KG;
