@@ -1519,7 +1519,10 @@ function renderVegetables() {
   els.vegetableCurrentText.textContent = selectedLabels.length ? selectedLabels.join(" / ") : "未选择";
   els.vegetableSummaryTitle.textContent = recommendation.status;
   els.vegetableSummaryMeta.textContent = recommendation.flavor;
-  els.vegetableSummaryHint.textContent = ready ? recommendation.soup : "选择后显示";
+  els.vegetableSummaryHint.textContent = ready ? `点按进入焖菜 · ${recommendation.soup}` : "选择后显示";
+  els.vegetableSummaryBar.dataset.vegetableCarry = ready ? recommendation.carry.flavor : "";
+  els.vegetableSummaryBar.setAttribute("aria-label", ready ? `带入${recommendation.flavor}并进入焖菜` : "选择蔬菜后进入焖菜");
+  els.vegetableSummaryBar.title = ready ? "带入当前推荐并进入焖菜" : "";
   els.vegetableSummaryBar.hidden = !ready;
   els.vegetableHandoffActions.innerHTML = renderVegetableHandoff(recommendation, ready);
 }
@@ -1932,7 +1935,8 @@ els.vegetableGroups.addEventListener("click", (event) => {
 });
 
 els.vegetableSummaryBar.addEventListener("click", () => {
-  document.querySelector(".vegetable-result").scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!state.vegetableStarted || !state.vegetableOptions.length) return;
+  applyVegetablesToBraise(els.vegetableSummaryBar.dataset.vegetableCarry);
 });
 
 els.vegetableHandoffActions.addEventListener("click", (event) => {
