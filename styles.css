@@ -1748,11 +1748,753 @@ h1 {
   }
 }
 
+/* Contextual meal editor: selecting a meal opens choices in place as a bottom sheet. */
+.meal-editor-toolbar,
+.meal-editor-backdrop[hidden] {
+  display: none;
+}
+
+body.meal-editor-open {
+  overflow: hidden;
+}
+
+.meal-editor-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(31, 33, 29, 0.38);
+  backdrop-filter: blur(3px);
+  cursor: default;
+}
+
+.settings-panel.meal-context-editor {
+  position: fixed;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 31;
+  width: min(calc(100% - 28px), 560px);
+  max-height: min(72dvh, 620px);
+  margin: 0;
+  padding: 18px;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 24px;
+  background: #fffefa;
+  box-shadow: 0 24px 70px rgba(50, 44, 34, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateX(-50%);
+  overscroll-behavior: contain;
+}
+
+.settings-panel.meal-context-editor > summary,
+.settings-panel.meal-context-editor::before {
+  display: none;
+}
+
+.settings-panel.meal-context-editor > summary::after {
+  content: none;
+}
+
+.settings-panel.meal-context-editor .meal-editor-toolbar {
+  position: sticky;
+  top: -18px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: -2px -2px 14px;
+  padding: 12px 2px 10px;
+  background: rgba(255, 254, 250, 0.94);
+  backdrop-filter: blur(12px);
+}
+
+.meal-editor-toolbar small,
+.meal-editor-toolbar h2 {
+  display: block;
+  margin: 0;
+}
+
+.meal-editor-toolbar small {
+  color: #7c847b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.meal-editor-toolbar h2 {
+  margin-top: 2px;
+  font-size: 20px;
+  letter-spacing: -0.025em;
+}
+
+.meal-editor-toolbar button {
+  min-width: 64px;
+  min-height: 40px;
+  padding: 0 15px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms ease;
+}
+
+.meal-editor-toolbar button:active {
+  transform: scale(0.97);
+}
+
+.settings-panel.meal-context-editor .control-strip {
+  display: block;
+  width: 100%;
+  padding: 0;
+}
+
+.settings-panel.meal-context-editor .diet-panel {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.settings-panel.meal-context-editor .diet-panel:not(.collapsed) {
+  display: block;
+}
+
+.settings-panel.meal-context-editor .diet-panel > .panel-head {
+  display: none;
+}
+
+.settings-panel.meal-context-editor .diet-panel > .panel-body {
+  display: grid;
+  margin: 0;
+}
+
+@media (max-width: 680px) {
+  body.meal-editor-open .mobile-bottom-nav {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(calc(100% + 24px));
+  }
+
+  .settings-panel.meal-context-editor {
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: calc(100% - 20px);
+    max-height: min(68dvh, 560px);
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .settings-panel.meal-context-editor .meal-editor-toolbar {
+    top: -16px;
+  }
+
+  .settings-panel.meal-context-editor .segmented {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .settings-panel.meal-context-editor .segmented button {
+    min-height: 48px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
     transition: none !important;
+  }
+}
+
+/* Option 1 — execution-first mobile redesign */
+:focus-visible {
+  outline: 3px solid rgba(55, 173, 117, 0.32);
+  outline-offset: 3px;
+}
+
+.nav-links {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  min-width: 240px;
+}
+
+.quick-day-controls,
+.execution-metrics,
+.today-actions,
+.prep-header,
+.prep-switch {
+  display: flex;
+}
+
+.quick-day-controls {
+  gap: 8px;
+}
+
+.quick-day-controls button,
+.prep-switch button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 254, 250, 0.72);
+  color: #677067;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.quick-day-controls button {
+  min-height: 42px;
+  padding: 0 18px;
+}
+
+.quick-day-controls button.active,
+.prep-switch button.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.execution-metrics {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+}
+
+.meal-edit-card {
+  position: relative;
+  cursor: pointer;
+  transition: background-color 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms ease;
+}
+
+.meal-edit-card::after {
+  content: "点按调整";
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  color: #5b925e;
+  font-size: 10px;
+  font-weight: 800;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.meal-edit-card:hover,
+.meal-edit-card:focus-visible {
+  background: #f7fbf6;
+}
+
+.meal-edit-card:hover::after,
+.meal-edit-card:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.meal-edit-card:active {
+  transform: scale(0.985);
+}
+
+.execution-metrics > span {
+  flex: 1;
+  min-width: 0;
+  padding: 15px 12px;
+  text-align: center;
+}
+
+.execution-metrics > span + span {
+  border-left: 1px solid var(--line);
+}
+
+.execution-metrics b,
+.execution-metrics small {
+  display: block;
+}
+
+.execution-metrics b {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.execution-metrics small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.today-actions {
+  gap: 10px;
+}
+
+.primary-action,
+.secondary-action {
+  min-height: 50px;
+  flex: 1;
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.primary-action {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.secondary-action {
+  border: 1px solid #ded8cc;
+  background: transparent;
+  color: #4f584f;
+}
+
+.prep-header {
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.prep-header h1 {
+  margin: 4px 0 0;
+}
+
+.prep-switch {
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #e9e4da;
+}
+
+.prep-switch button {
+  min-height: 38px;
+  padding: 0 14px;
+  border-color: transparent;
+  background: transparent;
+}
+
+.record-current,
+.record-item,
+.record-empty {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel);
+}
+
+.record-current {
+  padding: 22px;
+}
+
+.record-current h2 {
+  margin: 5px 0 8px;
+}
+
+.record-current > p:not(.kicker):not(.record-feedback) {
+  color: #667066;
+  line-height: 1.65;
+}
+
+.record-current .primary-action {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.record-feedback {
+  min-height: 20px;
+  margin: 10px 0 0;
+  color: #21845a;
+  font-size: 13px;
+}
+
+.record-history {
+  margin-top: 26px;
+}
+
+.record-item {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 14px;
+  padding: 16px;
+}
+
+.record-item + .record-item {
+  margin-top: 10px;
+}
+
+.record-item time,
+.record-item p,
+.record-empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.record-item p {
+  margin: 4px 0 0;
+}
+
+.record-empty {
+  padding: 20px;
+}
+
+.record-date,
+.source-meta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 680px) {
+  body {
+    background: #f5f1e8;
+  }
+
+  .app-shell {
+    padding: 10px 14px calc(88px + env(safe-area-inset-bottom));
+  }
+
+  .topbar {
+    position: relative;
+    top: auto;
+    padding: 7px 2px 13px;
+    margin-bottom: 2px;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .brand-mark,
+  .nav-links,
+  .mobile-section-tabs,
+  .status-stack,
+  .planner-head .kicker,
+  .daily-layout {
+    display: none;
+  }
+
+  .brand strong {
+    font-size: 18px;
+    letter-spacing: -0.03em;
+  }
+
+  .brand small {
+    margin-top: 4px;
+    font-size: 10px;
+  }
+
+  .planner {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .planner-head {
+    order: 1;
+    display: block;
+    padding: 9px 2px 0;
+  }
+
+  .page-date {
+    position: absolute;
+    top: 23px;
+    right: 16px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .planner-head h1 {
+    max-width: 290px;
+    margin: 0;
+    font-size: clamp(28px, 8.4vw, 34px);
+    line-height: 1.12;
+    letter-spacing: -0.045em;
+  }
+
+  .planner-lead {
+    margin: 7px 0 0;
+    color: #72786f;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .quick-day-controls {
+    order: 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+  }
+
+  .quick-day-controls button {
+    min-height: 37px;
+    padding: 0;
+    border-color: #dfd9ce;
+    background: rgba(255, 255, 255, 0.48);
+    font-size: 13px;
+  }
+
+  .settings-panel {
+    order: 7;
+    scroll-margin-top: 12px;
+  }
+
+  .settings-panel > summary {
+    display: none;
+  }
+
+  .settings-panel:not([open]) > *:not(summary) {
+    display: none;
+  }
+
+  .settings-panel[open] {
+    padding-top: 4px;
+  }
+
+  .settings-panel[open]::before {
+    content: "调整今日方案";
+    display: block;
+    margin: 2px 0 12px;
+    font-size: 19px;
+    font-weight: 800;
+  }
+
+  .meal-panel {
+    order: 3;
+    display: grid !important;
+    gap: 12px;
+  }
+
+  .meal-flow {
+    display: block;
+    overflow: hidden;
+    border: 1px solid #e9e3d8;
+    border-radius: 22px;
+    background: rgba(255, 254, 250, 0.9);
+    box-shadow: 0 12px 30px rgba(51, 45, 36, 0.045);
+  }
+
+  .meal-flow article {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 3px 10px;
+    padding: 13px 14px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .meal-edit-card::after {
+    display: none;
+  }
+
+  .meal-edit-card .meal-card-head span::after {
+    content: " · 调整";
+    color: #879087;
+    font-weight: 700;
+  }
+
+  .meal-flow article + article {
+    border-top: 1px solid var(--line);
+  }
+
+  .meal-card-head {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-left: 13px;
+  }
+
+  .meal-card-head::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 7px;
+    height: 7px;
+    border: 2px solid #5b925e;
+    border-radius: 50%;
+    background: #fffefa;
+  }
+
+  .meal-card-head span,
+  .meal-card-head time {
+    display: block;
+  }
+
+  .meal-card-head span {
+    order: 2;
+    margin-top: 3px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #5b925e;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .meal-card-head time {
+    order: 1;
+    margin-top: 5px;
+    color: #242923;
+    font-size: 11px;
+    font-weight: 800;
+    max-width: 70px;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .meal-flow b,
+  .meal-flow p,
+  .meal-flow small {
+    grid-column: 2;
+  }
+
+  .meal-flow b {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .meal-flow p {
+    display: none;
+  }
+
+  .meal-flow small {
+    margin-top: 2px;
+    color: #92968f;
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
+  .execution-metrics {
+    border-radius: 16px;
+    background: rgba(255, 254, 250, 0.7);
+  }
+
+  .execution-metrics > span {
+    padding: 10px 5px;
+  }
+
+  .execution-metrics b {
+    font-size: 13px;
+  }
+
+  .execution-metrics small {
+    font-size: 10px;
+  }
+
+  .daily-tip {
+    order: 4;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 9px;
+    padding: 10px 13px;
+    border: 1px solid #e4dac7;
+    border-radius: 16px;
+    background: #efe6d4;
+    color: #3a3c36;
+    box-shadow: none;
+  }
+
+  .daily-tip span {
+    grid-row: 1 / span 2;
+    align-self: start;
+    color: #9a681e;
+    font-size: 10px;
+  }
+
+  .daily-tip b {
+    font-size: 13px;
+  }
+
+  .daily-tip p {
+    color: #777469;
+    font-size: 11px;
+  }
+
+  .today-actions {
+    order: 5;
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 8px;
+  }
+
+  .primary-action,
+  .secondary-action {
+    min-height: 48px;
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .mobile-bottom-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .mobile-bottom-nav button {
+    min-width: 0;
+  }
+
+  .prep-header {
+    display: block;
+    margin: 4px 0 18px;
+  }
+
+  .prep-header > div:first-child {
+    display: none;
+  }
+
+  .prep-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    border-radius: 14px;
+  }
+
+  .prep-switch button {
+    border-radius: 11px;
+  }
+
+  .vegetables,
+  .braise,
+  .record,
+  .rules {
+    padding-top: 6px;
+  }
+
+  .record-current {
+    padding: 18px;
+  }
+
+  .record-item {
+    grid-template-columns: 64px 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .settings-panel.meal-context-editor {
+    position: fixed;
+    left: 50%;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    display: block;
+    width: calc(100% - 20px);
+    max-height: min(68dvh, 560px);
+    padding: 16px;
+    transform: translateX(-50%);
+  }
+
+  .settings-panel.meal-context-editor[open]::before {
+    display: none;
   }
 }

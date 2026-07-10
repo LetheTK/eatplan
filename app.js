@@ -1,5 +1,13 @@
 const PROFILE_WEIGHT_KG = 75;
 
+// 当前真实作息以根目录《个人作息与三餐时间安排》为准（2026-07-08）。
+// 集中在这里渲染，避免 HTML 初始内容和运行时展示再次出现餐时漂移。
+const mealTimes = {
+  first: "约 17:30",
+  second: "约 22:00",
+  third: "约 01:30–02:00"
+};
+
 const dayTypes = {
   daily: {
     label: "日常",
@@ -307,6 +315,7 @@ const thirdMeals = {
   }
 };
 const STORAGE_KEY = "eatplan.dashboard.state.v1";
+const RECORD_STORAGE_KEY = "eatplan.dashboard.records.v1";
 const BRAISE_PANEL_STATE_VERSION = 2;
 
 const garlicBases = {
@@ -502,7 +511,7 @@ function readSavedState() {
     if (!saved || typeof saved !== "object") return {};
 
     const next = {};
-    if (["today", "vegetables", "braise", "rules"].includes(saved.view)) next.view = saved.view;
+    if (["today", "vegetables", "braise", "record", "rules"].includes(saved.view)) next.view = saved.view;
     if (saved.view === "knowledge") next.view = "rules";
     if (["settings", "meals"].includes(saved.mobilePanel)) next.mobilePanel = saved.mobilePanel;
     if (saved.mobilePanel === "totals") next.mobilePanel = "meals";
@@ -558,8 +567,20 @@ const els = {
   mobileBottomNav: document.querySelector("#mobileBottomNav"),
   mobileSectionTabs: document.querySelector("#mobileSectionTabs"),
   mobilePanels: document.querySelectorAll("[data-mobile-panel-content]"),
+  mealEditCards: document.querySelectorAll("[data-meal-edit]"),
   mobileDietHint: document.querySelector("#mobileDietHint"),
   mobileTotalHint: document.querySelector("#mobileTotalHint"),
+  todayDate: document.querySelector("#todayDate"),
+  plannerTitle: document.querySelector("#planner-title"),
+  quickDayControls: document.querySelector("#quickDayControls"),
+  executionCalories: document.querySelector("#executionCalories"),
+  executionProtein: document.querySelector("#executionProtein"),
+  executionWater: document.querySelector("#executionWater"),
+  openSettingsButton: document.querySelector("#openSettingsButton"),
+  settingsPanel: document.querySelector("#settingsPanel"),
+  mealEditorTitle: document.querySelector("#mealEditorTitle"),
+  closeMealEditorButton: document.querySelector("#closeMealEditorButton"),
+  mealEditorBackdrop: document.querySelector("#mealEditorBackdrop"),
   mealTotalSummary: document.querySelector("#mealTotalSummary"),
   settingsSummary: document.querySelector("#settingsSummary"),
   dayControls: document.querySelector("#dayTypeControls"),
@@ -590,12 +611,15 @@ const els = {
   proteinRatio: document.querySelector("#proteinRatio"),
   carbRatio: document.querySelector("#carbRatio"),
   firstMealText: document.querySelector("#firstMealText"),
+  firstMealTime: document.querySelector("#firstMealTime"),
   firstMealHint: document.querySelector("#firstMealHint"),
   firstMealMeta: document.querySelector("#firstMealMeta"),
   secondMealText: document.querySelector("#secondMealText"),
+  secondMealTime: document.querySelector("#secondMealTime"),
   secondMealHint: document.querySelector("#secondMealHint"),
   secondMealMeta: document.querySelector("#secondMealMeta"),
   thirdMealText: document.querySelector("#thirdMealText"),
+  thirdMealTime: document.querySelector("#thirdMealTime"),
   thirdMealHint: document.querySelector("#thirdMealHint"),
   thirdMealMeta: document.querySelector("#thirdMealMeta"),
   knowledgeTabs: document.querySelector("#knowledgeTabs"),
@@ -641,7 +665,15 @@ const els = {
   braiseSummaryBar: document.querySelector("#braiseSummaryBar"),
   braiseSummaryAdd: document.querySelector("#braiseSummaryAdd"),
   braiseSummaryMeta: document.querySelector("#braiseSummaryMeta"),
-  braiseSummaryAvoid: document.querySelector("#braiseSummaryAvoid")
+  braiseSummaryAvoid: document.querySelector("#braiseSummaryAvoid"),
+  prepViewButtons: document.querySelectorAll("[data-prep-view]"),
+  viewLinkButtons: document.querySelectorAll("[data-view-link]"),
+  recordDate: document.querySelector("#recordDate"),
+  recordPlanTitle: document.querySelector("#recordPlanTitle"),
+  recordPlanSummary: document.querySelector("#recordPlanSummary"),
+  saveRecordButton: document.querySelector("#saveRecordButton"),
+  recordFeedback: document.querySelector("#recordFeedback"),
+  recordList: document.querySelector("#recordList")
 };
 
 function round(value, digits = 0) {
@@ -755,6 +787,63 @@ function saveState() {
   } catch {
     // localStorage may be unavailable in restricted browser modes.
   }
+}
+
+function todayLabel(includeWeekday = false) {
+  const now = new Date();
+  const date = `${now.getMonth() + 1}月${now.getDate()}日`;
+  if (!includeWeekday) return date;
+  return `${date} 周${"日一二三四五六"[now.getDay()]}`;
+}
+
+function dateKey() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+function readRecords() {
+  try {
+    const records = JSON.parse(window.localStorage.getItem(RECORD_STORAGE_KEY) || "[]");
+    return Array.isArray(records) ? records.slice(0, 14) : [];
+  } catch {
+    return [];
+  }
+}
+
+let records = readRecords();
+
+function renderRecords() {
+  const day = dayTypes[state.day];
+  const total = calculate();
+  const planCode = state.thirdMeal === "k" ? "K" : "F";
+  els.recordDate.textContent = todayLabel();
+  els.recordPlanTitle.textContent = `${day.label} · 方案 ${planCode}`;
+  els.recordPlanSummary.textContent = `${round(total.kcal)} kcal · 蛋白 ${formatDecimal(total.protein)}g · ${day.water} · ${mealTimes.first} / ${mealTimes.second} / ${mealTimes.third}`;
+  els.recordList.innerHTML = records.length
+    ? records.map((record) => `<article class="record-item"><time>${record.dateLabel}</time><div><b>${record.title}</b><p>${record.summary}</p></div></article>`).join("")
+    : '<p class="record-empty">还没有记录。执行完今天的方案后，在这里留一条即可。</p>';
+}
+
+function saveTodayRecord() {
+  const day = dayTypes[state.day];
+  const total = calculate();
+  const planCode = state.thirdMeal === "k" ? "K" : "F";
+  const record = {
+    key: dateKey(),
+    dateLabel: todayLabel(),
+    title: `${day.label} · 方案 ${planCode}`,
+    summary: `${round(total.kcal)} kcal · 蛋白 ${formatDecimal(total.protein)}g · ${day.water}`
+  };
+  records = [record, ...records.filter((item) => item.key !== record.key)].slice(0, 14);
+  try {
+    window.localStorage.setItem(RECORD_STORAGE_KEY, JSON.stringify(records));
+  } catch {
+    // Keep the current-session record visible when storage is restricted.
+  }
+  els.recordFeedback.textContent = "已记录今天的执行方案。当天再次保存会更新这条记录。";
+  renderRecords();
 }
 
 function calculate() {
@@ -1043,10 +1132,10 @@ function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
 function setNutritionAlert(hasAlert) {
   const todayButton = els.viewControls.querySelector('[data-view="today"]');
   const totalButton = els.mobileSectionTabs.querySelector('[data-mobile-panel="meals"]');
-  const nutritionButton = els.mobileBottomNav.querySelector('[data-mobile-panel="meals"]');
-  todayButton.classList.toggle("has-alert", hasAlert);
-  totalButton.classList.toggle("has-alert", hasAlert);
-  nutritionButton.classList.toggle("has-alert", hasAlert);
+  const nutritionButton = els.mobileBottomNav.querySelector('[data-view="today"]');
+  todayButton?.classList.toggle("has-alert", hasAlert);
+  totalButton?.classList.toggle("has-alert", hasAlert);
+  nutritionButton?.classList.toggle("has-alert", hasAlert);
 }
 
 function renderPlanner() {
@@ -1069,7 +1158,14 @@ function renderPlanner() {
   ];
   const macroIssues = macroChecks.filter((item) => alertStatuses.has(item.status));
   const macroIssue = macroIssues[0];
+  const planCode = state.thirdMeal === "k" ? "K" : "F";
+  const calorieLow = Math.floor(total.kcal / 100) * 100;
+  const calorieHigh = Math.ceil(total.kcal / 100) * 100;
+  const proteinLow = Math.floor(total.protein / 5) * 5;
+  const proteinHigh = Math.ceil(total.protein / 5) * 5;
 
+  els.todayDate.textContent = todayLabel(true);
+  els.plannerTitle.textContent = `今天按${day.label}方案 ${planCode}`;
   els.plannerLead.textContent = day.lead;
   els.waterTarget.textContent = day.water;
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
@@ -1085,6 +1181,9 @@ function renderPlanner() {
   els.dietAdjustSummary.textContent = [state.banana ? "香蕉" : "", state.buffer ? "50g缓冲" : ""].filter(Boolean).join("、") || "无调整";
   els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
   els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白`;
+  els.executionCalories.textContent = `约 ${calorieLow.toLocaleString("zh-CN")}–${calorieHigh.toLocaleString("zh-CN")}`;
+  els.executionProtein.textContent = `${proteinLow}–${proteinHigh}g`;
+  els.executionWater.textContent = day.water.replace(" 水", "");
   els.mealTotalSummary.textContent = buildMealAlertSummary(macroIssues);
   els.mealTotalSummary.parentElement.hidden = macroIssues.length === 0;
   els.mealTotalSummary.parentElement.classList.toggle("has-alert", macroIssues.length > 0);
@@ -1097,16 +1196,21 @@ function renderPlanner() {
   els.carbRatioBar.style.width = `${Math.min(100, Math.max(8, (carbRatio / 2.2) * 100))}%`;
 
   els.firstMealText.textContent = breakfast.meal;
+  els.firstMealTime.textContent = mealTimes.first;
   els.firstMealHint.textContent = breakfast.hint;
   els.secondMealText.textContent = `${formatSecondMeatItems(secondMeatPlan.items)} · 蔬菜200g · ${secondMealStapleText(state.staple)} · 橄榄油1汤匙`;
+  els.secondMealTime.textContent = mealTimes.second;
   els.secondMealHint.textContent = secondMeatPlan.items.length === 1
     ? "单选时由这一种肉承担第二餐肉类蛋白目标。"
     : `多选时按蛋白均分，每种约${formatDecimal(SECOND_MEAT_TARGET_PROTEIN / secondMeatPlan.items.length)}g蛋白。`;
   els.thirdMealText.textContent = thirdMeal.label;
+  els.thirdMealTime.textContent = mealTimes.third;
   els.thirdMealHint.textContent = thirdMeal.hint;
   els.firstMealMeta.textContent = `约 ${round(breakfast.mealKcal)} kcal · 蛋白 ${formatDecimal(breakfast.mealProtein)}g`;
   els.secondMealMeta.textContent = `约 ${round(secondMealBaseKcal(state.staple) + secondMeatPlan.delta.kcal)} kcal · 蛋白 60.5g · 含蔬菜`;
   els.thirdMealMeta.textContent = thirdMeal.meta;
+  setActive(els.quickDayControls, "dayQuick", state.day);
+  renderRecords();
 }
 
 function renderMobilePanel() {
@@ -1116,7 +1220,7 @@ function renderMobilePanel() {
     button.setAttribute("aria-current", active ? "true" : "false");
   });
   els.mobilePanels.forEach((panel) => {
-    panel.classList.toggle("active", panel.dataset.mobilePanelContent === state.mobilePanel);
+    panel.classList.add("active");
   });
   renderMobileBottomNav();
 }
@@ -1124,8 +1228,8 @@ function renderMobilePanel() {
 function renderMobileBottomNav() {
   els.mobileBottomNav.querySelectorAll("button").forEach((button) => {
     const targetView = button.dataset.view;
-    const active = targetView === "today"
-      ? state.view === "today" && button.dataset.mobilePanel === state.mobilePanel
+    const active = button.dataset.viewGroup === "prep"
+      ? ["vegetables", "braise"].includes(state.view)
       : state.view === targetView;
     button.classList.toggle("active", active);
     button.setAttribute("aria-current", active ? "page" : "false");
@@ -1135,9 +1239,16 @@ function renderMobileBottomNav() {
 function renderView() {
   document.body.dataset.view = state.view;
   els.viewControls.querySelectorAll("button").forEach((button) => {
-    const active = button.dataset.view === state.view;
+    const active = button.dataset.viewGroup === "prep"
+      ? ["vegetables", "braise"].includes(state.view)
+      : button.dataset.view === state.view;
     button.classList.toggle("active", active);
     button.setAttribute("aria-current", active ? "page" : "false");
+  });
+  els.prepViewButtons.forEach((button) => {
+    const active = button.dataset.prepView === state.view;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "step" : "false");
   });
   els.viewPanels.forEach((panel) => {
     const active = panel.dataset.viewPanel === state.view;
@@ -1346,13 +1457,13 @@ function buildVegetableRecommendation() {
 
 function renderVegetableHandoff(recommendation, ready) {
   if (!ready) {
-    return `<button type="button" class="handoff-button" disabled>带到焖菜</button>`;
+    return `<button type="button" class="handoff-button" disabled>查看焖菜做法</button>`;
   }
   const flavors = recommendation.carry.flavors || [recommendation.carry.flavor];
   if (flavors.length === 1) {
-    return `<button type="button" class="handoff-button" data-vegetable-carry="${flavors[0]}">带到焖菜</button>`;
+    return `<button type="button" class="handoff-button" data-vegetable-carry="${flavors[0]}">查看焖菜做法</button>`;
   }
-  return `<span class="handoff-label">带到焖菜</span>
+  return `<span class="handoff-label">选择焖菜风味</span>
     <div class="handoff-options">
       ${flavors.map((flavor) => (
         `<button type="button" class="handoff-button handoff-choice" data-vegetable-carry="${flavor}">${carryFlavorLabels[flavor]}</button>`
@@ -1704,11 +1815,10 @@ function renderBraise() {
   els.braiseSummaryBar.hidden = !ready;
 }
 
-els.dayControls.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-day]");
-  if (!button) return;
-  const day = dayTypes[button.dataset.day];
-  state.day = button.dataset.day;
+function selectDay(dayKey) {
+  const day = dayTypes[dayKey];
+  if (!day) return;
+  state.day = dayKey;
   state.banana = day.bananaDefault;
   state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, day.thirdMealDefault);
   els.bananaToggle.checked = state.banana;
@@ -1716,6 +1826,18 @@ els.dayControls.addEventListener("click", (event) => {
   renderThirdMealControls();
   saveState();
   renderPlanner();
+}
+
+els.dayControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-day]");
+  if (!button) return;
+  selectDay(button.dataset.day);
+});
+
+els.quickDayControls.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-day-quick]");
+  if (!button) return;
+  selectDay(button.dataset.dayQuick);
 });
 
 els.stapleControls.addEventListener("click", (event) => {
@@ -1895,6 +2017,90 @@ els.viewControls.addEventListener("click", (event) => {
   renderView();
 });
 
+els.prepViewButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.view = button.dataset.prepView;
+    saveState();
+    renderView();
+  });
+});
+
+els.viewLinkButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    state.view = button.dataset.viewLink;
+    saveState();
+    renderView();
+  });
+});
+
+let activeMealEditorCard = null;
+
+function closeMealEditor(restoreFocus = true) {
+  const previousCard = activeMealEditorCard;
+  activeMealEditorCard = null;
+  document.body.classList.remove("meal-editor-open");
+  els.settingsPanel.classList.remove("meal-context-editor");
+  els.settingsPanel.removeAttribute("role");
+  els.settingsPanel.removeAttribute("aria-modal");
+  els.settingsPanel.removeAttribute("aria-labelledby");
+  els.settingsPanel.open = false;
+  els.mealEditorBackdrop.hidden = true;
+  if (restoreFocus) previousCard?.focus({ preventScroll: true });
+}
+
+els.openSettingsButton.addEventListener("click", () => {
+  closeMealEditor(false);
+  els.settingsPanel.open = true;
+  els.settingsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+function openMealEditor(panel, sourceCard) {
+  if (!validDietPanels.includes(panel)) return;
+  const editorTitles = {
+    breakfast: "调整第一餐",
+    secondMeat: "调整第二餐肉类",
+    thirdMeal: "调整第三餐"
+  };
+  state.view = "today";
+  state.mobilePanel = "settings";
+  state.dietOpenPanels = [panel];
+  activeMealEditorCard = sourceCard || null;
+  document.body.classList.add("meal-editor-open");
+  els.settingsPanel.classList.add("meal-context-editor");
+  els.settingsPanel.setAttribute("role", "dialog");
+  els.settingsPanel.setAttribute("aria-modal", "true");
+  els.settingsPanel.setAttribute("aria-labelledby", "mealEditorTitle");
+  els.mealEditorTitle.textContent = editorTitles[panel] || "调整餐次";
+  els.settingsPanel.open = true;
+  els.mealEditorBackdrop.hidden = false;
+  renderMobilePanel();
+  renderDietPanels();
+  saveState();
+  window.requestAnimationFrame(() => {
+    const target = document.querySelector(`[data-diet-panel="${panel}"]`);
+    target?.querySelector(".panel-body button, .panel-body input")?.focus({ preventScroll: true });
+  });
+}
+
+els.mealEditCards.forEach((card) => {
+  card.addEventListener("click", () => openMealEditor(card.dataset.mealEdit, card));
+  card.addEventListener("keydown", (event) => {
+    if (!["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    openMealEditor(card.dataset.mealEdit, card);
+  });
+});
+
+els.closeMealEditorButton.addEventListener("click", () => closeMealEditor());
+els.mealEditorBackdrop.addEventListener("click", () => closeMealEditor());
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && document.body.classList.contains("meal-editor-open")) {
+    closeMealEditor();
+  }
+});
+
+els.saveRecordButton.addEventListener("click", saveTodayRecord);
+
 els.mobileSectionTabs.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-mobile-panel]");
   if (!button) return;
@@ -1923,6 +2129,7 @@ renderVegetables();
 renderBraise();
 renderMobilePanel();
 renderKnowledge();
+renderRecords();
 renderView();
 
 if ("serviceWorker" in navigator && ["https:", "http:"].includes(window.location.protocol)) {

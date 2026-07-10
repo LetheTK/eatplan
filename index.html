@@ -12,7 +12,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./assets/icon-192.png">
   <link rel="icon" href="./assets/icon-192.png" sizes="192x192">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=25">
 </head>
 <body>
   <div class="app-shell">
@@ -20,38 +20,45 @@
       <a class="brand" href="#top" aria-label="回到顶部">
         <span class="brand-mark" aria-hidden="true"></span>
         <span>
-          <strong>每日饮食建议</strong>
-          <small>75kg · 减脂保肌 · 总表 v4</small>
+          <strong>今日饮食</strong>
+          <small>总表 v4 · 同步于 2026-07-10</small>
         </span>
       </a>
       <nav class="nav-links" aria-label="页面导航" id="viewControls">
         <button type="button" data-view="today" class="active"><span>今日</span><i aria-hidden="true"></i></button>
-        <button type="button" data-view="vegetables"><span>蔬菜</span></button>
-        <button type="button" data-view="braise"><span>焖菜</span></button>
-        <button type="button" data-view="rules"><span>规则</span></button>
+        <button type="button" data-view="vegetables" data-view-group="prep"><span>备菜</span></button>
+        <button type="button" data-view="record"><span>记录</span></button>
+        <button type="button" data-view="rules"><span>依据</span></button>
       </nav>
     </header>
 
     <nav class="mobile-bottom-nav" aria-label="移动端导航" id="mobileBottomNav">
-      <button type="button" data-view="today" data-mobile-panel="settings" class="active"><span>饮食</span></button>
-      <button type="button" data-view="today" data-mobile-panel="meals"><span>三餐</span><i aria-hidden="true"></i></button>
-      <button type="button" data-view="vegetables"><span>蔬菜</span></button>
-      <button type="button" data-view="braise"><span>焖菜</span></button>
-      <button type="button" data-view="rules"><span>规则</span></button>
+      <button type="button" data-view="today" class="active"><span>今日</span><i aria-hidden="true"></i></button>
+      <button type="button" data-view="vegetables" data-view-group="prep"><span>备菜</span></button>
+      <button type="button" data-view="record"><span>记录</span></button>
+      <button type="button" data-view="rules"><span>依据</span></button>
     </nav>
 
     <main id="top">
       <section class="planner view-section active" data-view-panel="today" aria-labelledby="planner-title">
         <div class="planner-head">
           <div>
+            <p class="page-date" id="todayDate">7月10日 周五</p>
             <p class="kicker">今日执行</p>
-            <h1 id="planner-title">今天吃这个</h1>
+            <h1 id="planner-title">今天按日常方案 F</h1>
             <p class="planner-lead" id="plannerLead">日常默认方案 F，5km 慢跑按状态补碳，高疲劳时再升到 K。</p>
           </div>
           <div class="status-stack">
             <span id="statusPill">日常方案 F</span>
             <b id="waterTarget">2-2.5L 水</b>
           </div>
+        </div>
+
+        <div class="quick-day-controls" id="quickDayControls" aria-label="当天类型快速选择">
+          <button type="button" data-day-quick="daily" class="active">日常</button>
+          <button type="button" data-day-quick="run">跑步</button>
+          <button type="button" data-day-quick="strength">力量</button>
+          <button type="button" data-day-quick="rest">休息</button>
         </div>
 
         <div class="mobile-section-tabs" id="mobileSectionTabs" aria-label="今日内容切换">
@@ -66,11 +73,18 @@
           </button>
         </div>
 
-        <details class="settings-panel mobile-panel active" id="settingsPanel" data-mobile-panel-content="settings" open>
+        <details class="settings-panel mobile-panel active" id="settingsPanel" data-mobile-panel-content="settings">
           <summary>
-            <span>今日饮食</span>
+            <span>调整今日方案</span>
             <b id="settingsSummary">日常 · 土豆 · 平衡早餐 · F鸡蛋4个/200g</b>
           </summary>
+          <div class="meal-editor-toolbar">
+            <div>
+              <small>当前餐次</small>
+              <h2 id="mealEditorTitle">调整第一餐</h2>
+            </div>
+            <button type="button" id="closeMealEditorButton">完成</button>
+          </div>
           <div class="control-strip" aria-label="今日选项">
             <article class="braise-panel diet-panel" data-diet-panel="day">
               <button type="button" class="panel-head" data-diet-panel-toggle="day" aria-expanded="true">
@@ -169,30 +183,37 @@
             </article>
           </div>
         </details>
+        <button type="button" class="meal-editor-backdrop" id="mealEditorBackdrop" aria-label="关闭餐次选择" hidden></button>
 
-        <div class="meal-panel mobile-panel" data-mobile-panel-content="meals">
+        <div class="meal-panel mobile-panel active" data-mobile-panel-content="meals">
           <div class="meal-total-strip" aria-label="今日营养提醒" hidden>
             <p id="mealTotalSummary"></p>
           </div>
           <div class="meal-flow" aria-label="三餐结构">
-            <article>
-              <div class="meal-card-head"><span>第一餐</span><time>约 7:00</time></div>
+            <article class="meal-edit-card" data-meal-edit="breakfast" role="button" tabindex="0" aria-label="调整第一餐早餐方案">
+              <div class="meal-card-head"><span>第一餐</span><time id="firstMealTime">约 17:30</time></div>
               <b id="firstMealText">麦片100g + 牛奶125ml + 鸡蛋1个</b>
               <p id="firstMealHint">保留口感和钙，减少牛奶成本。</p>
               <small id="firstMealMeta">约 506 kcal · 蛋白 23.5g</small>
             </article>
-            <article>
-              <div class="meal-card-head"><span>第二餐</span><time>约 12:00</time></div>
+            <article class="meal-edit-card" data-meal-edit="secondMeat" role="button" tabindex="0" aria-label="调整第二餐肉类方案">
+              <div class="meal-card-head"><span>第二餐</span><time id="secondMealTime">约 22:00</time></div>
               <b id="secondMealText">鸡胸约120g + 去皮鸭胸约140g · 蔬菜200g · 土豆150g · 橄榄油1汤匙</b>
               <p id="secondMealHint">蔬菜和橄榄油计入第二餐；肉类按蛋白目标自动折算重量。</p>
               <small id="secondMealMeta">约 560 kcal · 蛋白 60.5g · 含蔬菜</small>
             </article>
-            <article>
-              <div class="meal-card-head"><span>第三餐</span><time>约 18:00</time></div>
+            <article class="meal-edit-card" data-meal-edit="thirdMeal" role="button" tabindex="0" aria-label="调整第三餐蛋白方案">
+              <div class="meal-card-head"><span>第三餐</span><time id="thirdMealTime">约 01:30–02:00</time></div>
               <b id="thirdMealText">方案 F：鸡蛋4个（约200g）</b>
               <p id="thirdMealHint">鸡蛋是默认；想减少鸡蛋时可用鸡胸或去皮鸭胸等蛋白替换。</p>
               <small id="thirdMealMeta">约 252 kcal · 蛋白 25.2g</small>
             </article>
+          </div>
+
+          <div class="execution-metrics" aria-label="今日营养摘要">
+            <span><b id="executionCalories">约 1,300–1,400</b><small>kcal</small></span>
+            <span><b id="executionProtein">105–110g</b><small>蛋白</small></span>
+            <span><b id="executionWater">2–2.5L</b><small>饮水</small></span>
           </div>
 
           <div class="daily-layout">
@@ -225,9 +246,21 @@
           <b id="dailyTipTitle">按日常方案 F 执行</b>
           <p id="dailyTipText">碳水 115g · 脂肪 50.0g · 蛋白 1.45g/kg</p>
         </div>
+
+        <div class="today-actions">
+          <button type="button" class="primary-action" id="openSettingsButton">调整今日方案</button>
+          <button type="button" class="secondary-action" data-view-link="rules">查看计算依据</button>
+        </div>
       </section>
 
       <section class="vegetables view-section" data-view-panel="vegetables" id="vegetables" aria-labelledby="vegetables-title" hidden>
+        <div class="prep-header">
+          <div><p class="kicker">从现有食材到做法</p><h1>备菜</h1></div>
+          <div class="prep-switch" aria-label="备菜步骤">
+            <button type="button" data-prep-view="vegetables" class="active">选蔬菜</button>
+            <button type="button" data-prep-view="braise">焖菜做法</button>
+          </div>
+        </div>
         <div class="section-heading">
           <div>
             <p class="kicker">备菜选择</p>
@@ -285,6 +318,13 @@
       </section>
 
       <section class="braise view-section" data-view-panel="braise" id="braise" aria-labelledby="braise-title" hidden>
+        <div class="prep-header">
+          <div><p class="kicker">从现有食材到做法</p><h1>备菜</h1></div>
+          <div class="prep-switch" aria-label="备菜步骤">
+            <button type="button" data-prep-view="vegetables">选蔬菜</button>
+            <button type="button" data-prep-view="braise" class="active">焖菜做法</button>
+          </div>
+        </div>
         <div class="section-heading">
           <div>
             <p class="kicker">焖菜调味</p>
@@ -407,10 +447,34 @@
         </button>
       </section>
 
+      <section class="record view-section" data-view-panel="record" id="record" aria-labelledby="record-title" hidden>
+        <div class="section-heading record-heading">
+          <div>
+            <p class="kicker">执行留痕</p>
+            <h1 id="record-title">今日记录</h1>
+          </div>
+          <span class="record-date" id="recordDate">7月10日</span>
+        </div>
+        <article class="record-current">
+          <p class="kicker">当前方案</p>
+          <h2 id="recordPlanTitle">日常 · 方案 F</h2>
+          <p id="recordPlanSummary">三餐与营养摘要会跟随今日方案更新。</p>
+          <button type="button" class="primary-action" id="saveRecordButton">记录今天按此执行</button>
+          <p class="record-feedback" id="recordFeedback" role="status" aria-live="polite"></p>
+        </article>
+        <div class="record-history">
+          <div class="section-heading"><div><p class="kicker">最近记录</p><h2>执行历史</h2></div></div>
+          <div id="recordList"></div>
+        </div>
+      </section>
+
       <section class="rules view-section" data-view-panel="rules" id="rules" aria-labelledby="rules-title" hidden>
         <div class="section-heading">
-          <p class="kicker">执行规则</p>
-          <h2 id="rules-title">只保留会改变今天吃法的规则，知识依据放在下面。</h2>
+          <div>
+            <p class="kicker">数据与规则</p>
+            <h1 id="rules-title">计算依据</h1>
+            <p class="source-meta">总表 v4 · 同步于 2026-07-10 · 肉类按生重 · 主食按熟重</p>
+          </div>
         </div>
         <div class="rule-grid">
           <article>
@@ -472,6 +536,6 @@
     </main>
   </div>
 
-  <script src="./app.js" defer></script>
+  <script src="./app.js?v=25" defer></script>
 </body>
 </html>
