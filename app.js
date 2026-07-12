@@ -643,6 +643,7 @@ const els = {
   vegetableCurrentText: document.querySelector("#vegetableCurrentText"),
   vegetableHandoffActions: document.querySelector("#vegetableHandoffActions"),
   vegetableSummaryBar: document.querySelector("#vegetableSummaryBar"),
+  vegetableSummaryStatus: document.querySelector("#vegetableSummaryStatus"),
   vegetableSummaryTitle: document.querySelector("#vegetableSummaryTitle"),
   vegetableSummaryMeta: document.querySelector("#vegetableSummaryMeta"),
   vegetableSummaryHint: document.querySelector("#vegetableSummaryHint"),
@@ -1351,6 +1352,51 @@ function carryFlavorFromLabel(flavor) {
   return carryFlavorOptionsFromLabel(flavor)[0];
 }
 
+function buildBraiseCarryOptions(recommendation, flavorOverride) {
+  const carryFlavor = flavorOverride || recommendation.carry.flavor;
+  const options = new Set();
+  if (recommendation.carry.soup === "tomato") options.add("tomato");
+  if (recommendation.carry.soup === "water") options.add("water");
+  if (carryFlavor === "sichuan") {
+    options.add("guizhouDip");
+    if (!options.has("tomato")) options.add("water");
+  } else if (carryFlavor === "chinese") {
+    options.add("soySauce");
+    if (!options.has("tomato")) options.add("water");
+  } else {
+    options.add("onionPowder");
+    options.add("blackPepper");
+    options.add("thyme");
+  }
+  return validBraiseOptions.filter((option) => options.has(option));
+}
+
+function buildVegetableSaucePreview(recommendation) {
+  const carryFlavor = recommendation.carry.flavor;
+  const options = buildBraiseCarryOptions(recommendation, carryFlavor);
+  const hasTomato = options.includes("tomato");
+  const status = recommendation.carry.soup === "tomato" && !hasVegetableOption("tomato")
+    ? "建议补番茄"
+    : recommendation.carry.soup === "water"
+      ? "建议补水"
+      : "可直接做";
+  const title = carryFlavor === "sichuan"
+    ? "川贵微辣汁"
+    : carryFlavor === "chinese"
+      ? "中式轻酱汁"
+      : hasTomato
+        ? "番茄香草汁"
+        : "清水香草汁";
+  const garlic = state.braiseGarlicBase !== "none" ? garlicBases[state.braiseGarlicBase] : "蒜香进入后选";
+  return {
+    status,
+    title,
+    components: options.map((option) => braiseOptionLabels[option]).join(" · "),
+    note: `${garlic} · 查看做法`,
+    carryFlavor
+  };
+}
+
 function setVegetablePanelOpen(panel, open) {
   const next = new Set(state.vegetableOpenPanels);
   if (open) {
@@ -1513,6 +1559,7 @@ function renderVegetableGroups() {
 
 function renderVegetables() {
   const recommendation = buildVegetableRecommendation();
+  const saucePreview = buildVegetableSaucePreview(recommendation);
   const selectedLabels = selectedVegetableLabels();
   const ready = state.vegetableStarted && state.vegetableOptions.length > 0;
   renderVegetableGroups();
@@ -1531,12 +1578,13 @@ function renderVegetables() {
   els.vegetableComboSummary.textContent = recommendation.comboSummary;
   els.vegetablePrepList.innerHTML = listItems(recommendation.prep);
   els.vegetableCurrentText.textContent = selectedLabels.length ? selectedLabels.join(" / ") : "未选择";
-  els.vegetableSummaryTitle.textContent = recommendation.status;
-  els.vegetableSummaryMeta.textContent = recommendation.flavor;
-  els.vegetableSummaryHint.textContent = ready ? `点按进入焖菜 · ${recommendation.soup}` : "选择后显示";
-  els.vegetableSummaryBar.dataset.vegetableCarry = ready ? recommendation.carry.flavor : "";
-  els.vegetableSummaryBar.setAttribute("aria-label", ready ? `带入${recommendation.flavor}并进入焖菜` : "选择蔬菜后进入焖菜");
-  els.vegetableSummaryBar.title = ready ? "带入当前推荐并进入焖菜" : "";
+  els.vegetableSummaryStatus.textContent = saucePreview.status;
+  els.vegetableSummaryTitle.textContent = saucePreview.title;
+  els.vegetableSummaryMeta.textContent = saucePreview.components;
+  els.vegetableSummaryHint.textContent = ready ? saucePreview.note : "选择后显示";
+  els.vegetableSummaryBar.dataset.vegetableCarry = ready ? saucePreview.carryFlavor : "";
+  els.vegetableSummaryBar.setAttribute("aria-label", ready ? `${saucePreview.status}，${saucePreview.title}：${saucePreview.components}。查看详细做法` : "选择蔬菜后进入焖菜");
+  els.vegetableSummaryBar.title = ready ? "带入当前料汁并查看详细做法" : "";
   els.vegetableSummaryBar.hidden = !ready;
   els.vegetableHandoffActions.innerHTML = renderVegetableHandoff(recommendation, ready);
 }
@@ -1544,23 +1592,8 @@ function renderVegetables() {
 function applyVegetablesToBraise(flavorOverride) {
   const recommendation = buildVegetableRecommendation();
   const next = new Set(state.braiseOptions);
-  const carryFlavor = flavorOverride || recommendation.carry.flavor;
-  next.delete("tomato");
-  next.delete("water");
-  ["onionPowder", "parsley", "thyme", "basil", "blackPepper", "soySauce", "oysterSauce", "guizhouDip", "sesameOil"].forEach((option) => next.delete(option));
-  if (recommendation.carry.soup === "tomato") next.add("tomato");
-  if (recommendation.carry.soup === "water") next.add("water");
-  if (carryFlavor === "sichuan") {
-    next.add("guizhouDip");
-    next.add("water");
-  } else if (carryFlavor === "chinese") {
-    next.add("soySauce");
-    next.add("water");
-  } else {
-    next.add("onionPowder");
-    next.add("blackPepper");
-    next.add("thyme");
-  }
+  validBraiseOptions.forEach((option) => next.delete(option));
+  buildBraiseCarryOptions(recommendation, flavorOverride).forEach((option) => next.add(option));
   state.braiseOptions = validBraiseOptions.filter((option) => next.has(option));
   state.braiseStarted = true;
   state.braiseOpenPanels = [];
