@@ -363,6 +363,7 @@ const vegetableItems = {
   shanghaiGreen: { label: "上海青", group: "深绿叶菜", short: "上海青" },
   spinach: { label: "菠菜", group: "深绿叶菜", short: "菠菜" },
   bokChoy: { label: "小白菜", group: "深绿叶菜", short: "小白菜" },
+  milkCabbage: { label: "奶白菜", group: "叶菜 · 可作主体", short: "奶白菜" },
   romaineLettuce: { label: "油麦菜", group: "深绿叶菜", short: "油麦菜" },
   eggplant: { label: "茄子", group: "主体菜", short: "茄子" },
   greenBeans: { label: "豆角", group: "主体菜", short: "豆角" },
@@ -374,10 +375,9 @@ const vegetableItems = {
 };
 
 const vegetableGroups = [
-  { id: "main", label: "主体菜", options: ["cabbage", "baoCabbage", "napaCabbage", "cauliflower", "babyCabbage", "eggplant", "kingOysterMushroom", "greenBeans", "kidneyBeans"] },
+  { id: "main", label: "主体菜 / 叶菜", options: ["cabbage", "baoCabbage", "napaCabbage", "cauliflower", "babyCabbage", "eggplant", "kingOysterMushroom", "greenBeans", "kidneyBeans", "shanghaiGreen", "spinach", "bokChoy", "milkCabbage", "romaineLettuce"] },
   { id: "color", label: "颜色/椒香", options: ["tomato", "carrot", "bellPepper", "greenPepper"] },
   { id: "juice", label: "出汁增香", options: ["onion", "zucchini", "celery", "loofah", "garlicScape"] },
-  { id: "leafy", label: "深绿叶菜", options: ["shanghaiGreen", "spinach", "bokChoy", "romaineLettuce"] },
   { id: "boost", label: "补强菜", options: ["okra", "edamame", "peas", "mixedVeg"] }
 ];
 
@@ -411,7 +411,7 @@ const practiceCombos = [
   { level: "C 调剂", score: 71, name: "茄子 + 青椒", options: ["eggplant", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "家常味不错，但容易偏干，建议补番茄或清水。" }
 ];
 
-const leafyOptions = ["shanghaiGreen", "spinach", "bokChoy", "romaineLettuce"];
+const leafyOptions = ["shanghaiGreen", "spinach", "bokChoy", "milkCabbage", "romaineLettuce"];
 
 const knowledgeItems = [
   {
@@ -533,7 +533,9 @@ function readSavedState() {
       next.vegetableOptions = saved.vegetableOptions.filter((option) => validVegetableOptions.includes(option));
     }
     if (Array.isArray(saved.vegetableOpenPanels)) {
-      const panels = saved.vegetableOpenPanels.filter((panel) => validVegetablePanels.includes(panel));
+      const panels = saved.vegetableOpenPanels
+        .map((panel) => panel === "leafy" ? "main" : panel)
+        .filter((panel) => validVegetablePanels.includes(panel));
       next.vegetableOpenPanels = panels;
     }
     if (typeof saved.vegetableStarted === "boolean") next.vegetableStarted = saved.vegetableStarted;
@@ -1312,7 +1314,7 @@ function findBestVegetableCombo() {
 }
 
 function formatMissingVegetables(missing) {
-  return missing.map((option) => option === "leafy" ? "上海青/菠菜/小白菜/油麦菜" : vegetableItems[option].short).join("、");
+  return missing.map((option) => option === "leafy" ? "上海青/菠菜/小白菜/奶白菜/油麦菜" : vegetableItems[option].short).join("、");
 }
 
 function vegetableNeedsTomato(selected) {
@@ -1362,10 +1364,11 @@ function setVegetablePanelOpen(panel, open) {
 function buildPrepOrder(selected) {
   const first = ["carrot", "cauliflower", "cabbage", "baoCabbage", "greenBeans", "kidneyBeans", "kingOysterMushroom", "eggplant"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
   const middle = ["onion", "greenPepper", "bellPepper", "zucchini", "napaCabbage", "babyCabbage", "celery", "garlicScape", "loofah", "okra", "edamame", "peas", "mixedVeg"].filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
-  const last = leafyOptions.filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
+  const last = leafyOptions.filter((option) => option !== "milkCabbage" && selected.has(option)).map((option) => vegetableItems[option].short);
   const rows = [];
   if (first.length) rows.push(`先放：${first.join("、")}，耐熟或吸汁，需要先焖。`);
   if (middle.length) rows.push(`中段：${middle.join("、")}，翻拌后继续焖。`);
+  if (selected.has("milkCabbage")) rows.push("分开放：奶白菜菜帮随中段入锅，菜叶最后1–2分钟放。");
   if (last.length) rows.push(`最后：${last.join("、")}，叶菜最后1-2分钟放。`);
   if (!rows.length) rows.push("选择蔬菜后显示备菜顺序。");
   return rows;
@@ -1393,6 +1396,7 @@ function buildVegetableRecommendation() {
   const exact = best && best.missing.length === 0;
   const near = best && best.missing.length === 1;
   const hasTomato = selected.has("tomato");
+  const milkCabbageIsBase = selected.has("milkCabbage");
   const hasEggplantGreenPepper = selected.has("eggplant") && selected.has("greenPepper");
   const hasOkraEggplant = selected.has("okra") && selected.has("eggplant");
   const needsTomato = vegetableNeedsTomato(selected);
@@ -1422,26 +1426,35 @@ function buildVegetableRecommendation() {
   if (!selected.has("leafy") && !selected.has("cabbage") && !selected.has("baoCabbage") && !selected.has("napaCabbage") && !selected.has("cauliflower")) {
     addSuggestion(improve, "包菜 / 油麦菜", "如果本周叶菜少，可补一个结构型绿菜；不是每锅必加。");
   }
-  if (!selected.has("edamame") && !selected.has("peas") && !selected.has("mixedVeg") && selectedCount <= 3) {
+  if (milkCabbageIsBase && selectedCount === 1) {
+    addSuggestion(improve, "番茄 / 胡萝卜（可选）", "奶白菜约250–350g时已经可以独立承担蔬菜主体；想补颜色和风味时再加50–100g即可。");
+  }
+  if (!milkCabbageIsBase && !selected.has("edamame") && !selected.has("peas") && !selected.has("mixedVeg") && selectedCount <= 3) {
     addSuggestion(improve, "毛豆仁 / 青豆粒", "想增加颗粒感时加30-50g即可，计入全天摄入。");
   }
 
-  const status = exact ? best.combo.level : near ? "接近好组合" : selectedCount >= 3 ? "可优化" : "先补齐";
-  const title = exact ? best.combo.level : near ? "差一个菜就很完整" : selectedCount >= 3 ? "当前可用，建议微调" : "先补一个关键菜";
-  const comboTitle = best ? `${best.combo.level} · ${best.combo.name}` : "暂无接近组合";
+  const status = exact ? best.combo.level : near ? "接近好组合" : milkCabbageIsBase ? "可直接做" : selectedCount >= 3 ? "可优化" : "先补齐";
+  const title = exact ? best.combo.level : near ? "差一个菜就很完整" : milkCabbageIsBase ? "奶白菜可作本餐主体" : selectedCount >= 3 ? "当前可用，建议微调" : "先补一个关键菜";
+  const comboTitle = best ? `${best.combo.level} · ${best.combo.name}` : milkCabbageIsBase ? "奶白菜主体方案" : "暂无接近组合";
   const comboSummary = exact
     ? best.combo.note
     : near
       ? `当前很接近这组，建议补：${formatMissingVegetables(best.missing)}。`
       : best
         ? `最接近：${best.combo.name}；可按建议补齐，也可以直接做当前组合。`
-        : "当前组合不在实践版主力表里，建议补番茄、甘蓝或洋葱这类结构菜。";
+        : milkCabbageIsBase
+          ? "奶白菜约250–350g时不必再强制添加主体菜；份量较少时，再补包菜、菜花或杏鲍菇。"
+          : "当前组合不在实践版主力表里，建议补番茄、甘蓝或洋葱这类结构菜。";
+
+  const baseSummary = milkCabbageIsBase
+    ? "奶白菜约250–350g时可独立承担蔬菜主体；菜帮先放，菜叶最后1–2分钟放。"
+    : "";
 
   return {
     status,
     title,
     flavor,
-    summary: `${soup} 推荐风味：${flavor}。`,
+    summary: `${baseSummary}${soup} 推荐风味：${flavor}。`,
     comboTitle,
     comboSummary,
     soup,
@@ -1502,6 +1515,7 @@ function renderVegetables() {
   const recommendation = buildVegetableRecommendation();
   const selectedLabels = selectedVegetableLabels();
   const ready = state.vegetableStarted && state.vegetableOptions.length > 0;
+  renderVegetableGroups();
   syncVegetableOptionButtons();
   els.vegetableStatusPill.textContent = recommendation.status;
   els.vegetableCountPill.textContent = `${state.vegetableOptions.length} 项`;
