@@ -70,6 +70,25 @@ const dayTypes = {
   }
 };
 
+const defaultDayTips = {
+  daily: {
+    title: "状态正常就维持",
+    text: "如果出现明显饥饿、头晕或恢复变差，再增加50g主食缓冲；否则不加。"
+  },
+  run: {
+    title: "只在触发条件出现时补碳",
+    text: "空腹、距上一餐超过4小时，或跑后1小时仍腿沉时，加香蕉1根或等量主食。"
+  },
+  strength: {
+    title: "先看训练表现",
+    text: "明显掉力时先开50g主食缓冲；连续疲劳、睡眠差或酸痛明显时再把第三餐改为K。"
+  },
+  rest: {
+    title: "饿了先加蔬菜",
+    text: "休息日保留一份主食；明显饥饿时先加蔬菜、番茄或黄瓜，不急着加香蕉。"
+  }
+};
+
 const staples = {
   rice: {
     label: "糙米",
@@ -317,6 +336,7 @@ const thirdMeals = {
 const STORAGE_KEY = "eatplan.dashboard.state.v1";
 const RECORD_STORAGE_KEY = "eatplan.dashboard.records.v1";
 const BRAISE_PANEL_STATE_VERSION = 2;
+const VEGETABLE_PANEL_STATE_VERSION = 2;
 
 const garlicBases = {
   olivePowder: "橄榄油 + 蒜粉",
@@ -420,7 +440,7 @@ const knowledgeItems = [
     title: "当前总控",
     summary: "日常默认方案F，5km慢跑不固定加碳水；空腹、距上一餐久、跑后恢复慢或叠加力量时再补。主食保持一份，额外补碳单独计入。",
     facts: [
-      ["日常蛋白", "约108.8g，约1.45g/kg"],
+      ["日常蛋白", "约108.8g，约1.45g/kg · 推荐档"],
       ["补碳触发", "空腹、间隔超过4小时、跑后1小时仍腿沉、叠加力量"],
       ["换算", "香蕉1根 ≈ 土豆100g / 糙米饭75-100g / 紫薯80-100g"],
       ["玉米馒头", "训练日可用1个替代正餐主食，不和米饭土豆叠加"]
@@ -431,11 +451,11 @@ const knowledgeItems = [
     id: "protein",
     type: "蛋白质",
     title: "F/K 蛋白档",
-    summary: "方案F是日常默认，F的4个鸡蛋可用等蛋白瘦肉替换，方案K仍是触发档。跑步日先看是否需要补碳，不默认靠K解决；早餐用牛奶125ml + 鸡蛋1个更平衡。",
+    summary: "方案F位于推荐档，是日常默认；F的4个鸡蛋可用等蛋白瘦肉替换。方案K位于训练恢复档，仅在跑步叠加力量、训练量明显增加、高疲劳或恢复压力大时按需使用。",
     facts: [
-      ["方案F", "鸡蛋4个（约200g），日常够用，操作最低"],
+      ["方案F", "鸡蛋4个（约200g），约1.43g/kg · 推荐档，日常够用"],
       ["F肉类替换", "鸡胸约110g、去皮鸭胸约125g、牛瘦肉约115g、猪瘦肉约125g，蛋白都接近25g"],
-      ["方案K", "鸡蛋3个（约150g）+ 鸡胸100g，用于跑步叠加力量或高疲劳"],
+      ["方案K", "鸡蛋3个（约150g）+ 鸡胸100g，约1.65g/kg · 训练恢复档，按需使用"],
       ["牛奶替换", "综合最优是牛奶125ml + 鸡蛋1个"]
     ],
     note: "来源：蛋白质补充方案、采购价格与替换规则。"
@@ -495,7 +515,7 @@ const defaultState = {
   buffer: false,
   knowledge: "plan",
   vegetableOptions: [],
-  vegetableOpenPanels: ["main", "color", "juice"],
+  vegetableOpenPanels: ["main"],
   vegetableStarted: false,
   braiseGarlicBase: "none",
   braiseOptions: [],
@@ -532,7 +552,7 @@ function readSavedState() {
     if (Array.isArray(saved.vegetableOptions)) {
       next.vegetableOptions = saved.vegetableOptions.filter((option) => validVegetableOptions.includes(option));
     }
-    if (Array.isArray(saved.vegetableOpenPanels)) {
+    if (saved.vegetablePanelStateVersion === VEGETABLE_PANEL_STATE_VERSION && Array.isArray(saved.vegetableOpenPanels)) {
       const panels = saved.vegetableOpenPanels
         .map((panel) => panel === "leafy" ? "main" : panel)
         .filter((panel) => validVegetablePanels.includes(panel));
@@ -576,7 +596,9 @@ const els = {
   plannerTitle: document.querySelector("#planner-title"),
   quickDayControls: document.querySelector("#quickDayControls"),
   executionCalories: document.querySelector("#executionCalories"),
+  executionProteinMetric: document.querySelector("#executionProteinMetric"),
   executionProtein: document.querySelector("#executionProtein"),
+  executionProteinTier: document.querySelector("#executionProteinTier"),
   executionWater: document.querySelector("#executionWater"),
   openSettingsButton: document.querySelector("#openSettingsButton"),
   settingsPanel: document.querySelector("#settingsPanel"),
@@ -780,6 +802,7 @@ function saveState() {
       knowledge: state.knowledge,
       vegetableOptions: state.vegetableOptions,
       vegetableOpenPanels: state.vegetableOpenPanels,
+      vegetablePanelStateVersion: VEGETABLE_PANEL_STATE_VERSION,
       vegetableStarted: state.vegetableStarted,
       braiseGarlicBase: state.braiseGarlicBase,
       braiseOptions: state.braiseOptions,
@@ -1001,8 +1024,9 @@ function renderBraisePanels() {
 }
 
 function assessmentClass(status) {
-  if (status === "下限以下" || status === "偏低") return "warn";
-  if (["赤字偏大", "偏低边缘", "偏高", "参考上限"].includes(status)) return "caution";
+  if (status === "低于目标" || status === "偏低") return "warn";
+  if (status === "训练恢复档") return "recovery";
+  if (["赤字偏大", "偏低边缘", "偏高", "超出当前需要"].includes(status)) return "caution";
   return "good";
 }
 
@@ -1024,17 +1048,15 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
     : null;
   let protein;
   if (proteinRatio < 1.3) {
-    protein = ["下限以下", "低于减脂保肌下限，优先选F或加蛋白。"];
+    protein = ["低于目标", "低于当前减脂保肌目标，不建议长期维持；优先选F或补足蛋白。"];
   } else if (proteinRatio < 1.4) {
-    protein = ["下限档", "减脂期可接受；训练日建议升到稳妥档。"];
-  } else if (proteinRatio < 1.55) {
-    protein = ["稳妥档", "减脂保肌日常首选区间。"];
+    protein = ["基础达标", "达到保肌下限；训练日建议升到推荐档。"];
   } else if (proteinRatio < 1.6) {
-    protein = ["稳妥上沿", "仍可执行，日常不必继续加蛋白。"];
-  } else if (proteinRatio <= 1.7) {
-    protein = ["参考上限", "适合跑步+力量、高疲劳或恢复压力大的日子。"];
+    protein = ["推荐档", "当前日常首选区间，方案F位于此档。"];
+  } else if (proteinRatio < 1.8) {
+    protein = ["训练恢复档", "不是日常必须目标；跑步叠加力量、训练量明显增加、高疲劳或恢复压力大时按需使用。"];
   } else {
-    protein = ["偏高", "已超过当前计划参考上沿，日常不用再加蛋白。"];
+    protein = ["超出当前需要", "不自动代表不安全，但按当前训练量通常无需主动追求。"];
   }
 
   let carb;
@@ -1071,9 +1093,6 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
 }
 
 function proteinSummary(status) {
-  if (status === "稳妥档" || status === "稳妥上沿") return "蛋白稳妥";
-  if (status === "参考上限") return "蛋白参考上限";
-  if (status === "下限档") return "蛋白下限";
   return `蛋白${status}`;
 }
 
@@ -1152,7 +1171,7 @@ function renderPlanner() {
   const proteinRatio = total.protein / PROFILE_WEIGHT_KG;
   const carbRatio = total.carbs / PROFILE_WEIGHT_KG;
   const assessment = buildMacroAssessment(total, proteinRatio, carbRatio);
-  const alertStatuses = new Set(["赤字偏大", "下限以下", "偏低", "偏低边缘", "偏高"]);
+  const alertStatuses = new Set(["赤字偏大", "低于目标", "偏低", "偏低边缘", "偏高", "超出当前需要"]);
   const macroChecks = [
     { kind: "calorie", status: assessment.calorie[0], text: assessment.calorie[1] },
     { kind: "protein", status: assessment.protein[0], text: assessment.protein[1] },
@@ -1173,8 +1192,9 @@ function renderPlanner() {
   els.waterTarget.textContent = day.water;
   els.todayTitle.textContent = `${day.label} · ${staple.label}主食`;
   els.statusPill.textContent = state.thirdMeal === "k" ? "已选择 K" : (breakfastLinked ? "早餐4蛋 · 第三餐轻补" : day.status);
-  els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue.status}` : (breakfastLinked ? "早餐4蛋日，第三餐轻补" : (state.thirdMeal === "k" ? "恢复压力大时保留 K" : day.lead));
-  els.dailyTipText.textContent = macroIssue ? macroIssue.text : (breakfastLinked ? "第三餐用轻补：鸡胸优先，也可换轻鸭/轻牛/轻猪；无备肉再选轻鸡蛋2个。" : `碳水 ${round(total.carbs)}g · 脂肪 ${formatDecimal(total.fat)}g · 蛋白 ${formatDecimal(proteinRatio)}g/kg`);
+  const defaultTip = defaultDayTips[state.day] || defaultDayTips.daily;
+  els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue.status}` : (breakfastLinked ? "早餐4蛋日，第三餐轻补" : (state.thirdMeal === "k" ? "恢复压力大时保留 K" : defaultTip.title));
+  els.dailyTipText.textContent = macroIssue ? macroIssue.text : (breakfastLinked ? "第三餐用轻补：鸡胸优先，也可换轻鸭/轻牛/轻猪；无备肉再选轻鸡蛋2个。" : (state.thirdMeal === "k" ? "连续疲劳、睡眠差或酸痛明显时保留K；状态恢复后回到F。" : defaultTip.text));
   els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${secondMeatShortLabel(secondMeatPlan.items)} · ${thirdMeal.shortLabel} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
   els.dietDaySummary.textContent = day.label;
   els.dietStapleSummary.textContent = staple.label;
@@ -1183,9 +1203,15 @@ function renderPlanner() {
   els.dietThirdMealSummary.textContent = thirdMeal.shortLabel;
   els.dietAdjustSummary.textContent = [state.banana ? "香蕉" : "", state.buffer ? "50g缓冲" : ""].filter(Boolean).join("、") || "无调整";
   els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
-  els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白`;
+  els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白 · ${assessment.protein[0]}`;
   els.executionCalories.textContent = `约 ${calorieLow.toLocaleString("zh-CN")}–${calorieHigh.toLocaleString("zh-CN")}`;
   els.executionProtein.textContent = `${proteinLow}–${proteinHigh}g`;
+  els.executionProteinTier.textContent = assessment.protein[0];
+  els.executionProteinMetric.dataset.proteinGrade = assessmentClass(assessment.protein[0]);
+  els.executionProteinMetric.setAttribute(
+    "aria-label",
+    `今日蛋白约${formatDecimal(total.protein)}克，${formatDecimal(proteinRatio)}克每公斤，属于${assessment.protein[0]}`
+  );
   els.executionWater.textContent = day.water.replace(" 水", "");
   els.mealTotalSummary.textContent = buildMealAlertSummary(macroIssues);
   els.mealTotalSummary.parentElement.hidden = macroIssues.length === 0;
@@ -1398,13 +1424,15 @@ function buildVegetableSaucePreview(recommendation) {
 }
 
 function setVegetablePanelOpen(panel, open) {
-  const next = new Set(state.vegetableOpenPanels);
-  if (open) {
-    next.add(panel);
-  } else {
-    next.delete(panel);
-  }
-  state.vegetableOpenPanels = validVegetablePanels.filter((item) => next.has(item));
+  state.vegetableOpenPanels = open
+    ? [panel]
+    : state.vegetableOpenPanels.filter((item) => item !== panel);
+}
+
+function advanceVegetablePanel(option) {
+  const currentIndex = vegetableGroups.findIndex((group) => group.options.includes(option));
+  const nextGroup = vegetableGroups[currentIndex + 1];
+  state.vegetableOpenPanels = nextGroup ? [nextGroup.id] : [];
 }
 
 function buildPrepOrder(selected) {
@@ -1581,7 +1609,7 @@ function renderVegetables() {
   els.vegetableSummaryStatus.textContent = saucePreview.status;
   els.vegetableSummaryTitle.textContent = saucePreview.title;
   els.vegetableSummaryMeta.textContent = saucePreview.components;
-  els.vegetableSummaryHint.textContent = ready ? saucePreview.note : "选择后显示";
+  els.vegetableSummaryHint.textContent = ready ? "查看做法" : "选择后显示";
   els.vegetableSummaryBar.dataset.vegetableCarry = ready ? saucePreview.carryFlavor : "";
   els.vegetableSummaryBar.setAttribute("aria-label", ready ? `${saucePreview.status}，${saucePreview.title}：${saucePreview.components}。查看详细做法` : "选择蔬菜后进入焖菜");
   els.vegetableSummaryBar.title = ready ? "带入当前料汁并查看详细做法" : "";
@@ -1970,13 +1998,15 @@ els.vegetableGroups.addEventListener("click", (event) => {
   if (!button) return;
   const option = button.dataset.vegetableOption;
   const selected = new Set(state.vegetableOptions);
-  if (selected.has(option)) {
+  const adding = !selected.has(option);
+  if (!adding) {
     selected.delete(option);
   } else {
     selected.add(option);
   }
   state.vegetableOptions = validVegetableOptions.filter((item) => selected.has(item));
   state.vegetableStarted = true;
+  if (adding) advanceVegetablePanel(option);
   saveState();
   renderVegetables();
 });
@@ -2085,11 +2115,10 @@ els.viewLinkButtons.forEach((button) => {
 });
 
 let activeMealEditorCard = null;
+let mealEditorCloseTimer = null;
 
-function closeMealEditor(restoreFocus = true) {
-  const previousCard = activeMealEditorCard;
-  activeMealEditorCard = null;
-  document.body.classList.remove("meal-editor-open");
+function finalizeMealEditorClose(previousCard, restoreFocus) {
+  document.body.classList.remove("meal-editor-open", "meal-editor-closing");
   els.settingsPanel.classList.remove("meal-context-editor");
   els.settingsPanel.removeAttribute("role");
   els.settingsPanel.removeAttribute("aria-modal");
@@ -2097,6 +2126,19 @@ function closeMealEditor(restoreFocus = true) {
   els.settingsPanel.open = false;
   els.mealEditorBackdrop.hidden = true;
   if (restoreFocus) previousCard?.focus({ preventScroll: true });
+}
+
+function closeMealEditor(restoreFocus = true) {
+  if (!document.body.classList.contains("meal-editor-open")) return;
+  const previousCard = activeMealEditorCard;
+  activeMealEditorCard = null;
+  document.body.classList.add("meal-editor-closing");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.clearTimeout(mealEditorCloseTimer);
+  mealEditorCloseTimer = window.setTimeout(
+    () => finalizeMealEditorClose(previousCard, restoreFocus),
+    reduceMotion ? 0 : 140
+  );
 }
 
 els.openSettingsButton.addEventListener("click", () => {
@@ -2116,6 +2158,8 @@ function openMealEditor(panel, sourceCard) {
   state.mobilePanel = "settings";
   state.dietOpenPanels = [panel];
   activeMealEditorCard = sourceCard || null;
+  window.clearTimeout(mealEditorCloseTimer);
+  document.body.classList.remove("meal-editor-closing");
   document.body.classList.add("meal-editor-open");
   els.settingsPanel.classList.add("meal-context-editor");
   els.settingsPanel.setAttribute("role", "dialog");
@@ -2145,8 +2189,31 @@ els.mealEditCards.forEach((card) => {
 els.closeMealEditorButton.addEventListener("click", () => closeMealEditor());
 els.mealEditorBackdrop.addEventListener("click", () => closeMealEditor());
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && document.body.classList.contains("meal-editor-open")) {
+  if (!document.body.classList.contains("meal-editor-open")) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
     closeMealEditor();
+    return;
+  }
+  if (event.key !== "Tab" || document.body.classList.contains("meal-editor-closing")) return;
+
+  const focusable = [...els.settingsPanel.querySelectorAll(
+    'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+  )].filter((element) => !element.hidden && element.offsetParent !== null);
+  if (!focusable.length) {
+    event.preventDefault();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  const active = document.activeElement;
+  if (event.shiftKey && (active === first || !els.settingsPanel.contains(active))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (active === last || !els.settingsPanel.contains(active))) {
+    event.preventDefault();
+    first.focus();
   }
 });
 

@@ -12,6 +12,7 @@
   --radius-lg: 22px;
   --radius-md: 16px;
   --radius-sm: 12px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --mono: "SFMono-Regular", "Cascadia Code", "Liberation Mono", Menlo, monospace;
   --sans: "Avenir Next", "Segoe UI", "PingFang SC", "Hiragino Sans GB", system-ui, sans-serif;
 }
@@ -500,6 +501,46 @@ h1 {
   min-width: 0;
 }
 
+.execution-side {
+  position: sticky;
+  top: 94px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  align-content: start;
+}
+
+.execution-side .today-card {
+  padding: 18px;
+}
+
+.execution-side .today-title h2 {
+  font-size: clamp(22px, 2.8vw, 30px);
+}
+
+.execution-side .today-summary {
+  margin: 9px 0 12px;
+  font-size: 13px;
+}
+
+.execution-side .nutrition-list {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.execution-side .nutrition-row {
+  min-height: 58px;
+  padding: 10px 12px;
+}
+
+.execution-side .nutrition-row strong {
+  font-size: 21px;
+}
+
+.execution-side .daily-tip {
+  margin-top: 0;
+}
+
 .meal-total-strip {
   grid-column: 1 / -1;
   display: flex;
@@ -630,6 +671,19 @@ h1 {
   color: #7a3f32;
 }
 
+.nutrition-row.recovery {
+  background: #f2f7fa;
+}
+
+.nutrition-row.recovery em {
+  background: #dbe9f2;
+  color: #3f687f;
+}
+
+.nutrition-row.recovery p {
+  color: #5d7380;
+}
+
 .ratio-set {
   display: grid;
   gap: 10px;
@@ -712,6 +766,13 @@ h1 {
   gap: 12px;
   align-items: start;
   min-width: 0;
+}
+
+.prep-guidance {
+  margin: -10px 0 14px;
+  color: #626a61;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .braise-picker,
@@ -1300,6 +1361,10 @@ h1 {
     position: static;
   }
 
+  .execution-side {
+    position: static;
+  }
+
   .status-stack {
     justify-items: start;
     grid-template-columns: repeat(2, max-content);
@@ -1332,9 +1397,12 @@ h1 {
     padding: max(10px, env(safe-area-inset-top)) 10px calc(98px + env(safe-area-inset-bottom));
   }
 
-  body[data-view="braise"] .app-shell,
-  body[data-view="vegetables"] .app-shell {
+  body[data-view="braise"] .app-shell {
     padding-bottom: calc(178px + env(safe-area-inset-bottom));
+  }
+
+  body[data-view="vegetables"] .app-shell {
+    padding-bottom: calc(150px + env(safe-area-inset-bottom));
   }
 
   .topbar {
@@ -1512,6 +1580,11 @@ h1 {
     display: grid;
   }
 
+  .execution-side {
+    display: grid;
+    gap: 11px;
+  }
+
   .day-segment,
   .segmented,
   .breakfast-segment,
@@ -1658,6 +1731,37 @@ h1 {
     display: none;
   }
 
+  .vegetable-floating-summary {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+    min-height: 56px;
+    border-radius: 18px;
+    padding: 8px 12px;
+  }
+
+  .vegetable-floating-summary span {
+    align-self: center;
+    padding: 4px 7px;
+    font-size: 11px;
+  }
+
+  .vegetable-floating-summary strong {
+    font-size: 16px;
+  }
+
+  .vegetable-floating-summary small {
+    display: none;
+  }
+
+  .vegetable-floating-summary em,
+  .vegetable-floating-summary.no-avoid em {
+    display: block;
+    grid-column: 3;
+    color: #24724e;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
   .today-card {
     padding: 14px;
     background: var(--panel);
@@ -1777,6 +1881,8 @@ body.meal-editor-open {
   background: rgba(31, 33, 29, 0.38);
   backdrop-filter: blur(3px);
   cursor: default;
+  opacity: 1;
+  transition: opacity 180ms var(--ease-out);
 }
 
 .settings-panel.meal-context-editor {
@@ -1793,8 +1899,32 @@ body.meal-editor-open {
   border-radius: 24px;
   background: #fffefa;
   box-shadow: 0 24px 70px rgba(50, 44, 34, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  transform: translateX(-50%);
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
   overscroll-behavior: contain;
+}
+
+@starting-style {
+  .meal-editor-backdrop {
+    opacity: 0;
+  }
+
+  .settings-panel.meal-context-editor {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
+body.meal-editor-closing .meal-editor-backdrop {
+  opacity: 0;
+  transition-duration: 140ms;
+}
+
+body.meal-editor-closing .settings-panel.meal-context-editor {
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition-duration: 140ms;
 }
 
 .settings-panel.meal-context-editor > summary,
@@ -1994,15 +2124,24 @@ body.meal-editor-open {
   transition: opacity 180ms ease, transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.meal-edit-card:hover,
 .meal-edit-card:focus-visible {
   background: #f7fbf6;
 }
 
-.meal-edit-card:hover::after,
 .meal-edit-card:focus-visible::after {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .meal-edit-card:hover {
+    background: #f7fbf6;
+  }
+
+  .meal-edit-card:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .meal-edit-card:active {
@@ -2034,6 +2173,24 @@ body.meal-editor-open {
   margin-top: 4px;
   color: var(--muted);
   font-size: 11px;
+}
+
+.execution-metrics small em {
+  color: #2f7f52;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.execution-metrics [data-protein-grade="caution"] small em {
+  color: #956518;
+}
+
+.execution-metrics [data-protein-grade="recovery"] small em {
+  color: #3f718d;
+}
+
+.execution-metrics [data-protein-grade="warn"] small em {
+  color: #b34a3b;
 }
 
 .today-actions {
@@ -2191,7 +2348,8 @@ body.meal-editor-open {
 
   .brand small {
     margin-top: 4px;
-    font-size: 10px;
+    color: #747a72;
+    font-size: 11px;
   }
 
   .planner {
@@ -2215,7 +2373,7 @@ body.meal-editor-open {
     top: 23px;
     right: 16px;
     margin: 0;
-    color: var(--muted);
+    color: #6f756d;
     font-size: 12px;
   }
 
@@ -2229,7 +2387,7 @@ body.meal-editor-open {
 
   .planner-lead {
     margin: 7px 0 0;
-    color: #72786f;
+    color: #5f675e;
     font-size: 13px;
     line-height: 1.55;
   }
@@ -2242,7 +2400,7 @@ body.meal-editor-open {
   }
 
   .quick-day-controls button {
-    min-height: 37px;
+    min-height: 44px;
     padding: 0;
     border-color: #dfd9ce;
     background: rgba(255, 255, 255, 0.48);
@@ -2379,8 +2537,8 @@ body.meal-editor-open {
 
   .meal-flow small {
     margin-top: 2px;
-    color: #92968f;
-    font-size: 10px;
+    color: #6f756d;
+    font-size: 12px;
     line-height: 1.4;
   }
 
@@ -2398,7 +2556,8 @@ body.meal-editor-open {
   }
 
   .execution-metrics small {
-    font-size: 10px;
+    color: #6f756d;
+    font-size: 12px;
   }
 
   .daily-tip {
@@ -2426,8 +2585,8 @@ body.meal-editor-open {
   }
 
   .daily-tip p {
-    color: #777469;
-    font-size: 11px;
+    color: #69675f;
+    font-size: 12px;
   }
 
   .today-actions {
@@ -2473,6 +2632,17 @@ body.meal-editor-open {
     border-radius: 11px;
   }
 
+  .prep-guidance {
+    margin: -2px 0 10px;
+    color: #626a61;
+    font-size: 12px;
+  }
+
+  .vegetable-options button small {
+    color: #737a72;
+    font-size: 12px;
+  }
+
   .vegetables,
   .braise,
   .record,
@@ -2498,7 +2668,6 @@ body.meal-editor-open {
     width: calc(100% - 20px);
     max-height: min(68dvh, 560px);
     padding: 16px;
-    transform: translateX(-50%);
   }
 
   .settings-panel.meal-context-editor[open]::before {

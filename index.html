@@ -12,7 +12,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./assets/icon-192.png">
   <link rel="icon" href="./assets/icon-192.png" sizes="192x192">
-  <link rel="stylesheet" href="./styles.css?v=30">
+  <link rel="stylesheet" href="./styles.css?v=33">
 </head>
 <body>
   <div class="app-shell">
@@ -210,46 +210,51 @@
             </article>
           </div>
 
-          <div class="execution-metrics" aria-label="今日营养摘要">
-            <span><b id="executionCalories">约 1,300–1,400</b><small>kcal</small></span>
-            <span><b id="executionProtein">105–110g</b><small>蛋白</small></span>
-            <span><b id="executionWater">2–2.5L</b><small>饮水</small></span>
-          </div>
+          <aside class="execution-side" aria-label="今日执行摘要">
+            <div class="execution-metrics" aria-label="今日营养摘要">
+              <span><b id="executionCalories">约 1,300–1,400</b><small>kcal</small></span>
+              <span id="executionProteinMetric" data-protein-grade="good">
+                <b id="executionProtein">105–110g</b>
+                <small>蛋白 · <em id="executionProteinTier">推荐档</em></small>
+              </span>
+              <span><b id="executionWater">2–2.5L</b><small>饮水</small></span>
+            </div>
 
-          <div class="daily-layout">
-            <article class="today-card">
-              <div class="today-title">
-                <p class="kicker">营养总计</p>
-                <h2 id="todayTitle">日常 · 土豆主食</h2>
-              </div>
-              <p class="today-summary" id="todaySummary"></p>
-
-              <div class="nutrition-list" id="nutritionList" aria-label="今日营养总计"></div>
-              <div class="ratio-set" aria-label="按体重营养比例">
-                <div class="ratio-line">
-                  <span>蛋白质</span>
-                  <div class="ratio-track"><div id="proteinRatioBar"></div></div>
-                  <b id="proteinRatio">1.5 g/kg</b>
+            <div class="daily-layout">
+              <article class="today-card">
+                <div class="today-title">
+                  <p class="kicker">营养总计</p>
+                  <h2 id="todayTitle">日常 · 土豆主食</h2>
                 </div>
-                <div class="ratio-line">
-                  <span>碳水</span>
-                  <div class="ratio-track"><div id="carbRatioBar"></div></div>
-                  <b id="carbRatio">1.5 g/kg</b>
+                <p class="today-summary" id="todaySummary"></p>
+
+                <div class="nutrition-list" id="nutritionList" aria-label="今日营养总计"></div>
+                <div class="ratio-set" aria-label="按体重营养比例">
+                  <div class="ratio-line">
+                    <span>蛋白质</span>
+                    <div class="ratio-track"><div id="proteinRatioBar"></div></div>
+                    <b id="proteinRatio">1.5 g/kg</b>
+                  </div>
+                  <div class="ratio-line">
+                    <span>碳水</span>
+                    <div class="ratio-track"><div id="carbRatioBar"></div></div>
+                    <b id="carbRatio">1.5 g/kg</b>
+                  </div>
                 </div>
-              </div>
-            </article>
-          </div>
-        </div>
+              </article>
+            </div>
 
-        <div class="daily-tip" id="dailyTip">
-          <span>今日提示</span>
-          <b id="dailyTipTitle">按日常方案 F 执行</b>
-          <p id="dailyTipText">碳水 115g · 脂肪 50.0g · 蛋白 1.45g/kg</p>
-        </div>
+            <div class="daily-tip" id="dailyTip">
+              <span>今日提示</span>
+              <b id="dailyTipTitle">状态正常就维持</b>
+              <p id="dailyTipText">出现明显饥饿或恢复变差时再增加主食缓冲。</p>
+            </div>
 
-        <div class="today-actions">
-          <button type="button" class="primary-action" id="openSettingsButton">调整今日方案</button>
-          <button type="button" class="secondary-action" data-view-link="rules">查看计算依据</button>
+            <div class="today-actions">
+              <button type="button" class="primary-action" id="openSettingsButton">调整今日方案</button>
+              <button type="button" class="secondary-action" data-view-link="rules">查看计算依据</button>
+            </div>
+          </aside>
         </div>
       </section>
 
@@ -271,6 +276,7 @@
             <b id="vegetableCountPill">0 项</b>
           </div>
         </div>
+        <p class="prep-guidance">先选今天有的主体菜或叶菜；选中后会自动进入下一组，也可随时返回修改。</p>
 
         <div class="braise-layout vegetable-layout">
           <div class="braise-picker vegetable-picker" id="vegetableGroups" aria-label="蔬菜选择"></div>
@@ -536,6 +542,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=30" defer></script>
+  <script src="./app.js?v=33" defer></script>
 </body>
 </html>
