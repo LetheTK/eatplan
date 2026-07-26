@@ -1,9 +1,9 @@
-const CACHE_NAME = "eatplan-pwa-v33";
+const CACHE_NAME = "eatplan-pwa-v34";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
+  "./styles.css?v=34",
+  "./app.js?v=34",
   "./manifest.webmanifest",
   "./assets/icon-192.png",
   "./assets/icon-512.png"
@@ -35,10 +35,17 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
         return response;
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./index.html")))
+      .catch(() => caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        // 仅导航请求回退到应用外壳，避免样式或脚本请求错拿到 HTML。
+        if (event.request.mode === "navigate") return caches.match("./index.html");
+        return Response.error();
+      }))
   );
 });

@@ -33,7 +33,7 @@ const dayTypes = {
     actions: [
       "状态正常的5km慢跑，不必固定加香蕉。",
       "空腹跑、距上一餐超过4小时、跑后1小时仍腿沉时，再补碳。",
-      "补碳可选香蕉1根，或土豆100g、糙米饭75-100g、紫薯80-100g。",
+      "补碳可选香蕉1根，或土豆约130g、糙米饭75-100g、紫薯约120g。",
       "跑后或力量后正好吃饭时，可用1个玉米馒头替代本餐主食。",
       "第三餐先按方案F；当天还做力量或连续疲劳时再选K。",
       "第二餐仍只吃一份主食，不把土豆和米饭完整叠加。"
@@ -93,7 +93,7 @@ const staples = {
   rice: {
     label: "糙米",
     kcal: 1308,
-    protein: 108.8,
+    protein: 109.2,
     carbs: 108,
     fat: 50.0,
     secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 糙米100g · 橄榄油1汤匙",
@@ -102,7 +102,7 @@ const staples = {
   potato: {
     label: "土豆",
     kcal: 1318,
-    protein: 108.8,
+    protein: 109.2,
     carbs: 115,
     fat: 50.0,
     secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 土豆150g · 橄榄油1汤匙",
@@ -111,7 +111,7 @@ const staples = {
   mixed: {
     label: "混搭",
     kcal: 1313,
-    protein: 108.8,
+    protein: 109.2,
     carbs: 112,
     fat: 50.0,
     secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 主食混搭 · 橄榄油1汤匙",
@@ -139,7 +139,7 @@ const breakfasts = {
     hint: "操作最简单，但蛋白质性价比最低。",
     mealKcal: 510,
     mealProtein: 21.3,
-    kcal: 5,
+    kcal: 4,
     protein: -2.2,
     carbs: 4.5,
     fat: -1.9
@@ -163,7 +163,7 @@ const breakfasts = {
     hint: "早餐已是高蛋白高脂；第三餐自动降为轻补蛋白，不再默认叠加F鸡蛋4个。",
     mealKcal: 627,
     mealProtein: 38.2,
-    kcal: 122,
+    kcal: 121,
     protein: 14.8,
     carbs: -3.5,
     fat: 10.7
@@ -171,7 +171,12 @@ const breakfasts = {
 };
 
 const banana = { kcal: 105, protein: 1.3, carbs: 27, fat: 0.3 };
-const buffer = { kcal: 45, protein: 0, carbs: 10, fat: 0 };
+// 50g 熟重缓冲按主食区分（总表：糙米 ~55 kcal/11.5g，土豆 ~40 kcal/10g，混搭取中值）。
+const buffers = {
+  rice: { kcal: 55, carbs: 11.5 },
+  potato: { kcal: 40, carbs: 10 },
+  mixed: { kcal: 48, carbs: 10.8 }
+};
 const SECOND_MEAT_TARGET_PROTEIN = 55;
 const SECOND_MEAT_BASELINE = { kcal: 290, protein: 55, fat: 6 };
 const secondMeats = {
@@ -206,7 +211,6 @@ const secondMeats = {
 };
 const validSecondMeats = Object.keys(secondMeats);
 const standardThirdMealIds = ["eggF", "chickenF", "duckF", "beefF", "porkF", "k"];
-const egg4ThirdMealIds = ["lightChicken", "lightDuck", "lightBeef", "lightPork", "lightEggs"];
 const lightThirdMealIds = ["lightChicken", "lightDuck", "lightBeef", "lightPork", "lightEggs"];
 const thirdMealButtonText = {
   lightChicken: ["轻鸡胸", "70-80g"],
@@ -230,7 +234,7 @@ const thirdMeals = {
     carbs: -2,
     fat: -15.8,
     hint: "早餐已吃4个鸡蛋时的首选第三餐；保住蛋白，同时避免全天8个全蛋和脂肪集中。",
-    meta: "约 87 kcal · 蛋白 17g"
+    meta: "约 87 kcal · 蛋白 17.3g"
   },
   lightDuck: {
     label: "轻补蛋白：去皮鸭胸约85g",
@@ -290,7 +294,7 @@ const thirdMeals = {
     carbs: -2,
     fat: -15,
     hint: "等蛋白替代4个鸡蛋，热量和脂肪更低，但需要提前备餐。",
-    meta: "约 128 kcal · 蛋白 25g"
+    meta: "约 128 kcal · 蛋白 25.4g"
   },
   duckF: {
     label: "F替换：去皮鸭胸1份（约125g）",
@@ -426,8 +430,8 @@ const practiceCombos = [
   { level: "B 轮换", score: 80, name: "番茄 + 芸豆 + 包菜 + 青椒", options: ["tomato", "kidneyBeans", "baoCabbage", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "芸豆更厚实，必须焖透；包菜和番茄负责汤底与体积。" },
   { level: "B 轮换", score: 79, name: "番茄 + 秋葵 + 茄子", options: ["tomato", "okra", "eggplant"], flavor: "地中海清淡风 / 川贵微辣风", note: "秋葵让汤汁更稠；清淡版靠番茄和香草，重口版走川贵。" },
   { level: "B 轮换", score: 79, name: "大白菜 + 芹菜 + 杏鲍菇", options: ["napaCabbage", "celery", "kingOysterMushroom"], flavor: "地中海无番茄简易版 / 中式轻酱香版", note: "不加番茄也能靠大白菜出水，杏鲍菇吸汁。" },
-  { level: "B 轮换", score: 75, name: "番茄 + 菜花 + 洋葱", options: ["tomato", "cauliflower", "onion"], flavor: "地中海清淡风", note: "菜花吸汁能力强，番茄能改善口感。" },
   { level: "B 轮换", score: 76, name: "番茄 + 丝瓜 + 油麦菜 + 芹菜", options: ["tomato", "loofah", "romaineLettuce", "celery"], flavor: "地中海清淡风（控盐执行）", note: "低负担、出水多，油麦菜最后短焖。" },
+  { level: "B 轮换", score: 75, name: "番茄 + 菜花 + 洋葱", options: ["tomato", "cauliflower", "onion"], flavor: "地中海清淡风", note: "菜花吸汁能力强，番茄能改善口感。" },
   { level: "C 调剂", score: 71, name: "茄子 + 青椒", options: ["eggplant", "greenPepper"], flavor: "中式 / 中西结合风、川贵微辣风", note: "家常味不错，但容易偏干，建议补番茄或清水。" }
 ];
 
@@ -440,9 +444,9 @@ const knowledgeItems = [
     title: "当前总控",
     summary: "日常默认方案F，5km慢跑不固定加碳水；空腹、距上一餐久、跑后恢复慢或叠加力量时再补。主食保持一份，额外补碳单独计入。",
     facts: [
-      ["日常蛋白", "约108.8g，约1.45g/kg · 推荐档"],
+      ["日常蛋白", "约109.2g，约1.46g/kg · 推荐档"],
       ["补碳触发", "空腹、间隔超过4小时、跑后1小时仍腿沉、叠加力量"],
-      ["换算", "香蕉1根 ≈ 土豆100g / 糙米饭75-100g / 紫薯80-100g"],
+      ["换算", "香蕉1根 ≈ 土豆约130g / 糙米饭75-100g / 紫薯约120g"],
       ["玉米馒头", "训练日可用1个替代正餐主食，不和米饭土豆叠加"]
     ],
     note: "来源：总表-v4。页面已把常用结论压缩成执行规则。"
@@ -504,7 +508,6 @@ const knowledgeItems = [
 
 const defaultState = {
   view: "today",
-  mobilePanel: "settings",
   day: "daily",
   staple: "potato",
   breakfast: "balanced",
@@ -533,8 +536,6 @@ function readSavedState() {
     const next = {};
     if (["today", "vegetables", "braise", "record", "rules"].includes(saved.view)) next.view = saved.view;
     if (saved.view === "knowledge") next.view = "rules";
-    if (["settings", "meals"].includes(saved.mobilePanel)) next.mobilePanel = saved.mobilePanel;
-    if (saved.mobilePanel === "totals") next.mobilePanel = "meals";
     if (dayTypes[saved.day]) next.day = saved.day;
     if (staples[saved.staple]) next.staple = saved.staple;
     if (breakfasts[saved.breakfast]) next.breakfast = saved.breakfast;
@@ -587,11 +588,7 @@ const els = {
   viewControls: document.querySelector("#viewControls"),
   viewPanels: document.querySelectorAll("[data-view-panel]"),
   mobileBottomNav: document.querySelector("#mobileBottomNav"),
-  mobileSectionTabs: document.querySelector("#mobileSectionTabs"),
-  mobilePanels: document.querySelectorAll("[data-mobile-panel-content]"),
   mealEditCards: document.querySelectorAll("[data-meal-edit]"),
-  mobileDietHint: document.querySelector("#mobileDietHint"),
-  mobileTotalHint: document.querySelector("#mobileTotalHint"),
   todayDate: document.querySelector("#todayDate"),
   plannerTitle: document.querySelector("#planner-title"),
   quickDayControls: document.querySelector("#quickDayControls"),
@@ -773,7 +770,7 @@ function secondMealBaseKcal(stapleKey) {
 }
 
 function thirdMealOptionsForBreakfast(breakfastKey) {
-  return breakfastKey === "egg4" ? egg4ThirdMealIds : standardThirdMealIds;
+  return breakfastKey === "egg4" ? lightThirdMealIds : standardThirdMealIds;
 }
 
 function recommendedThirdMealForBreakfast(breakfastKey, currentThirdMeal) {
@@ -790,7 +787,6 @@ function saveState() {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
       view: state.view,
-      mobilePanel: state.mobilePanel,
       day: state.day,
       staple: state.staple,
       breakfast: state.breakfast,
@@ -895,6 +891,7 @@ function calculate() {
   }
 
   if (state.buffer) {
+    const buffer = buffers[state.staple] || buffers.mixed;
     total.kcal += buffer.kcal;
     total.carbs += buffer.carbs;
   }
@@ -1153,11 +1150,12 @@ function renderNutritionRows(total, assessment, proteinRatio, carbRatio) {
 
 function setNutritionAlert(hasAlert) {
   const todayButton = els.viewControls.querySelector('[data-view="today"]');
-  const totalButton = els.mobileSectionTabs.querySelector('[data-mobile-panel="meals"]');
   const nutritionButton = els.mobileBottomNav.querySelector('[data-view="today"]');
-  todayButton?.classList.toggle("has-alert", hasAlert);
-  totalButton?.classList.toggle("has-alert", hasAlert);
-  nutritionButton?.classList.toggle("has-alert", hasAlert);
+  [todayButton, nutritionButton].forEach((button) => {
+    if (!button) return;
+    button.classList.toggle("has-alert", hasAlert);
+    button.setAttribute("aria-label", hasAlert ? "今日，有营养提醒" : "今日");
+  });
 }
 
 function renderPlanner() {
@@ -1202,8 +1200,6 @@ function renderPlanner() {
   els.dietSecondMeatSummary.textContent = secondMeatPlan.items.map((item) => secondMeats[item.id].shortLabel).join("、");
   els.dietThirdMealSummary.textContent = thirdMeal.shortLabel;
   els.dietAdjustSummary.textContent = [state.banana ? "香蕉" : "", state.buffer ? "50g缓冲" : ""].filter(Boolean).join("、") || "无调整";
-  els.mobileDietHint.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel}`;
-  els.mobileTotalHint.textContent = `${round(total.kcal)} kcal · ${formatDecimal(total.protein)}g蛋白 · ${assessment.protein[0]}`;
   els.executionCalories.textContent = `约 ${calorieLow.toLocaleString("zh-CN")}–${calorieHigh.toLocaleString("zh-CN")}`;
   els.executionProtein.textContent = `${proteinLow}–${proteinHigh}g`;
   els.executionProteinTier.textContent = assessment.protein[0];
@@ -1242,18 +1238,6 @@ function renderPlanner() {
   renderRecords();
 }
 
-function renderMobilePanel() {
-  els.mobileSectionTabs.querySelectorAll("button").forEach((button) => {
-    const active = button.dataset.mobilePanel === state.mobilePanel;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-current", active ? "true" : "false");
-  });
-  els.mobilePanels.forEach((panel) => {
-    panel.classList.add("active");
-  });
-  renderMobileBottomNav();
-}
-
 function renderMobileBottomNav() {
   els.mobileBottomNav.querySelectorAll("button").forEach((button) => {
     const targetView = button.dataset.view;
@@ -1265,7 +1249,13 @@ function renderMobileBottomNav() {
   });
 }
 
-function renderView() {
+const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+function scrollBehavior() {
+  return reduceMotionQuery.matches ? "auto" : "smooth";
+}
+
+function renderView(scrollToTop = true) {
   document.body.dataset.view = state.view;
   els.viewControls.querySelectorAll("button").forEach((button) => {
     const active = button.dataset.viewGroup === "prep"
@@ -1285,7 +1275,7 @@ function renderView() {
     panel.classList.toggle("active", active);
   });
   renderMobileBottomNav();
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (scrollToTop) window.scrollTo({ top: 0, behavior: scrollBehavior() });
 }
 
 function renderKnowledgeTabs() {
@@ -1565,7 +1555,7 @@ function renderVegetableGroups() {
     const selectedLabels = group.options.filter((option) => selected.has(option)).map((option) => vegetableItems[option].short);
     const open = openPanels.has(group.id);
     return `<article class="braise-panel vegetable-panel ${open ? "" : "collapsed"}" data-vegetable-panel="${group.id}">
-      <button type="button" class="panel-head" data-vegetable-panel-toggle="${group.id}" aria-expanded="${open ? "true" : "false"}">
+      <button type="button" class="panel-head" data-vegetable-panel-toggle="${group.id}" aria-expanded="${open ? "true" : "false"}" aria-controls="vegetablePanelBody-${group.id}">
         <span>${String(index + 1).padStart(2, "0")}</span>
         <div>
           <h3>${group.label}：</h3>
@@ -1573,7 +1563,7 @@ function renderVegetableGroups() {
         </div>
         <i aria-hidden="true"></i>
       </button>
-      <div class="option-grid vegetable-options panel-body">
+      <div class="option-grid vegetable-options panel-body" id="vegetablePanelBody-${group.id}">
         ${group.options.map((option) => (
           `<button type="button" data-vegetable-option="${option}">
             <b>${vegetableItems[option].label}</b>
@@ -1947,7 +1937,14 @@ els.secondMeatControls.addEventListener("click", (event) => {
   const next = selected.includes(meat)
     ? selected.filter((item) => item !== meat)
     : [...selected, meat];
-  if (!next.length) return;
+  if (!next.length) {
+    // 至少保留一种肉：轻微抖动提示不可取消最后一项。
+    button.classList.remove("deny");
+    void button.offsetWidth;
+    button.classList.add("deny");
+    window.setTimeout(() => button.classList.remove("deny"), 260);
+    return;
+  }
   state.secondMeats = next;
   renderSecondMeatControls();
   saveState();
@@ -2078,7 +2075,7 @@ els.braiseSpiceControls.addEventListener("click", (event) => {
 });
 
 els.braiseSummaryBar.addEventListener("click", () => {
-  document.querySelector(".braise-result").scrollIntoView({ behavior: "smooth", block: "start" });
+  document.querySelector("#braise .braise-result")?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
 });
 
 els.dietPanelToggles.forEach((toggle) => {
@@ -2133,18 +2130,20 @@ function closeMealEditor(restoreFocus = true) {
   const previousCard = activeMealEditorCard;
   activeMealEditorCard = null;
   document.body.classList.add("meal-editor-closing");
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   window.clearTimeout(mealEditorCloseTimer);
   mealEditorCloseTimer = window.setTimeout(
     () => finalizeMealEditorClose(previousCard, restoreFocus),
-    reduceMotion ? 0 : 140
+    reduceMotionQuery.matches ? 0 : 140
   );
 }
 
 els.openSettingsButton.addEventListener("click", () => {
-  closeMealEditor(false);
+  // 立即完成关闭，避免 140ms 后的关闭定时器把刚打开的设置面板又收起。
+  window.clearTimeout(mealEditorCloseTimer);
+  finalizeMealEditorClose(activeMealEditorCard, false);
+  activeMealEditorCard = null;
   els.settingsPanel.open = true;
-  els.settingsPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+  els.settingsPanel.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
 });
 
 function openMealEditor(panel, sourceCard) {
@@ -2155,7 +2154,6 @@ function openMealEditor(panel, sourceCard) {
     thirdMeal: "调整第三餐"
   };
   state.view = "today";
-  state.mobilePanel = "settings";
   state.dietOpenPanels = [panel];
   activeMealEditorCard = sourceCard || null;
   window.clearTimeout(mealEditorCloseTimer);
@@ -2168,7 +2166,6 @@ function openMealEditor(panel, sourceCard) {
   els.mealEditorTitle.textContent = editorTitles[panel] || "调整餐次";
   els.settingsPanel.open = true;
   els.mealEditorBackdrop.hidden = false;
-  renderMobilePanel();
   renderDietPanels();
   saveState();
   window.requestAnimationFrame(() => {
@@ -2219,24 +2216,12 @@ document.addEventListener("keydown", (event) => {
 
 els.saveRecordButton.addEventListener("click", saveTodayRecord);
 
-els.mobileSectionTabs.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-mobile-panel]");
-  if (!button) return;
-  state.mobilePanel = button.dataset.mobilePanel;
-  saveState();
-  renderMobilePanel();
-});
-
 els.mobileBottomNav.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-view]");
   if (!button) return;
   state.view = button.dataset.view;
-  if (button.dataset.mobilePanel) {
-    state.mobilePanel = button.dataset.mobilePanel;
-  }
   saveState();
   renderView();
-  renderMobilePanel();
 });
 
 renderKnowledgeTabs();
@@ -2245,10 +2230,9 @@ syncControls();
 renderPlanner();
 renderVegetables();
 renderBraise();
-renderMobilePanel();
 renderKnowledge();
 renderRecords();
-renderView();
+renderView(false);
 
 if ("serviceWorker" in navigator && ["https:", "http:"].includes(window.location.protocol)) {
   window.addEventListener("load", () => {
