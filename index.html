@@ -13,7 +13,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./assets/icon-192.png">
   <link rel="icon" href="./assets/icon-192.png" sizes="192x192">
-  <link rel="stylesheet" href="./styles.css?v=34">
+  <link rel="stylesheet" href="./styles.css?v=35">
 </head>
 <body>
   <div class="app-shell">
@@ -28,7 +28,6 @@
       <nav class="nav-links" aria-label="页面导航" id="viewControls">
         <button type="button" data-view="today" class="active" aria-current="page"><span>今日</span><i aria-hidden="true"></i></button>
         <button type="button" data-view="vegetables" data-view-group="prep"><span>备菜</span></button>
-        <button type="button" data-view="record"><span>记录</span></button>
         <button type="button" data-view="rules"><span>依据</span></button>
       </nav>
     </header>
@@ -36,7 +35,6 @@
     <nav class="mobile-bottom-nav" aria-label="移动端导航" id="mobileBottomNav">
       <button type="button" data-view="today" class="active" aria-current="page"><span>今日</span><i aria-hidden="true"></i></button>
       <button type="button" data-view="vegetables" data-view-group="prep"><span>备菜</span></button>
-      <button type="button" data-view="record"><span>记录</span></button>
       <button type="button" data-view="rules"><span>依据</span></button>
     </nav>
 
@@ -239,9 +237,25 @@
               <p id="dailyTipText">如果出现明显饥饿、头晕或恢复变差，再增加50g主食缓冲；否则不加。</p>
             </div>
 
+            <div class="quick-adjust" role="group" aria-label="今日调整">
+              <button type="button" id="bananaQuickToggle" aria-pressed="false"><strong>香蕉 1 根</strong><small>补碳 +105 kcal · 27g 碳水</small></button>
+              <button type="button" id="bufferQuickToggle" aria-pressed="false"><strong>主食缓冲</strong><small>主食 +50g 熟重</small></button>
+            </div>
+
             <div class="today-actions">
               <button type="button" class="primary-action" id="openSettingsButton">调整今日方案</button>
               <button type="button" class="secondary-action" data-view-link="rules">查看计算依据</button>
+            </div>
+
+            <div class="record-inline">
+              <div class="record-inline-actions">
+                <button type="button" class="primary-action save-record" id="saveRecordButton">✓ 今天按此执行</button>
+                <button type="button" class="secondary-action" id="toggleHistoryButton" aria-expanded="false" aria-controls="recordHistory">查看历史</button>
+              </div>
+              <p class="record-feedback" id="recordFeedback" role="status" aria-live="polite"></p>
+              <div class="record-history" id="recordHistory" hidden>
+                <div id="recordList"></div>
+              </div>
             </div>
           </aside>
         </div>
@@ -442,27 +456,6 @@
         </button>
       </section>
 
-      <section class="record view-section" data-view-panel="record" id="record" aria-labelledby="record-title" hidden>
-        <div class="section-heading record-heading">
-          <div>
-            <p class="kicker">执行留痕</p>
-            <h1 id="record-title">今日记录</h1>
-          </div>
-          <span class="record-date" id="recordDate"></span>
-        </div>
-        <article class="record-current">
-          <p class="kicker">当前方案</p>
-          <h2 id="recordPlanTitle">日常 · 方案 F</h2>
-          <p id="recordPlanSummary">三餐与营养摘要会跟随今日方案更新。</p>
-          <button type="button" class="primary-action" id="saveRecordButton">记录今天按此执行</button>
-          <p class="record-feedback" id="recordFeedback" role="status" aria-live="polite"></p>
-        </article>
-        <div class="record-history">
-          <div class="section-heading"><div><p class="kicker">最近记录</p><h2>执行历史</h2></div></div>
-          <div id="recordList"></div>
-        </div>
-      </section>
-
       <section class="rules view-section" data-view-panel="rules" id="rules" aria-labelledby="rules-title" hidden>
         <div class="section-heading">
           <div>
@@ -471,48 +464,41 @@
             <p class="source-meta">总表 v4 · 同步于 2026-07-10 · 肉类按生重 · 主食按熟重</p>
           </div>
         </div>
-        <div class="rule-grid">
-          <article>
-            <span class="rule-index">01</span>
-            <h3>补碳触发</h3>
+        <div class="rule-accordion">
+          <details class="rule-item" open>
+            <summary><span class="rule-index">01</span><span class="rule-item-title"><h3>补碳触发</h3><small>正常不加 · 4 个触发条件</small></span><i aria-hidden="true"></i></summary>
             <p>5km 慢跑状态正常不用固定加。空腹跑、距上一餐超过4小时、跑后1小时仍腿沉/头晕/很饿、当天叠加力量或距离强度提高时，再补碳。</p>
-          </article>
-          <article>
-            <span class="rule-index">02</span>
-            <h3>补碳换算</h3>
+          </details>
+          <details class="rule-item">
+            <summary><span class="rule-index">02</span><span class="rule-item-title"><h3>补碳换算</h3><small>香蕉1根 ≈ 105 kcal · 27g 碳水</small></span><i aria-hidden="true"></i></summary>
             <p>香蕉1根约105 kcal、27g碳水；可换土豆约130g、糙米饭75-100g、紫薯约120g，或训练日用1个玉米馒头替代正餐主食。</p>
-          </article>
-          <article>
-            <span class="rule-index">03</span>
-            <h3>主食一份</h3>
+          </details>
+          <details class="rule-item">
+            <summary><span class="rule-index">03</span><span class="rule-item-title"><h3>主食一份</h3><small>糙米100g / 土豆150g / 紫薯130g</small></span><i aria-hidden="true"></i></summary>
             <p>糙米100g、土豆150g、紫薯130g或混搭都算一份。玉米馒头1个约75g、196 kcal、40g碳水，算一份偏大主食。</p>
-          </article>
-          <article>
-            <span class="rule-index">04</span>
-            <h3>F日常，K触发</h3>
+          </details>
+          <details class="rule-item">
+            <summary><span class="rule-index">04</span><span class="rule-item-title"><h3>F日常，K触发</h3><small>K 只在恢复压力大时用</small></span><i aria-hidden="true"></i></summary>
             <p>F覆盖日常保肌。跑步叠加力量、高疲劳、恢复差或睡眠差时，再把第三餐升到K。</p>
-          </article>
-          <article>
-            <span class="rule-index">05</span>
-            <h3>鸡鸭别搞复杂</h3>
+          </details>
+          <details class="rule-item">
+            <summary><span class="rule-index">05</span><span class="rule-item-title"><h3>鸡鸭别搞复杂</h3><small>鸡胸150g + 鸭胸100g</small></span><i aria-hidden="true"></i></summary>
             <p>每天混就鸡胸150g+鸭胸100g；嫌麻烦就鸡胸4天、鸭胸3天轮换。</p>
-          </article>
-          <article>
-            <span class="rule-index">06</span>
-            <h3>温热复热</h3>
+          </details>
+          <details class="rule-item">
+            <summary><span class="rule-index">06</span><span class="rule-item-title"><h3>温热复热</h3><small>冷藏/冷冻 · 加热到温热</small></span><i aria-hidden="true"></i></summary>
             <p>土豆、紫薯、米饭熟后冷藏或冷冻，吃前加热到温热即可。</p>
-          </article>
-          <article>
-            <span class="rule-index">07</span>
-            <h3>水跟训练走</h3>
+          </details>
+          <details class="rule-item">
+            <summary><span class="rule-index">07</span><span class="rule-item-title"><h3>水跟训练走</h3><small>日常 2-2.5L · 力量 2.3-2.8L · 跑步 2.5-3L</small></span><i aria-hidden="true"></i></summary>
             <p>日常2-2.5L，力量2.3-2.8L，跑步2.5-3L。跑后小口慢饮。</p>
-          </article>
+          </details>
         </div>
 
         <div class="knowledge-compact" id="knowledge" aria-labelledby="knowledge-title">
           <div class="section-heading">
             <p class="kicker">知识依据</p>
-            <h2 id="knowledge-title">需要时点开看依据，不单独占一个导航。</h2>
+            <h2 id="knowledge-title">分类速查</h2>
           </div>
           <div class="knowledge-layout">
             <div class="knowledge-tabs" id="knowledgeTabs" aria-label="知识库分类"></div>
@@ -531,6 +517,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=34" defer></script>
+  <script src="./app.js?v=35" defer></script>
 </body>
 </html>

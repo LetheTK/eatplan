@@ -534,8 +534,9 @@ function readSavedState() {
     if (!saved || typeof saved !== "object") return {};
 
     const next = {};
-    if (["today", "vegetables", "braise", "record", "rules"].includes(saved.view)) next.view = saved.view;
+    if (["today", "vegetables", "braise", "rules"].includes(saved.view)) next.view = saved.view;
     if (saved.view === "knowledge") next.view = "rules";
+    if (saved.view === "record") next.view = "today";
     if (dayTypes[saved.day]) next.day = saved.day;
     if (staples[saved.staple]) next.staple = saved.staple;
     if (breakfasts[saved.breakfast]) next.breakfast = saved.breakfast;
@@ -690,9 +691,10 @@ const els = {
   braiseSummaryAvoid: document.querySelector("#braiseSummaryAvoid"),
   prepViewButtons: document.querySelectorAll("[data-prep-view]"),
   viewLinkButtons: document.querySelectorAll("[data-view-link]"),
-  recordDate: document.querySelector("#recordDate"),
-  recordPlanTitle: document.querySelector("#recordPlanTitle"),
-  recordPlanSummary: document.querySelector("#recordPlanSummary"),
+  recordHistory: document.querySelector("#recordHistory"),
+  toggleHistoryButton: document.querySelector("#toggleHistoryButton"),
+  bananaQuickToggle: document.querySelector("#bananaQuickToggle"),
+  bufferQuickToggle: document.querySelector("#bufferQuickToggle"),
   saveRecordButton: document.querySelector("#saveRecordButton"),
   recordFeedback: document.querySelector("#recordFeedback"),
   recordList: document.querySelector("#recordList")
@@ -837,15 +839,13 @@ function readRecords() {
 let records = readRecords();
 
 function renderRecords() {
-  const day = dayTypes[state.day];
-  const total = calculate();
-  const planCode = state.thirdMeal === "k" ? "K" : "F";
-  els.recordDate.textContent = todayLabel();
-  els.recordPlanTitle.textContent = `${day.label} · 方案 ${planCode}`;
-  els.recordPlanSummary.textContent = `${round(total.kcal)} kcal · 蛋白 ${formatDecimal(total.protein)}g · ${day.water} · ${mealTimes.first} / ${mealTimes.second} / ${mealTimes.third}`;
   els.recordList.innerHTML = records.length
     ? records.map((record) => `<article class="record-item"><time>${record.dateLabel}</time><div><b>${record.title}</b><p>${record.summary}</p></div></article>`).join("")
     : '<p class="record-empty">还没有记录。执行完今天的方案后，在这里留一条即可。</p>';
+  const todayKey = dateKey();
+  const savedToday = records.some((record) => record.key === todayKey);
+  els.saveRecordButton.textContent = savedToday ? "已记录 · 点按可更新" : "✓ 今天按此执行";
+  els.saveRecordButton.classList.toggle("saved", savedToday);
 }
 
 function saveTodayRecord() {
@@ -1200,6 +1200,10 @@ function renderPlanner() {
   els.dietSecondMeatSummary.textContent = secondMeatPlan.items.map((item) => secondMeats[item.id].shortLabel).join("、");
   els.dietThirdMealSummary.textContent = thirdMeal.shortLabel;
   els.dietAdjustSummary.textContent = [state.banana ? "香蕉" : "", state.buffer ? "50g缓冲" : ""].filter(Boolean).join("、") || "无调整";
+  els.bananaQuickToggle.classList.toggle("active", state.banana);
+  els.bananaQuickToggle.setAttribute("aria-pressed", String(state.banana));
+  els.bufferQuickToggle.classList.toggle("active", state.buffer);
+  els.bufferQuickToggle.setAttribute("aria-pressed", String(state.buffer));
   els.executionCalories.textContent = `约 ${calorieLow.toLocaleString("zh-CN")}–${calorieHigh.toLocaleString("zh-CN")}`;
   els.executionProtein.textContent = `${proteinLow}–${proteinHigh}g`;
   els.executionProteinTier.textContent = assessment.protein[0];
@@ -2215,6 +2219,27 @@ document.addEventListener("keydown", (event) => {
 });
 
 els.saveRecordButton.addEventListener("click", saveTodayRecord);
+
+els.bananaQuickToggle.addEventListener("click", () => {
+  state.banana = !state.banana;
+  els.bananaToggle.checked = state.banana;
+  saveState();
+  renderPlanner();
+});
+
+els.bufferQuickToggle.addEventListener("click", () => {
+  state.buffer = !state.buffer;
+  els.bufferToggle.checked = state.buffer;
+  saveState();
+  renderPlanner();
+});
+
+els.toggleHistoryButton.addEventListener("click", () => {
+  const open = els.recordHistory.hidden;
+  els.recordHistory.hidden = !open;
+  els.toggleHistoryButton.textContent = open ? "收起历史" : "查看历史";
+  els.toggleHistoryButton.setAttribute("aria-expanded", String(open));
+});
 
 els.mobileBottomNav.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-view]");
