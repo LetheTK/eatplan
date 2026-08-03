@@ -1,9 +1,9 @@
-const CACHE_NAME = "eatplan-pwa-v35";
+const CACHE_NAME = "eatplan-pwa-v37";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=35",
-  "./app.js?v=35",
+  "./styles.css?v=37",
+  "./app.js?v=37",
   "./manifest.webmanifest",
   "./assets/icon-192.png",
   "./assets/icon-512.png"

@@ -13,7 +13,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./assets/icon-192.png">
   <link rel="icon" href="./assets/icon-192.png" sizes="192x192">
-  <link rel="stylesheet" href="./styles.css?v=35">
+  <link rel="stylesheet" href="./styles.css?v=37">
 </head>
 <body>
   <div class="app-shell">
@@ -22,7 +22,7 @@
         <span class="brand-mark" aria-hidden="true"></span>
         <span>
           <strong>今日饮食</strong>
-          <small>总表 v4 · 同步于 2026-07-10</small>
+          <small>总表 v4 · 同步于 2026-08-03</small>
         </span>
       </a>
       <nav class="nav-links" aria-label="页面导航" id="viewControls">
@@ -89,24 +89,9 @@
                 <button type="button" data-day="rest">休息</button>
               </div>
             </article>
-            <article class="braise-panel diet-panel collapsed" data-diet-panel="staple">
-              <button type="button" class="panel-head" data-diet-panel-toggle="staple" aria-expanded="false" aria-controls="stapleControls">
-                <span>02</span>
-                <div>
-                  <h3>主食：</h3>
-                  <b id="dietStapleSummary">土豆</b>
-                </div>
-                <i aria-hidden="true"></i>
-              </button>
-              <div class="segmented panel-body" id="stapleControls">
-                <button type="button" data-staple="rice">糙米</button>
-                <button type="button" data-staple="potato" class="active" aria-pressed="true">土豆</button>
-                <button type="button" data-staple="mixed">混搭</button>
-              </div>
-            </article>
             <article class="braise-panel diet-panel collapsed" data-diet-panel="breakfast">
               <button type="button" class="panel-head" data-diet-panel-toggle="breakfast" aria-expanded="false" aria-controls="breakfastControls">
-                <span>03</span>
+                <span>02</span>
                 <div>
                   <h3>早餐：</h3>
                   <b id="dietBreakfastSummary">平衡</b>
@@ -120,25 +105,66 @@
                 <button type="button" data-breakfast="egg4">4蛋麦片</button>
               </div>
             </article>
-            <article class="braise-panel diet-panel collapsed" data-diet-panel="secondMeat">
-              <button type="button" class="panel-head" data-diet-panel-toggle="secondMeat" aria-expanded="false" aria-controls="secondMeatControls">
-                <span>04</span>
+            <article class="braise-panel diet-panel collapsed" data-diet-panel="secondMeal">
+              <button type="button" class="panel-head" data-diet-panel-toggle="secondMeal" aria-expanded="false" aria-controls="secondMealControls">
+                <span>03</span>
                 <div>
-                  <h3>第二餐肉类：</h3>
-                  <b id="dietSecondMeatSummary">鸡、鸭</b>
+                  <h3>第二餐：</h3>
+                  <b id="dietSecondMealSummary">土豆150g · 鸡、鸭</b>
                 </div>
                 <i aria-hidden="true"></i>
               </button>
-              <div class="segmented second-meat-segment panel-body" id="secondMeatControls" role="group" aria-label="第二餐肉类，可多选">
-                <button type="button" data-second-meat="chicken" class="active" aria-pressed="true">鸡胸</button>
-                <button type="button" data-second-meat="duck" class="active" aria-pressed="true">鸭胸</button>
-                <button type="button" data-second-meat="beef">牛瘦肉</button>
-                <button type="button" data-second-meat="pork">猪瘦肉</button>
+              <div class="second-meal-editor panel-body" id="secondMealControls">
+                <section class="meal-control-block" aria-labelledby="stapleTypeLabel">
+                  <div class="meal-control-label" id="stapleTypeLabel"><b>主食</b><small>生重</small></div>
+                  <div class="segmented staple-segment" id="stapleControls" role="group" aria-label="第二餐主食类型">
+                    <button type="button" data-staple="rice">糙米</button>
+                    <button type="button" data-staple="potato" class="active" aria-pressed="true">土豆</button>
+                    <button type="button" data-staple="mixed">混搭</button>
+                  </div>
+                </section>
+
+                <section class="meal-control-block" id="singleStapleWeight" aria-labelledby="stapleWeightLabel">
+                  <div class="meal-control-label" id="stapleWeightLabel"><b>主食重量</b><small id="stapleWeightFood">土豆 · 生重</small></div>
+                  <div class="weight-stepper">
+                    <button type="button" data-staple-weight-delta="-1" aria-label="减少主食生重">−</button>
+                    <label for="stapleWeightInput"><span class="sr-only">主食生重，单位克</span><input id="stapleWeightInput" type="number" inputmode="numeric" min="50" max="600" step="25" value="150"><i>g</i></label>
+                    <button type="button" data-staple-weight-delta="1" aria-label="增加主食生重">＋</button>
+                  </div>
+                  <div class="weight-presets" role="group" aria-label="主食生重预设">
+                    <button type="button" id="stapleBasePreset" data-staple-preset="base">基础 150g</button>
+                    <button type="button" id="stapleIncreasePreset" data-staple-preset="increase">加量 300g</button>
+                  </div>
+                  <p class="weight-nutrition" id="stapleWeightMeta">约 120 kcal · 碳水 30g</p>
+                </section>
+
+                <section class="meal-control-block" id="mixedStapleWeights" aria-labelledby="mixedWeightLabel" hidden>
+                  <div class="meal-control-label" id="mixedWeightLabel"><b>混搭重量</b><small>分别按生重</small></div>
+                  <div class="mixed-weight-grid">
+                    <label for="mixedRiceWeight">糙米<input id="mixedRiceWeight" type="number" inputmode="numeric" min="5" max="150" step="5" value="15"><i>g</i></label>
+                    <label for="mixedPotatoWeight">土豆<input id="mixedPotatoWeight" type="number" inputmode="numeric" min="25" max="600" step="25" value="75"><i>g</i></label>
+                  </div>
+                  <div class="weight-presets" role="group" aria-label="混搭生重预设">
+                    <button type="button" data-mixed-preset="base">基础混搭</button>
+                    <button type="button" data-mixed-preset="increase">加量混搭</button>
+                  </div>
+                  <p class="weight-nutrition" id="mixedWeightMeta">约 115 kcal · 碳水 26.5g</p>
+                </section>
+
+                <section class="meal-control-block" aria-labelledby="secondMeatLabel">
+                  <div class="meal-control-label" id="secondMeatLabel"><b>肉类</b><small>可多选</small></div>
+                  <div class="segmented second-meat-segment" id="secondMeatControls" role="group" aria-label="第二餐肉类，可多选">
+                    <button type="button" data-second-meat="chicken" class="active" aria-pressed="true">鸡胸</button>
+                    <button type="button" data-second-meat="duck" class="active" aria-pressed="true">鸭胸</button>
+                    <button type="button" data-second-meat="beef">牛瘦肉</button>
+                    <button type="button" data-second-meat="pork">猪瘦肉</button>
+                  </div>
+                </section>
               </div>
             </article>
             <article class="braise-panel diet-panel collapsed" data-diet-panel="thirdMeal">
               <button type="button" class="panel-head" data-diet-panel-toggle="thirdMeal" aria-expanded="false" aria-controls="thirdMealControls">
-                <span>05</span>
+                <span>04</span>
                 <div>
                   <h3>第三餐：</h3>
                   <b id="dietThirdMealSummary">F鸡蛋</b>
@@ -156,7 +182,7 @@
             </article>
             <article class="braise-panel diet-panel collapsed" data-diet-panel="adjust">
               <button type="button" class="panel-head" data-diet-panel-toggle="adjust" aria-expanded="false" aria-controls="adjustControls">
-                <span>06</span>
+                <span>05</span>
                 <div>
                   <h3>调整：</h3>
                   <b id="dietAdjustSummary">无调整</b>
@@ -165,7 +191,6 @@
               </button>
               <div class="toggle-row panel-body" id="adjustControls">
                 <label><input id="bananaToggle" type="checkbox"> 香蕉</label>
-                <label><input id="bufferToggle" type="checkbox"> 50g 缓冲</label>
               </div>
             </article>
           </div>
@@ -183,11 +208,11 @@
               <p id="firstMealHint">保留口感和钙，减少牛奶成本。</p>
               <small id="firstMealMeta">约 506 kcal · 蛋白 23.5g</small>
             </article>
-            <article class="meal-edit-card" data-meal-edit="secondMeat" role="button" tabindex="0" aria-label="调整第二餐肉类方案">
+            <article class="meal-edit-card" data-meal-edit="secondMeal" role="button" tabindex="0" aria-label="调整第二餐主食生重和肉类方案">
               <div class="meal-card-head"><span>第二餐</span><time id="secondMealTime">约 22:00</time></div>
-              <b id="secondMealText">鸡胸约120g + 去皮鸭胸约140g · 蔬菜200g · 土豆150g · 橄榄油1汤匙</b>
-              <p id="secondMealHint">多选时按蛋白均分，每种约27.5g蛋白。</p>
-              <small id="secondMealMeta">约 579 kcal · 蛋白 60.5g · 含蔬菜</small>
+              <b id="secondMealText">鸡胸约120g + 去皮鸭胸约140g · 蔬菜200g · 土豆150g（生重）· 橄榄油1汤匙</b>
+              <p id="secondMealHint">主食按生重计算；肉类多选时每种约27.5g蛋白。</p>
+              <small id="secondMealMeta">约 579 kcal · 蛋白 60.5g · 碳水 40g</small>
             </article>
             <article class="meal-edit-card" data-meal-edit="thirdMeal" role="button" tabindex="0" aria-label="调整第三餐蛋白方案">
               <div class="meal-card-head"><span>第三餐</span><time id="thirdMealTime">约 01:30–02:00</time></div>
@@ -203,6 +228,10 @@
               <span id="executionProteinMetric" data-protein-grade="good">
                 <b id="executionProtein">105–110g</b>
                 <small>蛋白 · <em id="executionProteinTier">推荐档</em></small>
+              </span>
+              <span id="executionCarbMetric" data-carb-grade="good">
+                <b id="executionCarbs">130–135g</b>
+                <small>碳水 · <em id="executionCarbTier">合理</em></small>
               </span>
               <span><b id="executionWater">2–2.5L</b><small>饮水</small></span>
             </div>
@@ -234,12 +263,12 @@
             <div class="daily-tip" id="dailyTip">
               <span>今日提示</span>
               <b id="dailyTipTitle">状态正常就维持</b>
-              <p id="dailyTipText">如果出现明显饥饿、头晕或恢复变差，再增加50g主食缓冲；否则不加。</p>
+              <p id="dailyTipText">如果出现明显饥饿、头晕、睡眠或恢复变差，再调整第二餐主食生重。</p>
             </div>
 
             <div class="quick-adjust" role="group" aria-label="今日调整">
               <button type="button" id="bananaQuickToggle" aria-pressed="false"><strong>香蕉 1 根</strong><small>补碳 +105 kcal · 27g 碳水</small></button>
-              <button type="button" id="bufferQuickToggle" aria-pressed="false"><strong>主食缓冲</strong><small>主食 +50g 熟重</small></button>
+              <button type="button" id="stapleQuickEdit"><strong>调整主食</strong><small id="stapleQuickSummary">土豆 150g · 生重</small></button>
             </div>
 
             <div class="today-actions">
@@ -461,7 +490,7 @@
           <div>
             <p class="kicker">数据与规则</p>
             <h1 id="rules-title">计算依据</h1>
-            <p class="source-meta">总表 v4 · 同步于 2026-07-10 · 肉类按生重 · 主食按熟重</p>
+            <p class="source-meta">总表 v4 · 主食与肉类均按下锅前生重</p>
           </div>
         </div>
         <div class="rule-accordion">
@@ -471,11 +500,11 @@
           </details>
           <details class="rule-item">
             <summary><span class="rule-index">02</span><span class="rule-item-title"><h3>补碳换算</h3><small>香蕉1根 ≈ 105 kcal · 27g 碳水</small></span><i aria-hidden="true"></i></summary>
-            <p>香蕉1根约105 kcal、27g碳水；可换土豆约130g、糙米饭75-100g、紫薯约120g，或训练日用1个玉米馒头替代正餐主食。</p>
+            <p>香蕉1根约105 kcal、27g碳水；约等于土豆135g生重或糙米35g生重。训练日也可用1个玉米馒头替代正餐主食。</p>
           </details>
           <details class="rule-item">
-            <summary><span class="rule-index">03</span><span class="rule-item-title"><h3>主食一份</h3><small>糙米100g / 土豆150g / 紫薯130g</small></span><i aria-hidden="true"></i></summary>
-            <p>糙米100g、土豆150g、紫薯130g或混搭都算一份。玉米馒头1个约75g、196 kcal、40g碳水，算一份偏大主食。</p>
+            <summary><span class="rule-index">03</span><span class="rule-item-title"><h3>主食生重</h3><small>糙米30g / 土豆150g为基础量</small></span><i aria-hidden="true"></i></summary>
+            <p>糙米在下锅前称重，基础30g、加量60g；土豆按可食部下锅前称重，基础150g、加量300g。混搭时分别填写两种生重。</p>
           </details>
           <details class="rule-item">
             <summary><span class="rule-index">04</span><span class="rule-item-title"><h3>F日常，K触发</h3><small>K 只在恢复压力大时用</small></span><i aria-hidden="true"></i></summary>
@@ -517,6 +546,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=35" defer></script>
+  <script src="./app.js?v=37" defer></script>
 </body>
 </html>

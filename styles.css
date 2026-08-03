@@ -404,6 +404,180 @@ h1 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.second-meal-editor {
+  display: grid;
+  gap: 0;
+}
+
+.meal-control-block {
+  min-width: 0;
+  padding: 14px 0;
+}
+
+.meal-control-block:first-child {
+  padding-top: 0;
+}
+
+.meal-control-block:last-child {
+  padding-bottom: 0;
+}
+
+.meal-control-block + .meal-control-block {
+  border-top: 1px solid var(--line);
+}
+
+.meal-control-block[hidden] {
+  display: none !important;
+}
+
+.meal-control-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 9px;
+}
+
+.meal-control-label b {
+  color: #303730;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.meal-control-label small,
+.weight-nutrition {
+  color: #747b73;
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.weight-stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(112px, 1fr) 44px;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.weight-stepper > button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid #ddd8ce;
+  border-radius: var(--radius-sm);
+  background: #fbfaf6;
+  color: #2f513a;
+  cursor: pointer;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.weight-stepper > button:active {
+  transform: scale(0.96);
+}
+
+.weight-stepper label,
+.mixed-weight-grid label {
+  position: relative;
+  min-width: 0;
+}
+
+.weight-stepper input,
+.mixed-weight-grid input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #d9d5cb;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: #252b26;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  padding: 0 30px 0 12px;
+  text-align: center;
+  appearance: textfield;
+}
+
+.weight-stepper input::-webkit-inner-spin-button,
+.mixed-weight-grid input::-webkit-inner-spin-button {
+  appearance: none;
+}
+
+.weight-stepper label i,
+.mixed-weight-grid label i {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  color: #7b817a;
+  font-size: 12px;
+  font-style: normal;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.mixed-weight-grid label i {
+  top: auto;
+  bottom: 14px;
+  transform: none;
+}
+
+#adjustControls {
+  grid-template-columns: 1fr;
+}
+
+.weight-presets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.weight-presets button {
+  min-height: 40px;
+  border: 1px solid #e1ddd4;
+  border-radius: var(--radius-sm);
+  background: #f8f7f2;
+  color: #536057;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.weight-presets button.active {
+  border-color: transparent;
+  background: #e0f2e8;
+  color: #24724e;
+}
+
+.weight-nutrition {
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+.mixed-weight-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mixed-weight-grid label {
+  display: grid;
+  gap: 5px;
+  color: #536057;
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .segmented button,
 .toggle-row label,
 .knowledge-tabs button,
@@ -1997,6 +2171,8 @@ body.meal-editor-closing .settings-panel.meal-context-editor {
 }
 
 .execution-metrics {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr 0.9fr;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -2047,7 +2223,6 @@ body.meal-editor-closing .settings-panel.meal-context-editor {
 }
 
 .execution-metrics > span {
-  flex: 1;
   min-width: 0;
   padding: 15px 12px;
   text-align: center;
@@ -2079,15 +2254,18 @@ body.meal-editor-closing .settings-panel.meal-context-editor {
   font-weight: 800;
 }
 
-.execution-metrics [data-protein-grade="caution"] small em {
+.execution-metrics [data-protein-grade="caution"] small em,
+.execution-metrics [data-carb-grade="caution"] small em {
   color: #956518;
 }
 
-.execution-metrics [data-protein-grade="recovery"] small em {
+.execution-metrics [data-protein-grade="recovery"] small em,
+.execution-metrics [data-carb-grade="recovery"] small em {
   color: #3f718d;
 }
 
-.execution-metrics [data-protein-grade="warn"] small em {
+.execution-metrics [data-protein-grade="warn"] small em,
+.execution-metrics [data-carb-grade="warn"] small em {
   color: #b34a3b;
 }
 
@@ -2429,12 +2607,14 @@ body.meal-editor-closing .settings-panel.meal-context-editor {
   }
 
   .execution-metrics b {
-    font-size: 13px;
+    font-size: 12px;
+    white-space: nowrap;
   }
 
   .execution-metrics small {
     color: #6f756d;
-    font-size: 12px;
+    font-size: 10px;
+    white-space: nowrap;
   }
 
   .daily-tip {

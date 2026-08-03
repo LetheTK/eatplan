@@ -15,12 +15,12 @@ const dayTypes = {
     water: "2-2.5L 水",
     bananaDefault: false,
     thirdMealDefault: "eggF",
-    lead: "按优化版基础饮食执行，不主动加香蕉和主食缓冲。",
+    lead: "按优化版基础饮食执行，第二餐主食按生重记录。",
     actions: [
       "早餐吃麦片100g + 牛奶125ml + 鸡蛋1个。",
       "第二餐肉类按约55g蛋白折算；可单选鸡胸/鸭胸/牛瘦肉/猪瘦肉，也可多选按蛋白均分。",
       "第三餐默认按方案F吃鸡蛋4个（约200g）；想减少鸡蛋时可换等蛋白鸡胸1份约110g或去皮鸭胸1份约125g。",
-      "今天不主动加香蕉，不主动加50g主食缓冲。"
+      "主食按实际生重填写；状态正常时使用基础量。"
     ]
   },
   run: {
@@ -33,10 +33,10 @@ const dayTypes = {
     actions: [
       "状态正常的5km慢跑，不必固定加香蕉。",
       "空腹跑、距上一餐超过4小时、跑后1小时仍腿沉时，再补碳。",
-      "补碳可选香蕉1根，或土豆约130g、糙米饭75-100g、紫薯约120g。",
+      "补碳可选香蕉1根，或土豆约135g生重、糙米约35g生重。",
       "跑后或力量后正好吃饭时，可用1个玉米馒头替代本餐主食。",
       "第三餐先按方案F；当天还做力量或连续疲劳时再选K。",
-      "第二餐仍只吃一份主食，不把土豆和米饭完整叠加。"
+      "第二餐按实际生重记录；混搭时分别填写糙米和土豆。"
     ]
   },
   strength: {
@@ -45,10 +45,10 @@ const dayTypes = {
     water: "2.3-2.8L 水",
     bananaDefault: false,
     thirdMealDefault: "eggF",
-    lead: "力量日先用方案 F；训练掉力或恢复差时再开 K 和主食缓冲。",
+    lead: "力量日先用方案 F；训练掉力或恢复差时再调整第二餐主食生重。",
     actions: [
       "先按方案F执行，蛋白质已经覆盖日常保肌。",
-      "如果今天训练明显掉力，打开50g主食缓冲。",
+      "如果今天训练明显掉力，适当增加第二餐主食生重。",
       "训练日吃1个玉米馒头可以，但把它当本餐主食，不再叠加米饭或土豆。",
       "如果连续疲劳、睡眠差或酸痛明显，第三餐选K。",
       "训练后先补水，再判断是否需要额外主食。"
@@ -64,7 +64,7 @@ const dayTypes = {
     actions: [
       "照日常方案F吃，第三餐不要省。",
       "香蕉可不加，保留更大的热量赤字。",
-      "主食只吃一份，不启用50g缓冲。",
+      "主食先用基础生重，明显饥饿时再小幅增加。",
       "如果饥饿明显，优先加蔬菜或番茄黄瓜。"
     ]
   }
@@ -73,7 +73,7 @@ const dayTypes = {
 const defaultDayTips = {
   daily: {
     title: "状态正常就维持",
-    text: "如果出现明显饥饿、头晕或恢复变差，再增加50g主食缓冲；否则不加。"
+    text: "如果出现明显饥饿、头晕、睡眠或恢复变差，再调整第二餐主食生重。"
   },
   run: {
     title: "只在触发条件出现时补碳",
@@ -81,42 +81,52 @@ const defaultDayTips = {
   },
   strength: {
     title: "先看训练表现",
-    text: "明显掉力时先开50g主食缓冲；连续疲劳、睡眠差或酸痛明显时再把第三餐改为K。"
+    text: "明显掉力时先增加第二餐主食；连续疲劳、睡眠差或酸痛明显时再把第三餐改为K。"
   },
   rest: {
     title: "饿了先加蔬菜",
-    text: "休息日保留一份主食；明显饥饿时先加蔬菜、番茄或黄瓜，不急着加香蕉。"
+    text: "休息日主食先用基础生重；明显饥饿时先加蔬菜、番茄或黄瓜。"
   }
 };
 
+// 生重密度沿用总表既有单份营养：糙米30g生重约110 kcal/23g碳水，土豆150g生重约120 kcal/30g碳水。
 const staples = {
   rice: {
     label: "糙米",
-    kcal: 1308,
-    protein: 109.2,
-    carbs: 108,
-    fat: 50.0,
-    secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 糙米100g · 橄榄油1汤匙",
-    description: "糙米基础日"
+    description: "糙米主食日",
+    defaultGrams: 30,
+    minGrams: 10,
+    maxGrams: 150,
+    stepGrams: 5,
+    per100: { kcal: 366.7, protein: 8.33, carbs: 76.67, fat: 3.33 }
   },
   potato: {
     label: "土豆",
-    kcal: 1318,
-    protein: 109.2,
-    carbs: 115,
-    fat: 50.0,
-    secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 土豆150g · 橄榄油1汤匙",
-    description: "土豆基础日"
+    description: "土豆主食日",
+    defaultGrams: 150,
+    minGrams: 50,
+    maxGrams: 600,
+    stepGrams: 25,
+    per100: { kcal: 80, protein: 1.67, carbs: 20, fat: 0.67 }
   },
   mixed: {
     label: "混搭",
-    kcal: 1313,
-    protein: 109.2,
-    carbs: 112,
-    fat: 50.0,
-    secondMeal: "第二餐肉类按约55g蛋白折算 · 蔬菜200g · 主食混搭 · 橄榄油1汤匙",
     description: "主食混搭日"
   }
+};
+
+const BASE_TOTAL_WITHOUT_STAPLE = {
+  kcal: 1198,
+  protein: 106.7,
+  carbs: 85,
+  fat: 49
+};
+
+const defaultStapleGrams = {
+  rice: 30,
+  potato: 150,
+  mixedRice: 15,
+  mixedPotato: 75
 };
 
 const breakfasts = {
@@ -171,12 +181,6 @@ const breakfasts = {
 };
 
 const banana = { kcal: 105, protein: 1.3, carbs: 27, fat: 0.3 };
-// 50g 熟重缓冲按主食区分（总表：糙米 ~55 kcal/11.5g，土豆 ~40 kcal/10g，混搭取中值）。
-const buffers = {
-  rice: { kcal: 55, carbs: 11.5 },
-  potato: { kcal: 40, carbs: 10 },
-  mixed: { kcal: 48, carbs: 10.8 }
-};
 const SECOND_MEAT_TARGET_PROTEIN = 55;
 const SECOND_MEAT_BASELINE = { kcal: 290, protein: 55, fat: 6 };
 const secondMeats = {
@@ -366,7 +370,7 @@ const braiseOptionLabels = {
 };
 
 const validBraiseOptions = Object.keys(braiseOptionLabels);
-const validDietPanels = ["day", "staple", "breakfast", "secondMeat", "thirdMeal", "adjust"];
+const validDietPanels = ["day", "breakfast", "secondMeal", "thirdMeal", "adjust"];
 
 const vegetableItems = {
   tomato: { label: "番茄", group: "颜色/椒香", short: "番茄" },
@@ -442,12 +446,12 @@ const knowledgeItems = [
     id: "plan",
     type: "总表",
     title: "当前总控",
-    summary: "日常默认方案F，5km慢跑不固定加碳水；空腹、距上一餐久、跑后恢复慢或叠加力量时再补。主食保持一份，额外补碳单独计入。",
+    summary: "日常默认方案F，5km慢跑不固定加碳水；第二餐主食按下锅前生重记录并动态计入。",
     facts: [
       ["日常蛋白", "约109.2g，约1.46g/kg · 推荐档"],
       ["补碳触发", "空腹、间隔超过4小时、跑后1小时仍腿沉、叠加力量"],
-      ["换算", "香蕉1根 ≈ 土豆约130g / 糙米饭75-100g / 紫薯约120g"],
-      ["玉米馒头", "训练日可用1个替代正餐主食，不和米饭土豆叠加"]
+      ["换算", "香蕉1根 ≈ 土豆约135g生重 / 糙米约35g生重"],
+      ["称重", "糙米下锅前称；土豆按可食部下锅前称"]
     ],
     note: "来源：总表-v4。页面已把常用结论压缩成执行规则。"
   },
@@ -468,14 +472,14 @@ const knowledgeItems = [
     id: "staple",
     type: "主食",
     title: "主食与混搭",
-    summary: "土豆、糙米、紫薯可以混搭。混搭相当于把轮换放进同一餐，兼顾营养互补、肠道菌群多样性和执行口感。",
+    summary: "第二餐主食统一按下锅前生重记录；糙米和土豆可以单选，也可以分别称重后混搭。",
     facts: [
-      ["糙米", "100g熟重约一份"],
-      ["土豆", "150g熟重约一份"],
+      ["糙米", "基础30g生重；加量60g生重"],
+      ["土豆", "基础150g生重；加量300g生重"],
       ["玉米馒头", "1个约75g、196 kcal、40g碳水，算一份偏大主食"],
-      ["混搭", "在一份主食额度内拆分，不是叠加"],
+      ["混搭", "糙米和土豆分别填写生重"],
       ["轮换价值", "营养互补 + 肠道菌群多样性 + 减少厌倦"],
-      ["缓冲", "额外50g熟重只在训练状态差时加"]
+      ["微调", "糙米每次5g、土豆每次25g，页面实时计算"]
     ],
     note: "来源：主食健康饮食指南。"
   },
@@ -510,12 +514,12 @@ const defaultState = {
   view: "today",
   day: "daily",
   staple: "potato",
+  stapleGrams: { ...defaultStapleGrams },
   breakfast: "balanced",
   secondMeats: ["chicken", "duck"],
   thirdMeal: "eggF",
   dietOpenPanels: ["day"],
   banana: false,
-  buffer: false,
   knowledge: "plan",
   vegetableOptions: [],
   vegetableOpenPanels: ["main"],
@@ -525,6 +529,21 @@ const defaultState = {
   braiseOpenPanels: [],
   braiseStarted: false
 };
+
+function normalizeStapleGrams(value) {
+  const source = value && typeof value === "object" ? value : {};
+  const limits = {
+    rice: [10, 150],
+    potato: [50, 600],
+    mixedRice: [5, 150],
+    mixedPotato: [25, 600]
+  };
+  return Object.fromEntries(Object.entries(defaultStapleGrams).map(([key, fallback]) => {
+    const candidate = Number(source[key]);
+    const [min, max] = limits[key];
+    return [key, Number.isFinite(candidate) ? Math.min(max, Math.max(min, candidate)) : fallback];
+  }));
+}
 
 function readSavedState() {
   try {
@@ -547,7 +566,9 @@ function readSavedState() {
     if (thirdMeals[saved.thirdMeal]) next.thirdMeal = saved.thirdMeal;
     if (!saved.thirdMeal && saved.proteinK === true) next.thirdMeal = "k";
     if (Array.isArray(saved.dietOpenPanels)) {
-      const panels = saved.dietOpenPanels.filter((panel) => validDietPanels.includes(panel));
+      const panels = [...new Set(saved.dietOpenPanels
+        .map((panel) => ["staple", "secondMeat"].includes(panel) ? "secondMeal" : panel)
+        .filter((panel) => validDietPanels.includes(panel)))];
       next.dietOpenPanels = panels;
     }
     if (knowledgeItems.some((item) => item.id === saved.knowledge)) next.knowledge = saved.knowledge;
@@ -570,9 +591,17 @@ function readSavedState() {
       next.braiseOpenPanels = panels;
     }
     if (typeof saved.braiseStarted === "boolean") next.braiseStarted = saved.braiseStarted;
-    ["banana", "buffer"].forEach((key) => {
-      if (typeof saved[key] === "boolean") next[key] = saved[key];
-    });
+    if (typeof saved.banana === "boolean") next.banana = saved.banana;
+    const grams = normalizeStapleGrams(saved.stapleGrams);
+    if (!saved.stapleGrams && saved.buffer === true) {
+      if (saved.staple === "rice") grams.rice += 15;
+      if (saved.staple === "potato") grams.potato += 50;
+      if (saved.staple === "mixed") {
+        grams.mixedRice += 10;
+        grams.mixedPotato += 15;
+      }
+    }
+    next.stapleGrams = normalizeStapleGrams(grams);
     return next;
   } catch {
     return {};
@@ -583,6 +612,7 @@ const state = {
   ...defaultState,
   ...readSavedState()
 };
+state.stapleGrams = normalizeStapleGrams(state.stapleGrams);
 state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, state.thirdMeal);
 
 const els = {
@@ -597,6 +627,9 @@ const els = {
   executionProteinMetric: document.querySelector("#executionProteinMetric"),
   executionProtein: document.querySelector("#executionProtein"),
   executionProteinTier: document.querySelector("#executionProteinTier"),
+  executionCarbMetric: document.querySelector("#executionCarbMetric"),
+  executionCarbs: document.querySelector("#executionCarbs"),
+  executionCarbTier: document.querySelector("#executionCarbTier"),
   executionWater: document.querySelector("#executionWater"),
   openSettingsButton: document.querySelector("#openSettingsButton"),
   settingsPanel: document.querySelector("#settingsPanel"),
@@ -607,19 +640,27 @@ const els = {
   settingsSummary: document.querySelector("#settingsSummary"),
   dayControls: document.querySelector("#dayTypeControls"),
   stapleControls: document.querySelector("#stapleControls"),
+  singleStapleWeight: document.querySelector("#singleStapleWeight"),
+  mixedStapleWeights: document.querySelector("#mixedStapleWeights"),
+  stapleWeightInput: document.querySelector("#stapleWeightInput"),
+  stapleWeightFood: document.querySelector("#stapleWeightFood"),
+  stapleWeightMeta: document.querySelector("#stapleWeightMeta"),
+  stapleBasePreset: document.querySelector("#stapleBasePreset"),
+  stapleIncreasePreset: document.querySelector("#stapleIncreasePreset"),
+  mixedRiceWeight: document.querySelector("#mixedRiceWeight"),
+  mixedPotatoWeight: document.querySelector("#mixedPotatoWeight"),
+  mixedWeightMeta: document.querySelector("#mixedWeightMeta"),
   breakfastControls: document.querySelector("#breakfastControls"),
   secondMeatControls: document.querySelector("#secondMeatControls"),
   thirdMealControls: document.querySelector("#thirdMealControls"),
   dietPanels: document.querySelectorAll("[data-diet-panel]"),
   dietPanelToggles: document.querySelectorAll("[data-diet-panel-toggle]"),
   dietDaySummary: document.querySelector("#dietDaySummary"),
-  dietStapleSummary: document.querySelector("#dietStapleSummary"),
   dietBreakfastSummary: document.querySelector("#dietBreakfastSummary"),
-  dietSecondMeatSummary: document.querySelector("#dietSecondMeatSummary"),
+  dietSecondMealSummary: document.querySelector("#dietSecondMealSummary"),
   dietThirdMealSummary: document.querySelector("#dietThirdMealSummary"),
   dietAdjustSummary: document.querySelector("#dietAdjustSummary"),
   bananaToggle: document.querySelector("#bananaToggle"),
-  bufferToggle: document.querySelector("#bufferToggle"),
   plannerLead: document.querySelector("#plannerLead"),
   waterTarget: document.querySelector("#waterTarget"),
   todayTitle: document.querySelector("#todayTitle"),
@@ -694,7 +735,8 @@ const els = {
   recordHistory: document.querySelector("#recordHistory"),
   toggleHistoryButton: document.querySelector("#toggleHistoryButton"),
   bananaQuickToggle: document.querySelector("#bananaQuickToggle"),
-  bufferQuickToggle: document.querySelector("#bufferQuickToggle"),
+  stapleQuickEdit: document.querySelector("#stapleQuickEdit"),
+  stapleQuickSummary: document.querySelector("#stapleQuickSummary"),
   saveRecordButton: document.querySelector("#saveRecordButton"),
   recordFeedback: document.querySelector("#recordFeedback"),
   recordList: document.querySelector("#recordList")
@@ -759,16 +801,37 @@ function secondMeatShortLabel(items) {
   return `二餐${items.map((item) => secondMeats[item.id].shortLabel).join("")}`;
 }
 
-function secondMealStapleText(stapleKey) {
-  if (stapleKey === "rice") return "糙米100g";
-  if (stapleKey === "potato") return "土豆150g";
-  return "主食混搭";
+function nutrientsForGrams(food, grams) {
+  return Object.fromEntries(Object.entries(food.per100).map(([key, value]) => [key, value * grams / 100]));
 }
 
-function secondMealBaseKcal(stapleKey) {
-  if (stapleKey === "rice") return 550;
-  if (stapleKey === "potato") return 560;
-  return 555;
+function calculateStaplePlan() {
+  const items = state.staple === "mixed"
+    ? [
+        { id: "rice", label: staples.rice.label, grams: state.stapleGrams.mixedRice },
+        { id: "potato", label: staples.potato.label, grams: state.stapleGrams.mixedPotato }
+      ]
+    : [{ id: state.staple, label: staples[state.staple].label, grams: state.stapleGrams[state.staple] }];
+  const totals = items.reduce((sum, item) => {
+    const nutrients = nutrientsForGrams(staples[item.id], item.grams);
+    Object.keys(sum).forEach((key) => { sum[key] += nutrients[key]; });
+    return sum;
+  }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+  return { items, totals };
+}
+
+function formatStapleItems(items, includeBasis = false) {
+  const text = items.map((item) => `${item.label}${round(item.grams, 1)}g`).join(" + ");
+  return includeBasis ? `${text}（生重）` : text;
+}
+
+function secondMealMacros(staplePlan, secondMeatPlan) {
+  return {
+    kcal: secondMeatPlan.totals.kcal + 150 + staplePlan.totals.kcal,
+    protein: secondMeatPlan.totals.protein + 3 + staplePlan.totals.protein,
+    carbs: 10 + staplePlan.totals.carbs,
+    fat: secondMeatPlan.totals.fat + 10.5 + staplePlan.totals.fat
+  };
 }
 
 function thirdMealOptionsForBreakfast(breakfastKey) {
@@ -791,12 +854,12 @@ function saveState() {
       view: state.view,
       day: state.day,
       staple: state.staple,
+      stapleGrams: state.stapleGrams,
       breakfast: state.breakfast,
       secondMeats: state.secondMeats,
       thirdMeal: state.thirdMeal,
       dietOpenPanels: state.dietOpenPanels,
       banana: state.banana,
-      buffer: state.buffer,
       knowledge: state.knowledge,
       vegetableOptions: state.vegetableOptions,
       vegetableOpenPanels: state.vegetableOpenPanels,
@@ -869,10 +932,14 @@ function saveTodayRecord() {
 }
 
 function calculate() {
-  const staple = staples[state.staple];
+  const staplePlan = calculateStaplePlan();
   const breakfast = breakfasts[state.breakfast];
   const secondMeatPlan = calculateSecondMeatPlan();
-  const total = { ...staple };
+  const total = { ...BASE_TOTAL_WITHOUT_STAPLE };
+
+  Object.keys(staplePlan.totals).forEach((key) => {
+    total[key] += staplePlan.totals[key];
+  });
 
   total.kcal += secondMeatPlan.delta.kcal;
   total.protein += secondMeatPlan.delta.protein;
@@ -888,12 +955,6 @@ function calculate() {
     total.protein += banana.protein;
     total.carbs += banana.carbs;
     total.fat += banana.fat;
-  }
-
-  if (state.buffer) {
-    const buffer = buffers[state.staple] || buffers.mixed;
-    total.kcal += buffer.kcal;
-    total.carbs += buffer.carbs;
   }
 
   const thirdMeal = thirdMeals[state.thirdMeal] || thirdMeals.eggF;
@@ -921,6 +982,47 @@ function renderSecondMeatControls() {
     button.classList.toggle("active", active);
     button.setAttribute("aria-pressed", active ? "true" : "false");
   });
+}
+
+function renderStapleControls() {
+  setActive(els.stapleControls, "staple", state.staple);
+  const mixed = state.staple === "mixed";
+  els.singleStapleWeight.hidden = mixed;
+  els.mixedStapleWeights.hidden = !mixed;
+
+  if (mixed) {
+    els.mixedRiceWeight.value = round(state.stapleGrams.mixedRice, 1);
+    els.mixedPotatoWeight.value = round(state.stapleGrams.mixedPotato, 1);
+    const plan = calculateStaplePlan();
+    els.mixedWeightMeta.textContent = `约 ${round(plan.totals.kcal)} kcal · 碳水 ${formatDecimal(plan.totals.carbs)}g`;
+    const baseActive = state.stapleGrams.mixedRice === defaultStapleGrams.mixedRice
+      && state.stapleGrams.mixedPotato === defaultStapleGrams.mixedPotato;
+    const increaseActive = state.stapleGrams.mixedRice === defaultStapleGrams.mixedRice * 2
+      && state.stapleGrams.mixedPotato === defaultStapleGrams.mixedPotato * 2;
+    document.querySelector('[data-mixed-preset="base"]')?.classList.toggle("active", baseActive);
+    document.querySelector('[data-mixed-preset="increase"]')?.classList.toggle("active", increaseActive);
+    return;
+  }
+
+  const staple = staples[state.staple];
+  const grams = state.stapleGrams[state.staple];
+  const nutrients = nutrientsForGrams(staple, grams);
+  els.stapleWeightFood.textContent = `${staple.label} · 生重`;
+  els.stapleWeightInput.min = staple.minGrams;
+  els.stapleWeightInput.max = staple.maxGrams;
+  els.stapleWeightInput.step = staple.stepGrams;
+  els.stapleWeightInput.value = round(grams, 1);
+  els.stapleBasePreset.textContent = `基础 ${staple.defaultGrams}g`;
+  els.stapleIncreasePreset.textContent = `加量 ${staple.defaultGrams * 2}g`;
+  els.stapleBasePreset.classList.toggle("active", grams === staple.defaultGrams);
+  els.stapleIncreasePreset.classList.toggle("active", grams === staple.defaultGrams * 2);
+  els.stapleWeightMeta.textContent = `约 ${round(nutrients.kcal)} kcal · 碳水 ${formatDecimal(nutrients.carbs)}g`;
+}
+
+function setStapleGrams(key, value) {
+  state.stapleGrams = normalizeStapleGrams({ ...state.stapleGrams, [key]: value });
+  saveState();
+  renderPlanner();
 }
 
 function renderThirdMealControls() {
@@ -960,7 +1062,7 @@ function renderDietPanels() {
 
 function syncControls() {
   setActive(els.dayControls, "day", state.day);
-  setActive(els.stapleControls, "staple", state.staple);
+  renderStapleControls();
   setActive(els.breakfastControls, "breakfast", state.breakfast);
   renderSecondMeatControls();
   renderThirdMealControls();
@@ -969,7 +1071,6 @@ function syncControls() {
   syncVegetableOptionButtons();
   syncBraiseOptionButtons();
   els.bananaToggle.checked = state.banana;
-  els.bufferToggle.checked = state.buffer;
 }
 
 function syncVegetableOptionButtons() {
@@ -1032,8 +1133,8 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
     ? [
         "赤字偏大",
         state.day === "run" || state.day === "strength"
-          ? "训练日热量偏低；若头晕、掉力、持续饥饿、睡眠差或恢复差，优先加50g熟主食或香蕉。"
-          : "减脂期可接受；若头晕、持续饥饿、睡眠变差、怕冷或第二天恢复差，再加50g熟主食或换回F鸡蛋。"
+          ? "训练日热量偏低；若头晕、掉力、持续饥饿、睡眠差或恢复差，优先增加第二餐主食生重或加香蕉。"
+          : "减脂期可接受；若头晕、持续饥饿、睡眠变差、怕冷或第二天恢复差，再增加第二餐主食或换回F鸡蛋。"
       ]
     : total.kcal < 1450
       ? ["减脂赤字", "处在计划内赤字；没有明显不适时可以保持。"]
@@ -1041,7 +1142,7 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
         ? ["训练友好", "更适合跑步、力量或恢复压力较大的日子。"]
         : ["偏高", "若非高活动日，优先取消香蕉或主食缓冲。"];
   const mixedLowCarbHint = state.staple === "mixed"
-    ? "混搭本身没问题；训练状态差时加50g熟重缓冲。"
+    ? "混搭本身没问题；训练状态差时增加其中一种主食的生重。"
     : null;
   let protein;
   if (proteinRatio < 1.3) {
@@ -1065,16 +1166,16 @@ function buildMacroAssessment(total, proteinRatio, carbRatio) {
         : ["合理", "5km慢跑可用；空腹、间隔久或跑后恢复慢时再补碳。"];
   } else if (state.day === "strength") {
     carb = carbRatio < 1.5
-      ? ["偏低", mixedLowCarbHint || "力量日可能影响训练状态，掉力时加50g主食。"]
+      ? ["偏低", mixedLowCarbHint || "力量日可能影响训练状态，掉力时增加第二餐主食生重。"]
       : carbRatio > 2.2
         ? ["偏高", "若非高疲劳日，可取消香蕉或缓冲。"]
         : ["合理", "能覆盖日常力量训练。"];
   } else {
     carb = carbRatio < 1.4
-      ? ["偏低", mixedLowCarbHint || "日常减脂可接受；若饿或脑雾再加50g主食缓冲。"]
+      ? ["偏低", mixedLowCarbHint || "日常减脂可接受；若饿或脑雾再增加第二餐主食生重。"]
       : carbRatio > 2.0
         ? ["偏高", "休息/日常日不需要继续加碳水。"]
-        : ["合理", state.staple === "mixed" ? "混搭可长期用，按一份主食额度执行。" : "适合休息或日常减脂。"];
+        : ["合理", state.staple === "mixed" ? "混搭可长期用，按页面填写的生重执行。" : "适合休息或日常减脂。"];
   }
 
   const fatRatio = total.fat / PROFILE_WEIGHT_KG;
@@ -1161,10 +1262,12 @@ function setNutritionAlert(hasAlert) {
 function renderPlanner() {
   const day = dayTypes[state.day];
   const staple = staples[state.staple];
+  const staplePlan = calculateStaplePlan();
   const breakfast = breakfasts[state.breakfast];
   const thirdMeal = thirdMeals[state.thirdMeal] || thirdMeals.eggF;
   const breakfastLinked = state.breakfast === "egg4";
   const secondMeatPlan = calculateSecondMeatPlan();
+  const secondMeal = secondMealMacros(staplePlan, secondMeatPlan);
   const total = calculate();
   const proteinRatio = total.protein / PROFILE_WEIGHT_KG;
   const carbRatio = total.carbs / PROFILE_WEIGHT_KG;
@@ -1183,6 +1286,8 @@ function renderPlanner() {
   const calorieHigh = Math.ceil(total.kcal / 100) * 100;
   const proteinLow = Math.floor(total.protein / 5) * 5;
   const proteinHigh = Math.ceil(total.protein / 5) * 5;
+  const carbLow = Math.floor(total.carbs / 5) * 5;
+  const carbHigh = Math.ceil(total.carbs / 5) * 5;
 
   els.todayDate.textContent = todayLabel(true);
   els.plannerTitle.textContent = `今天按${day.label}方案 ${planCode}`;
@@ -1193,17 +1298,15 @@ function renderPlanner() {
   const defaultTip = defaultDayTips[state.day] || defaultDayTips.daily;
   els.dailyTipTitle.textContent = macroIssue ? `营养提醒：${macroIssue.status}` : (breakfastLinked ? "早餐4蛋日，第三餐轻补" : (state.thirdMeal === "k" ? "恢复压力大时保留 K" : defaultTip.title));
   els.dailyTipText.textContent = macroIssue ? macroIssue.text : (breakfastLinked ? "第三餐用轻补：鸡胸优先，也可换轻鸭/轻牛/轻猪；无备肉再选轻鸡蛋2个。" : (state.thirdMeal === "k" ? "连续疲劳、睡眠差或酸痛明显时保留K；状态恢复后回到F。" : defaultTip.text));
-  els.settingsSummary.textContent = `${day.label} · ${staple.label} · ${breakfast.shortLabel} · ${secondMeatShortLabel(secondMeatPlan.items)} · ${thirdMeal.shortLabel} · ${state.banana ? "香蕉" : "无香蕉"}${state.buffer ? " · 50g缓冲" : ""}`;
+  els.settingsSummary.textContent = `${day.label} · ${formatStapleItems(staplePlan.items)}生重 · ${breakfast.shortLabel} · ${secondMeatShortLabel(secondMeatPlan.items)} · ${thirdMeal.shortLabel} · ${state.banana ? "香蕉" : "无香蕉"}`;
   els.dietDaySummary.textContent = day.label;
-  els.dietStapleSummary.textContent = staple.label;
   els.dietBreakfastSummary.textContent = breakfast.shortLabel;
-  els.dietSecondMeatSummary.textContent = secondMeatPlan.items.map((item) => secondMeats[item.id].shortLabel).join("、");
+  els.dietSecondMealSummary.textContent = `${formatStapleItems(staplePlan.items)} · ${secondMeatPlan.items.map((item) => secondMeats[item.id].shortLabel).join("、")}`;
   els.dietThirdMealSummary.textContent = thirdMeal.shortLabel;
-  els.dietAdjustSummary.textContent = [state.banana ? "香蕉" : "", state.buffer ? "50g缓冲" : ""].filter(Boolean).join("、") || "无调整";
+  els.dietAdjustSummary.textContent = state.banana ? "香蕉" : "无调整";
   els.bananaQuickToggle.classList.toggle("active", state.banana);
   els.bananaQuickToggle.setAttribute("aria-pressed", String(state.banana));
-  els.bufferQuickToggle.classList.toggle("active", state.buffer);
-  els.bufferQuickToggle.setAttribute("aria-pressed", String(state.buffer));
+  els.stapleQuickSummary.textContent = `${formatStapleItems(staplePlan.items)} · 生重`;
   els.executionCalories.textContent = `约 ${calorieLow.toLocaleString("zh-CN")}–${calorieHigh.toLocaleString("zh-CN")}`;
   els.executionProtein.textContent = `${proteinLow}–${proteinHigh}g`;
   els.executionProteinTier.textContent = assessment.protein[0];
@@ -1212,11 +1315,18 @@ function renderPlanner() {
     "aria-label",
     `今日蛋白约${formatDecimal(total.protein)}克，${formatDecimal(proteinRatio)}克每公斤，属于${assessment.protein[0]}`
   );
+  els.executionCarbs.textContent = carbLow === carbHigh ? `${carbLow}g` : `${carbLow}–${carbHigh}g`;
+  els.executionCarbTier.textContent = assessment.carb[0];
+  els.executionCarbMetric.dataset.carbGrade = assessmentClass(assessment.carb[0]);
+  els.executionCarbMetric.setAttribute(
+    "aria-label",
+    `今日碳水约${formatDecimal(total.carbs)}克，${formatDecimal(carbRatio)}克每公斤，属于${assessment.carb[0]}`
+  );
   els.executionWater.textContent = day.water.replace(" 水", "");
   els.mealTotalSummary.textContent = buildMealAlertSummary(macroIssues);
   els.mealTotalSummary.parentElement.hidden = macroIssues.length === 0;
   els.mealTotalSummary.parentElement.classList.toggle("has-alert", macroIssues.length > 0);
-  els.todaySummary.textContent = `${staple.description}，第二餐肉类按${formatSecondMeatItems(secondMeatPlan.items)}执行，蔬菜约200g已计入，早餐为${breakfast.label}，第三餐为${thirdMeal.shortLabel}${breakfastLinked ? "（早餐4蛋日使用轻补，不叠加F整份）" : ""}，${state.banana ? "已计入香蕉" : "未计入香蕉"}，${state.buffer ? "已加50g主食缓冲" : "未加主食缓冲"}。`;
+  els.todaySummary.textContent = `${staple.description}，第二餐主食为${formatStapleItems(staplePlan.items, true)}，肉类按${formatSecondMeatItems(secondMeatPlan.items)}执行，蔬菜约200g已计入，早餐为${breakfast.label}，第三餐为${thirdMeal.shortLabel}${breakfastLinked ? "（早餐4蛋日使用轻补，不叠加F整份）" : ""}，${state.banana ? "已计入香蕉" : "未计入香蕉"}。`;
   setNutritionAlert(Boolean(macroIssue));
   renderNutritionRows(total, assessment, proteinRatio, carbRatio);
   els.proteinRatio.textContent = `${formatDecimal(proteinRatio)} g/kg`;
@@ -1227,17 +1337,18 @@ function renderPlanner() {
   els.firstMealText.textContent = breakfast.meal;
   els.firstMealTime.textContent = mealTimes.first;
   els.firstMealHint.textContent = breakfast.hint;
-  els.secondMealText.textContent = `${formatSecondMeatItems(secondMeatPlan.items)} · 蔬菜200g · ${secondMealStapleText(state.staple)} · 橄榄油1汤匙`;
+  els.secondMealText.textContent = `${formatSecondMeatItems(secondMeatPlan.items)} · 蔬菜200g · ${formatStapleItems(staplePlan.items, true)} · 橄榄油1汤匙`;
   els.secondMealTime.textContent = mealTimes.second;
   els.secondMealHint.textContent = secondMeatPlan.items.length === 1
-    ? "单选时由这一种肉承担第二餐肉类蛋白目标。"
-    : `多选时按蛋白均分，每种约${formatDecimal(SECOND_MEAT_TARGET_PROTEIN / secondMeatPlan.items.length)}g蛋白。`;
+    ? "主食按生重计算；单选时由这一种肉承担第二餐肉类蛋白目标。"
+    : `主食按生重计算；肉类多选时每种约${formatDecimal(SECOND_MEAT_TARGET_PROTEIN / secondMeatPlan.items.length)}g蛋白。`;
   els.thirdMealText.textContent = thirdMeal.label;
   els.thirdMealTime.textContent = mealTimes.third;
   els.thirdMealHint.textContent = thirdMeal.hint;
   els.firstMealMeta.textContent = `约 ${round(breakfast.mealKcal)} kcal · 蛋白 ${formatDecimal(breakfast.mealProtein)}g`;
-  els.secondMealMeta.textContent = `约 ${round(secondMealBaseKcal(state.staple) + secondMeatPlan.delta.kcal)} kcal · 蛋白 60.5g · 含蔬菜`;
+  els.secondMealMeta.textContent = `约 ${round(secondMeal.kcal)} kcal · 蛋白 ${formatDecimal(secondMeal.protein)}g · 碳水 ${formatDecimal(secondMeal.carbs)}g`;
   els.thirdMealMeta.textContent = thirdMeal.meta;
+  renderStapleControls();
   setActive(els.quickDayControls, "dayQuick", state.day);
   renderRecords();
 }
@@ -1916,9 +2027,67 @@ els.stapleControls.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-staple]");
   if (!button) return;
   state.staple = button.dataset.staple;
-  setActive(els.stapleControls, "staple", state.staple);
   saveState();
   renderPlanner();
+});
+
+document.querySelectorAll("[data-staple-weight-delta]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (state.staple === "mixed") return;
+    const staple = staples[state.staple];
+    const direction = Number(button.dataset.stapleWeightDelta);
+    setStapleGrams(state.staple, state.stapleGrams[state.staple] + direction * staple.stepGrams);
+  });
+});
+
+const stapleInputTimers = {};
+
+function scheduleStapleInput(key, input, immediate = false) {
+  window.clearTimeout(stapleInputTimers[key]);
+  const commit = () => {
+    const value = Number(input.value);
+    if (Number.isFinite(value)) setStapleGrams(key, value);
+  };
+  if (immediate) {
+    commit();
+    return;
+  }
+  stapleInputTimers[key] = window.setTimeout(commit, 300);
+}
+
+els.stapleWeightInput.addEventListener("input", () => {
+  if (state.staple !== "mixed") scheduleStapleInput(state.staple, els.stapleWeightInput);
+});
+
+els.stapleWeightInput.addEventListener("change", () => {
+  if (state.staple !== "mixed") scheduleStapleInput(state.staple, els.stapleWeightInput, true);
+});
+
+document.querySelectorAll("[data-staple-preset]").forEach((button) => {
+  button.addEventListener("click", () => {
+    if (state.staple === "mixed") return;
+    const staple = staples[state.staple];
+    const multiplier = button.dataset.staplePreset === "increase" ? 2 : 1;
+    setStapleGrams(state.staple, staple.defaultGrams * multiplier);
+  });
+});
+
+els.mixedRiceWeight.addEventListener("input", () => scheduleStapleInput("mixedRice", els.mixedRiceWeight));
+els.mixedRiceWeight.addEventListener("change", () => scheduleStapleInput("mixedRice", els.mixedRiceWeight, true));
+els.mixedPotatoWeight.addEventListener("input", () => scheduleStapleInput("mixedPotato", els.mixedPotatoWeight));
+els.mixedPotatoWeight.addEventListener("change", () => scheduleStapleInput("mixedPotato", els.mixedPotatoWeight, true));
+
+document.querySelectorAll("[data-mixed-preset]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const multiplier = button.dataset.mixedPreset === "increase" ? 2 : 1;
+    state.stapleGrams = normalizeStapleGrams({
+      ...state.stapleGrams,
+      mixedRice: defaultStapleGrams.mixedRice * multiplier,
+      mixedPotato: defaultStapleGrams.mixedPotato * multiplier
+    });
+    saveState();
+    renderPlanner();
+  });
 });
 
 els.breakfastControls.addEventListener("click", (event) => {
@@ -1966,12 +2135,6 @@ els.thirdMealControls.addEventListener("click", (event) => {
 
 els.bananaToggle.addEventListener("change", () => {
   state.banana = els.bananaToggle.checked;
-  saveState();
-  renderPlanner();
-});
-
-els.bufferToggle.addEventListener("change", () => {
-  state.buffer = els.bufferToggle.checked;
   saveState();
   renderPlanner();
 });
@@ -2154,7 +2317,7 @@ function openMealEditor(panel, sourceCard) {
   if (!validDietPanels.includes(panel)) return;
   const editorTitles = {
     breakfast: "调整第一餐",
-    secondMeat: "调整第二餐肉类",
+    secondMeal: "调整第二餐",
     thirdMeal: "调整第三餐"
   };
   state.view = "today";
@@ -2227,11 +2390,8 @@ els.bananaQuickToggle.addEventListener("click", () => {
   renderPlanner();
 });
 
-els.bufferQuickToggle.addEventListener("click", () => {
-  state.buffer = !state.buffer;
-  els.bufferToggle.checked = state.buffer;
-  saveState();
-  renderPlanner();
+els.stapleQuickEdit.addEventListener("click", () => {
+  openMealEditor("secondMeal", document.querySelector('[data-meal-edit="secondMeal"]'));
 });
 
 els.toggleHistoryButton.addEventListener("click", () => {
