@@ -20,7 +20,7 @@ const dayTypes = {
       "早餐吃麦片100g + 牛奶125ml + 鸡蛋1个。",
       "第二餐肉类按约55g蛋白折算；可单选鸡胸/鸭胸/牛瘦肉/猪瘦肉，也可多选按蛋白均分。",
       "第三餐默认按方案F吃鸡蛋4个（约200g）；想减少鸡蛋时可换等蛋白鸡胸1份约110g或去皮鸭胸1份约125g。",
-      "主食按实际生重填写；状态正常时使用基础量。"
+      "主食按实际生重填写；若用馒头替代，恢复/日常日一餐约半个到¾个。"
     ]
   },
   run: {
@@ -34,7 +34,7 @@ const dayTypes = {
       "状态正常的5km慢跑，不必固定加香蕉。",
       "空腹跑、距上一餐超过4小时、跑后1小时仍腿沉时，再补碳。",
       "补碳可选香蕉1根，或土豆约135g生重、糙米约35g生重。",
-      "跑后或力量后正好吃饭时，可用1个玉米馒头替代本餐主食。",
+      "跑后或力量后正好吃饭时，可用1个玉米馒头替代本餐主食，不与米饭或土豆叠加。",
       "第三餐先按方案F；当天还做力量或连续疲劳时再选K。",
       "第二餐按实际生重记录；混搭时分别填写糙米和土豆。"
     ]
@@ -49,7 +49,7 @@ const dayTypes = {
     actions: [
       "先按方案F执行，蛋白质已经覆盖日常保肌。",
       "如果今天训练明显掉力，适当增加第二餐主食生重。",
-      "训练日吃1个玉米馒头可以，但把它当本餐主食，不再叠加米饭或土豆。",
+      "训练日可吃1个玉米馒头，作为本餐主食，不再叠加米饭或土豆。",
       "如果连续疲劳、睡眠差或酸痛明显，第三餐选K。",
       "训练后先补水，再判断是否需要额外主食。"
     ]
@@ -65,7 +65,7 @@ const dayTypes = {
       "照日常方案F吃，第三餐不要省。",
       "香蕉可不加，保留更大的热量赤字。",
       "主食先用基础生重，明显饥饿时再小幅增加。",
-      "如果饥饿明显，优先加蔬菜或番茄黄瓜。"
+      "如果用馒头替代主食，休息日一餐约半个到¾个；明显饥饿时优先加蔬菜或番茄黄瓜。"
     ]
   }
 };
@@ -89,7 +89,8 @@ const defaultDayTips = {
   }
 };
 
-// 生重密度沿用总表既有单份营养：糙米30g生重约110 kcal/23g碳水，土豆150g生重约120 kcal/30g碳水。
+// 主食口径：糙米30g生重约110 kcal/23g碳水，土豆150g生重约120 kcal/30g碳水；馒头按每个75g、196 kcal、40g碳水估算。
+const MANTOU_UNIT_GRAMS = 75;
 const staples = {
   rice: {
     label: "糙米",
@@ -109,6 +110,16 @@ const staples = {
     stepGrams: 25,
     per100: { kcal: 80, protein: 1.67, carbs: 20, fat: 0.67 }
   },
+  mantou: {
+    label: "馒头",
+    description: "馒头主食日",
+    defaultGrams: MANTOU_UNIT_GRAMS,
+    minGrams: MANTOU_UNIT_GRAMS / 2,
+    maxGrams: MANTOU_UNIT_GRAMS * 4,
+    stepGrams: MANTOU_UNIT_GRAMS / 2,
+    unit: "个",
+    per100: { kcal: 261.33, protein: 6, carbs: 53.33, fat: 1.2 }
+  },
   mixed: {
     label: "混搭",
     description: "主食混搭日"
@@ -125,6 +136,7 @@ const BASE_TOTAL_WITHOUT_STAPLE = {
 const defaultStapleGrams = {
   rice: 30,
   potato: 150,
+  mantou: MANTOU_UNIT_GRAMS,
   mixedRice: 15,
   mixedPotato: 75
 };
@@ -476,7 +488,7 @@ const knowledgeItems = [
     facts: [
       ["糙米", "基础30g生重；加量60g生重"],
       ["土豆", "基础150g生重；加量300g生重"],
-      ["玉米馒头", "1个约75g、196 kcal、40g碳水，算一份偏大主食"],
+      ["玉米馒头", "每个约75g、196 kcal、40g碳水；训练日1个，恢复/休息日0.5–0.75个，替代原主食"],
       ["混搭", "糙米和土豆分别填写生重"],
       ["轮换价值", "营养互补 + 肠道菌群多样性 + 减少厌倦"],
       ["微调", "糙米每次5g、土豆每次25g，页面实时计算"]
@@ -535,6 +547,7 @@ function normalizeStapleGrams(value) {
   const limits = {
     rice: [10, 150],
     potato: [50, 600],
+    mantou: [MANTOU_UNIT_GRAMS / 2, MANTOU_UNIT_GRAMS * 4],
     mixedRice: [5, 150],
     mixedPotato: [25, 600]
   };
@@ -640,9 +653,12 @@ const els = {
   settingsSummary: document.querySelector("#settingsSummary"),
   dayControls: document.querySelector("#dayTypeControls"),
   stapleControls: document.querySelector("#stapleControls"),
+  stapleTypeBasis: document.querySelector("#stapleTypeBasis"),
   singleStapleWeight: document.querySelector("#singleStapleWeight"),
   mixedStapleWeights: document.querySelector("#mixedStapleWeights"),
   stapleWeightInput: document.querySelector("#stapleWeightInput"),
+  stapleWeightInputLabel: document.querySelector("#stapleWeightInputLabel"),
+  stapleWeightUnit: document.querySelector("#stapleWeightUnit"),
   stapleWeightFood: document.querySelector("#stapleWeightFood"),
   stapleWeightMeta: document.querySelector("#stapleWeightMeta"),
   stapleBasePreset: document.querySelector("#stapleBasePreset"),
@@ -821,8 +837,22 @@ function calculateStaplePlan() {
 }
 
 function formatStapleItems(items, includeBasis = false) {
-  const text = items.map((item) => `${item.label}${round(item.grams, 1)}g`).join(" + ");
-  return includeBasis ? `${text}（生重）` : text;
+  const text = items.map((item) => item.id === "mantou"
+    ? `${item.label}${formatMantouCount(item.grams)}个（约${round(item.grams)}g）`
+    : `${item.label}${round(item.grams, 1)}g`).join(" + ");
+  return includeBasis && !items.some((item) => item.id === "mantou") ? `${text}（生重）` : text;
+}
+
+function formatMantouCount(grams) {
+  const count = grams / MANTOU_UNIT_GRAMS;
+  return Number.isInteger(count) ? String(count) : formatDecimal(count);
+}
+
+function mantouGuidance(dayKey) {
+  if (dayKey === "run" || dayKey === "strength") {
+    return { count: "1个", grams: MANTOU_UNIT_GRAMS, text: "训练日按1个执行，替代本餐糙米或土豆，不叠加。" };
+  }
+  return { count: "0.5–0.75个", grams: MANTOU_UNIT_GRAMS * 0.75, text: "恢复/休息日建议半个到¾个，替代本餐糙米或土豆，不叠加。" };
 }
 
 function secondMealMacros(staplePlan, secondMeatPlan) {
@@ -1007,16 +1037,24 @@ function renderStapleControls() {
   const staple = staples[state.staple];
   const grams = state.stapleGrams[state.staple];
   const nutrients = nutrientsForGrams(staple, grams);
-  els.stapleWeightFood.textContent = `${staple.label} · 生重`;
-  els.stapleWeightInput.min = staple.minGrams;
-  els.stapleWeightInput.max = staple.maxGrams;
-  els.stapleWeightInput.step = staple.stepGrams;
-  els.stapleWeightInput.value = round(grams, 1);
-  els.stapleBasePreset.textContent = `基础 ${staple.defaultGrams}g`;
-  els.stapleIncreasePreset.textContent = `加量 ${staple.defaultGrams * 2}g`;
+  const isMantou = state.staple === "mantou";
+  const displayValue = isMantou ? grams / MANTOU_UNIT_GRAMS : grams;
+  els.stapleTypeBasis.textContent = isMantou ? "按个数" : "生重";
+  els.stapleWeightFood.textContent = isMantou ? "馒头 · 个（每个约75g）" : `${staple.label} · 生重`;
+  els.stapleWeightInputLabel.textContent = isMantou ? "馒头数量，单位个" : "主食生重，单位克";
+  els.stapleWeightUnit.textContent = isMantou ? "个" : "g";
+  document.querySelectorAll("[data-staple-weight-delta]").forEach((button) => {
+    button.setAttribute("aria-label", `${button.dataset.stapleWeightDelta === "1" ? "增加" : "减少"}${isMantou ? "馒头数量" : "主食重量"}`);
+  });
+  els.stapleWeightInput.min = isMantou ? 0.5 : staple.minGrams;
+  els.stapleWeightInput.max = isMantou ? 4 : staple.maxGrams;
+  els.stapleWeightInput.step = isMantou ? 0.5 : staple.stepGrams;
+  els.stapleWeightInput.value = round(displayValue, 1);
+  els.stapleBasePreset.textContent = isMantou ? "基础 1个" : `基础 ${staple.defaultGrams}g`;
+  els.stapleIncreasePreset.textContent = isMantou ? "加量 2个" : `加量 ${staple.defaultGrams * 2}g`;
   els.stapleBasePreset.classList.toggle("active", grams === staple.defaultGrams);
   els.stapleIncreasePreset.classList.toggle("active", grams === staple.defaultGrams * 2);
-  els.stapleWeightMeta.textContent = `约 ${round(nutrients.kcal)} kcal · 碳水 ${formatDecimal(nutrients.carbs)}g`;
+  els.stapleWeightMeta.textContent = `约 ${round(nutrients.kcal)} kcal · 碳水 ${formatDecimal(nutrients.carbs)}g${isMantou ? ` · ${formatMantouCount(grams)}个` : ""}`;
 }
 
 function setStapleGrams(key, value) {
@@ -1342,6 +1380,9 @@ function renderPlanner() {
   els.secondMealHint.textContent = secondMeatPlan.items.length === 1
     ? "主食按生重计算；单选时由这一种肉承担第二餐肉类蛋白目标。"
     : `主食按生重计算；肉类多选时每种约${formatDecimal(SECOND_MEAT_TARGET_PROTEIN / secondMeatPlan.items.length)}g蛋白。`;
+  if (state.staple === "mantou") {
+    els.secondMealHint.textContent += ` ${mantouGuidance(state.day).text}`;
+  }
   els.thirdMealText.textContent = thirdMeal.label;
   els.thirdMealTime.textContent = mealTimes.third;
   els.thirdMealHint.textContent = thirdMeal.hint;
@@ -2002,6 +2043,9 @@ function selectDay(dayKey) {
   const day = dayTypes[dayKey];
   if (!day) return;
   state.day = dayKey;
+  if (state.staple === "mantou") {
+    state.stapleGrams.mantou = mantouGuidance(dayKey).grams;
+  }
   state.banana = day.bananaDefault;
   state.thirdMeal = recommendedThirdMealForBreakfast(state.breakfast, day.thirdMealDefault);
   els.bananaToggle.checked = state.banana;
@@ -2027,6 +2071,9 @@ els.stapleControls.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-staple]");
   if (!button) return;
   state.staple = button.dataset.staple;
+  if (state.staple === "mantou") {
+    state.stapleGrams.mantou = mantouGuidance(state.day).grams;
+  }
   saveState();
   renderPlanner();
 });
@@ -2046,7 +2093,10 @@ function scheduleStapleInput(key, input, immediate = false) {
   window.clearTimeout(stapleInputTimers[key]);
   const commit = () => {
     const value = Number(input.value);
-    if (Number.isFinite(value)) setStapleGrams(key, value);
+    if (Number.isFinite(value)) {
+      const grams = key === "mantou" ? value * MANTOU_UNIT_GRAMS : value;
+      setStapleGrams(key, grams);
+    }
   };
   if (immediate) {
     commit();

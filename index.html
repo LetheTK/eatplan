@@ -116,20 +116,21 @@
               </button>
               <div class="second-meal-editor panel-body" id="secondMealControls">
                 <section class="meal-control-block" aria-labelledby="stapleTypeLabel">
-                  <div class="meal-control-label" id="stapleTypeLabel"><b>主食</b><small>生重</small></div>
+                  <div class="meal-control-label" id="stapleTypeLabel"><b>主食</b><small id="stapleTypeBasis">生重</small></div>
                   <div class="segmented staple-segment" id="stapleControls" role="group" aria-label="第二餐主食类型">
                     <button type="button" data-staple="rice">糙米</button>
                     <button type="button" data-staple="potato" class="active" aria-pressed="true">土豆</button>
+                    <button type="button" data-staple="mantou">馒头</button>
                     <button type="button" data-staple="mixed">混搭</button>
                   </div>
                 </section>
 
                 <section class="meal-control-block" id="singleStapleWeight" aria-labelledby="stapleWeightLabel">
-                  <div class="meal-control-label" id="stapleWeightLabel"><b>主食重量</b><small id="stapleWeightFood">土豆 · 生重</small></div>
+                  <div class="meal-control-label" id="stapleWeightLabel"><b>主食重量/数量</b><small id="stapleWeightFood">土豆 · 生重</small></div>
                   <div class="weight-stepper">
-                    <button type="button" data-staple-weight-delta="-1" aria-label="减少主食生重">−</button>
-                    <label for="stapleWeightInput"><span class="sr-only">主食生重，单位克</span><input id="stapleWeightInput" type="number" inputmode="numeric" min="50" max="600" step="25" value="150"><i>g</i></label>
-                    <button type="button" data-staple-weight-delta="1" aria-label="增加主食生重">＋</button>
+                    <button type="button" data-staple-weight-delta="-1" aria-label="减少主食重量">−</button>
+                    <label for="stapleWeightInput"><span class="sr-only" id="stapleWeightInputLabel">主食生重，单位克</span><input id="stapleWeightInput" type="number" inputmode="numeric" min="50" max="600" step="25" value="150"><i id="stapleWeightUnit">g</i></label>
+                    <button type="button" data-staple-weight-delta="1" aria-label="增加主食重量">＋</button>
                   </div>
                   <div class="weight-presets" role="group" aria-label="主食生重预设">
                     <button type="button" id="stapleBasePreset" data-staple-preset="base">基础 150g</button>
@@ -490,7 +491,7 @@
           <div>
             <p class="kicker">数据与规则</p>
             <h1 id="rules-title">计算依据</h1>
-            <p class="source-meta">总表 v4 · 主食与肉类均按下锅前生重</p>
+            <p class="source-meta">总表 v4 · 糙米/土豆和肉类按下锅前生重；馒头按个数</p>
           </div>
         </div>
         <div class="rule-accordion">
@@ -500,11 +501,11 @@
           </details>
           <details class="rule-item">
             <summary><span class="rule-index">02</span><span class="rule-item-title"><h3>补碳换算</h3><small>香蕉1根 ≈ 105 kcal · 27g 碳水</small></span><i aria-hidden="true"></i></summary>
-            <p>香蕉1根约105 kcal、27g碳水；约等于土豆135g生重或糙米35g生重。训练日也可用1个玉米馒头替代正餐主食。</p>
+            <p>香蕉1根约105 kcal、27g碳水；约等于土豆135g生重或糙米35g生重。馒头按每个约75g、196 kcal、40g碳水计算：力量/跑步日1个，恢复/休息日0.5–0.75个，均替代本餐原有米饭或土豆，不叠加。</p>
           </details>
           <details class="rule-item">
             <summary><span class="rule-index">03</span><span class="rule-item-title"><h3>主食生重</h3><small>糙米30g / 土豆150g为基础量</small></span><i aria-hidden="true"></i></summary>
-            <p>糙米在下锅前称重，基础30g、加量60g；土豆按可食部下锅前称重，基础150g、加量300g。混搭时分别填写两种生重。</p>
+            <p>糙米在下锅前称重，基础30g、加量60g；土豆按可食部下锅前称重，基础150g、加量300g；馒头按个数填写，每个约75g。混搭时分别填写糙米和土豆生重。</p>
           </details>
           <details class="rule-item">
             <summary><span class="rule-index">04</span><span class="rule-item-title"><h3>F日常，K触发</h3><small>K 只在恢复压力大时用</small></span><i aria-hidden="true"></i></summary>
@@ -546,6 +547,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=37" defer></script>
+  <script src="./app.js?v=38" defer></script>
 </body>
 </html>
